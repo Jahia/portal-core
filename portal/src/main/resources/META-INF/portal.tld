@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+        version="2.0">
+
+    <description>Provides a tag library with functions for the portals</description>
+    <display-name>Jahia Portal Tag Library</display-name>
+    <tlib-version>1.0</tlib-version>
+    <short-name>portal</short-name>
+    <uri>http://www.jahia.org/tags/portalLib</uri>
+
+    <function>
+        <name>getNodeTypes</name>
+        <function-class>org.jahia.modules.portal.PortalFunctions</function-class>
+        <function-signature>javax.jcr.nodetype.NodeTypeIterator getNodeTypes()</function-signature>
+    </function>
+
+    <function>
+        <name>getNodeTypeDisplayableName</name>
+        <function-class>org.jahia.modules.portal.PortalFunctions</function-class>
+        <function-signature>java.lang.String getI18nNodetype(org.jahia.data.templates.JahiaTemplatesPackage,java.lang.String,java.util.Locale)</function-signature>
+    </function>
+</taglib>

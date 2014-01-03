@@ -1,0 +1,47 @@
+<jnt = 'http://www.jahia.org/jahia/nt/1.0'>
+<mix = 'http://www.jcp.org/jcr/mix/1.0'>
+<jmix = 'http://www.jahia.org/jahia/mix/1.0'>
+
+//---------------------------------------------------------
+// Portal
+//---------------------------------------------------------
+
+[jnt:portalsFolder] > nt:base
+ + * (jnt:portalsFolder)
+ + * (jmix:portal)
+
+[jmix:portal] mixin
+ - j:templateRoot (weakreference) mandatory < jnt:template
+ + * (jnt:portalTab)
+
+[jnt:portalModel] > jmix:portal, jnt:content, mix:title, jmix:list
+
+[jnt:portal] > jmix:portal, jnt:content, mix:title, jmix:list
+ - j:model (weakreference) mandatory < jnt:portalModel
+
+[jnt:portalTab] > jnt:content, mix:title, jmix:list, jmix:hasTemplateNode
+ + * (nt:base) = nt:base version
+
+[jnt:portalColumn] > jnt:content, mix:title, jmix:list
+orderable
+ + * (jmix:portalComponent)
+
+[jnt:portalArea] > jmix:layoutComponentContent, jmix:studioOnly
+
+//---------------------------------------------------------
+// Portal admin
+//---------------------------------------------------------
+
+[jnt:siteSettingsManagePortals] > jnt:content, mix:title, jmix:studioOnly, jmix:siteComponent
+
+//---------------------------------------------------------
+// Portal components
+//---------------------------------------------------------
+
+[jmix:portalComponent] > mix:referenceable mixin
+
+//---------------------------------------------------------
+// test
+//---------------------------------------------------------
+
+[jnt:testJavascript] > jmix:queryContent, jnt:content, mix:title

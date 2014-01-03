@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+		http://www.springframework.org/schema/webflow
+		http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+
+    <var name="flowHandler" class="org.jahia.modules.portal.sitesettings.ManagePortalsHandler"/>
+    <var name="portalForm" class="org.jahia.modules.portal.sitesettings.form.PortalForm"/>
+
+    <view-state id="managePortals">
+        <on-render>
+            <evaluate expression="flowHandler.getSitePortalModels(flowRequestContext)" result="requestScope.portals"/>
+        </on-render>
+        <transition on="createPortal" to="formPortal" bind="false" validate="false"/>
+        <transition on="editPortal" to="formPortal" bind="false" validate="false">
+            <set name="flowScope.portalIdentifier" value="requestParameters.selectedPortal" type="java.lang.String" />
+        </transition>
+    </view-state>
+
+    <view-state id="formPortal" model="portalForm">
+        <on-render>
+            <evaluate expression="flowHandler.getTemplatesPath(flowRequestContext)" result="requestScope.templatesPath"/>
+        </on-render>
+        <transition on="submit" to="managePortals">
+            <evaluate expression="flowHandler.createPortalModel(flowRequestContext, portalForm)" />
+        </transition>
+        <transition on="cancel" to="managePortals" bind="false" validate="false"/>
+    </view-state>
+</flow>
