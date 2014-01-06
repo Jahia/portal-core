@@ -1,5 +1,6 @@
 package org.jahia.modules.portal.action;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.jahia.bin.Action;
 import org.jahia.bin.ActionResult;
 import org.jahia.modules.portal.service.PortalService;
@@ -19,8 +20,9 @@ import java.util.Map;
  * Time: 15:20
  * To change this template use File | Settings | File Templates.
  */
-public class AddWidgetsAction extends Action{
-    private static final String NODETYPES_PARAM = "nodetypes";
+public class AddWidgetAction extends Action{
+    private static final String NODETYPE_PARAM = "nodetype";
+    private static final String NAME_PARAM = "name";
 
     private PortalService portalService;
 
@@ -31,9 +33,10 @@ public class AddWidgetsAction extends Action{
     @Override
     public ActionResult doExecute(HttpServletRequest req, RenderContext renderContext, Resource resource,
                                   JCRSessionWrapper session, Map<String, List<String>> parameters, URLResolver urlResolver) throws Exception {
-        List<String> nodetypes =  parameters.get(NODETYPES_PARAM);
-        if(nodetypes != null && nodetypes.size() > 0){
-            portalService.addWidgetsToPortal(resource.getNode(), nodetypes, session);
+        List<String> nodetype =  parameters.get(NODETYPE_PARAM);
+        List<String> name =  parameters.get(NAME_PARAM);
+        if(CollectionUtils.isNotEmpty(nodetype) && CollectionUtils.isNotEmpty(name)){
+            portalService.addWidgetToPortal(resource.getNode(), nodetype.get(0), name.get(0), session);
         }
 
         return ActionResult.OK_JSON;

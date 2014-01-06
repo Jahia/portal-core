@@ -29,7 +29,7 @@
     </bean>
 
     <!-- Actions -->
-    <bean class="org.jahia.modules.portal.action.AddWidgetsAction">
+    <bean class="org.jahia.modules.portal.action.AddWidgetAction">
         <property name="portalService" ref="PortalService"/>
     </bean>
 </beans>

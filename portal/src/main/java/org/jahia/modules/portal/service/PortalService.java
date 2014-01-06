@@ -30,7 +30,7 @@ public class PortalService {
     private static final String JNT_PORTAL_TAB = "jnt:portalTab";
     private static final String JNT_PORTAL_COLUMN = "jnt:portalColumn";
 
-    public JCRNodeWrapper getSitePortalsRootFolder(JCRSiteNode site, JCRSessionWrapper session){
+    public JCRNodeWrapper getSitePortalsRootFolder(JCRSiteNode site, JCRSessionWrapper session) {
         try {
             QueryManager queryManager = session.getWorkspace().getQueryManager();
             if (queryManager == null) {
@@ -50,7 +50,7 @@ public class PortalService {
         return null;
     }
 
-    public List<JCRNodeWrapper> getSitePortalModels(JCRSiteNode site, String orderBy, boolean orderAscending, JCRSessionWrapper session){
+    public List<JCRNodeWrapper> getSitePortalModels(JCRSiteNode site, String orderBy, boolean orderAscending, JCRSessionWrapper session) {
         long timer = System.currentTimeMillis();
 
         final List<JCRNodeWrapper> portalsNode = new LinkedList<JCRNodeWrapper>();
@@ -69,7 +69,7 @@ public class PortalService {
             }
             Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
 
-            for (NodeIterator nodes = query.execute().getNodes(); nodes.hasNext();) {
+            for (NodeIterator nodes = query.execute().getNodes(); nodes.hasNext(); ) {
                 portalsNode.add((JCRNodeWrapper) nodes.next());
             }
         } catch (RepositoryException e) {
@@ -87,10 +87,10 @@ public class PortalService {
     public void createPortalModel(PortalForm form, JCRSiteNode site, JCRSessionWrapper session) throws RepositoryException {
         // Create portals root folder
         JCRNodeWrapper portalsRootFolderNode = getSitePortalsRootFolder(site, session);
-        if(portalsRootFolderNode == null){
+        if (portalsRootFolderNode == null) {
             portalsRootFolderNode = site.addNode("portals", JNT_PORTALS_FOLDER);
         }
-        
+
         // Create portal
         JCRNodeWrapper portalNode = portalsRootFolderNode.addNode(JCRContentUtils.generateNodeName(form.getName(), 32), JNT_PORTAL_MODEL);
         portalNode.setProperty("j:templateRoot", form.getTemplateRoot());
@@ -98,14 +98,14 @@ public class PortalService {
         // Create first tab
         JCRNodeWrapper portalTab = portalNode.addNode(JCRContentUtils.generateNodeName("home", 32), JNT_PORTAL_TAB);
         List<JCRNodeWrapper> portalTabTemplates = getPortalTabTemplates(form.getTemplateRoot(), session);
-        if(portalTabTemplates.size() > 0){
+        if (portalTabTemplates.size() > 0) {
             portalTab.setProperty("j:templateName", portalTabTemplates.get(0).getName());
         }
 
         session.save();
     }
 
-    public List<JCRNodeWrapper> getPortalTabs(JCRNodeWrapper portalNode, JCRSessionWrapper session){
+    public List<JCRNodeWrapper> getPortalTabs(JCRNodeWrapper portalNode, JCRSessionWrapper session) {
         List<JCRNodeWrapper> portalTabs = new LinkedList<JCRNodeWrapper>();
 
         QueryManager queryManager = session.getWorkspace().getQueryManager();
@@ -120,7 +120,7 @@ public class PortalService {
             Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
 
             NodeIterator nodes = query.execute().getNodes();
-            while (nodes.hasNext()){
+            while (nodes.hasNext()) {
                 JCRNodeWrapper node = (JCRNodeWrapper) nodes.next();
                 portalTabs.add(node);
             }
@@ -147,7 +147,7 @@ public class PortalService {
             Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
 
             NodeIterator nodes = query.execute().getNodes();
-            while (nodes.hasNext()){
+            while (nodes.hasNext()) {
                 JCRNodeWrapper node = (JCRNodeWrapper) nodes.next();
                 portalTabTemplates.add(node);
             }
@@ -158,45 +158,31 @@ public class PortalService {
         return portalTabTemplates;
     }
 
-    public void addWidgetsToPortal(JCRNodeWrapper portalTabNode, List<String> nodetypes, JCRSessionWrapper session){
-        JCRNodeWrapper columnNode = getColumn(portalTabNode, 0, session);
+    public void addWidgetToPortal(JCRNodeWrapper portalTabNode, String nodetype, String nodeName, JCRSessionWrapper session) {
+        JCRNodeWrapper columnNode = getColumn(portalTabNode, 0);
 
-        for (String nodetype : nodetypes){
-            try {
-                columnNode.addNode(JCRContentUtils.generateNodeName("portal component", 32), nodetype);
-                session.save();
-            } catch (RepositoryException e) {
-                logger.error(e.getMessage(), e);
-            }
+        try {
+            JCRNodeWrapper widget = columnNode.addNode(JCRContentUtils.findAvailableNodeName(columnNode, JCRContentUtils.generateNodeName(nodeName)), nodetype);
+            widget.setProperty("jcr:title", nodeName);
+            session.save();
+        } catch (RepositoryException e) {
+            logger.error(e.getMessage(), e);
         }
     }
 
-    public JCRNodeWrapper getColumn(JCRNodeWrapper portalTabNode, int index, JCRSessionWrapper session){
-        QueryManager queryManager = session.getWorkspace().getQueryManager();
-
-        if (queryManager == null) {
-            logger.error("Unable to obtain QueryManager instance");
-        }
-
+    public JCRNodeWrapper getColumn(JCRNodeWrapper portalTabNode, int index) {
+        String columnName = "col-" + index;
+        JCRNodeWrapper columnNode;
         try {
-            // Get first column in tab / create if not exist
-            StringBuilder q = new StringBuilder();
-            String columnName = "col-" + index;
-            q.append("select * from [" + JNT_PORTAL_COLUMN + "] as c where isdescendantnode(c, ['").append(portalTabNode.getPath())
-                    .append("']) and c.name = '" + columnName + "'");
-            Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
-
-            NodeIterator nodes = query.execute().getNodes();
-            JCRNodeWrapper columnNode;
-            if(nodes.hasNext()){
-                columnNode = (JCRNodeWrapper) nodes.next();
-            } else {
-                columnNode = portalTabNode.addNode(JCRContentUtils.generateNodeName(columnName, 32), JNT_PORTAL_COLUMN);
-            }
-
+             columnNode = portalTabNode.getNode(columnName);
             return columnNode;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+        } catch (RepositoryException e) {
+            try {
+                columnNode = portalTabNode.addNode(JCRContentUtils.generateNodeName(columnName, 32), JNT_PORTAL_COLUMN);
+                return columnNode;
+            } catch (RepositoryException e1) {
+                logger.error(e.getMessage(), e);
+            }
         }
 
         return null;

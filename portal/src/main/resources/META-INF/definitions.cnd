@@ -38,7 +38,7 @@ orderable
 // Portal components
 //---------------------------------------------------------
 
-[jmix:portalComponent] > mix:referenceable mixin
+[jmix:portalComponent] > mix:referenceable, mix:title mixin
 
 //---------------------------------------------------------
 // test

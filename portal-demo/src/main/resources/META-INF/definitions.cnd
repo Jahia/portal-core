@@ -5,6 +5,6 @@
 
 [jnt:portalToolbar] > jmix:portalComponentContent, jmix:studioOnly, jnt:content, mix:title
 
-[jnt:portalWidgetSample] > jmix:portalComponent
+[jnt:portalWidgetSample] > jnt:content, jmix:portalComponent
 
-[jnt:portalWidgetSampleAnother] > jmix:portalComponent
+[jnt:portalWidgetSampleAnother] > jnt:content, jmix:portalComponent

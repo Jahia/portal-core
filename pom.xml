@@ -75,7 +75,7 @@
 	<modules>
         <module>portal</module>
         <module>portal-demo</module>
-	</modules>
+    </modules>
 
 </project>
 

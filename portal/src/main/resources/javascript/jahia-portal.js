@@ -16,7 +16,7 @@ Jahia.Portal = function () {
 
 Jahia.Portal.constants = {
     WIDGETS_PORTAL_VIEW: ".widgets.json",
-    ADD_WIDGETS_ACTION: ".addWidgets.do"
+    ADD_WIDGET_ACTION: ".addWidget.do"
 };
 
 Jahia.Portal.default = {
@@ -81,24 +81,21 @@ Jahia.Portal.prototype = {
         });
     },
 
-    addWidget: function () {
-
-    },
-
-    addWidgets: function (nodetypes) {
+    addWidget: function (nodetype, name) {
         var instance = this;
-        instance._debug("Add widgets: " + JSON.stringify(nodetypes));
+        instance._debug("Add widget: " + name + " [" + nodetype + "]");
         var data = {
-            nodetypes: nodetypes
+            nodetype: nodetype,
+            name: name
         };
         $.ajax({
             type: "POST",
             dataType: "json",
             traditional: true,
-            url: instance.urlBase + instance.portalTabPath + Jahia.Portal.constants.ADD_WIDGETS_ACTION,
+            url: instance.urlBase + instance.portalTabPath + Jahia.Portal.constants.ADD_WIDGET_ACTION,
             data: data
         }).done(function () {
-                instance._debug(nodetypes.length + " widgets added");
+                instance._debug("widget added");
             });
     },
 

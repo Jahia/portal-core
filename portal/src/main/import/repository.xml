@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <content xmlns:j="http://www.jahia.org/jahia/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0">
     <modules jcr:primaryType="jnt:modules">
-        <jahia-portal j:dependencies="default siteSettings"
+        <portal-core j:dependencies="default siteSettings"
                     j:moduleType="module"
                     j:title="Jahia portal"
                     jcr:primaryType="jnt:module">
@@ -9,51 +9,6 @@
                 <templates j:rootTemplatePath="/base" jcr:primaryType="jnt:templatesFolder">
                     <files jcr:primaryType="jnt:folder"/>
                     <contents jcr:primaryType="jnt:contentFolder"/>
-                    <base j:hiddenTemplate="false"
-                  j:view="default"
-                  jcr:primaryType="jnt:template">
-                        <j:translation_en jcr:language="en"
-                                 jcr:mixinTypes="mix:title"
-                                 jcr:primaryType="jnt:translation"
-                                 jcr:title="base"/>
-                        <pagecontent jcr:primaryType="jnt:contentList">
-                            <area26198 j:allowedTypes="" jcr:primaryType="jnt:area">
-                                <area26198 jcr:primaryType="jnt:contentList">
-                                    <simple-text jcr:primaryType="jnt:text">
-                                        <j:translation_en jcr:language="en"
-                                             jcr:primaryType="jnt:translation"
-                                             text="Portal test"/>
-                                    </simple-text>
-                            </area26198>
-                            </area26198>
-                            <area133123 j:allowedTypes="" jcr:primaryType="jnt:area"/>
-                        </pagecontent>
-                        <_x0031_-raw j:applyOn=""
-                            j:defaultTemplate="false"
-                            j:hiddenTemplate="false"
-                            jcr:primaryType="jnt:contentTemplate">
-                            <j:translation_en jcr:language="en"
-                                    jcr:mixinTypes="mix:title"
-                                    jcr:primaryType="jnt:translation"
-                                    jcr:title="1 raw"/>
-                            <area133123 jcr:primaryType="jnt:contentList">
-                                <portalarea jcr:primaryType="jnt:portalArea"/>
-                            </area133123>
-                        </_x0031_-raw>
-                        <_x0032_-raw j:applyOn=""
-                            j:defaultTemplate="false"
-                            j:hiddenTemplate="false"
-                            jcr:primaryType="jnt:contentTemplate">
-                            <j:translation_en jcr:language="en"
-                                    jcr:mixinTypes="mix:title"
-                                    jcr:primaryType="jnt:translation"
-                                    jcr:title="2 raw"/>
-                            <area133123 jcr:primaryType="jnt:contentList">
-                                <portalarea jcr:primaryType="jnt:portalArea"/>
-                                <portalarea-1 jcr:primaryType="jnt:portalArea"/>
-                            </area133123>
-                        </_x0032_-raw>
-                    </base>
                     <site-settings-base j:view="siteSettings"
                                 jcr:mixinTypes="jmix:useUILocale"
                                 jcr:primaryType="jnt:template">
@@ -81,6 +36,6 @@
                 <portlets jcr:primaryType="jnt:portletFolder"/>
                 <files jcr:primaryType="jnt:folder"/>
                 <contents jcr:primaryType="jnt:contentFolder"/>
-            </jahia-portal>
+            </portal-core>
     </modules>
 </content>

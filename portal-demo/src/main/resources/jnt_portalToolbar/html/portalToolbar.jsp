@@ -29,15 +29,13 @@
         <input type="button" value="+" ng-click="openWidgetsMenu()"/>
 
         <div ng-show="showWidgetsMenu">
+            <label for="widget_desiredName">Name:</label>
+            <input id="widget_desiredName" ng-model="desiredName" type="text">
             <div ng-repeat="widget in widgets">
-                <input type="checkbox"
-                       value="{{widget.name}}"
-                       ng-checked="selectedWidgets.indexOf(widget.name) > -1"
-                       ng-click="selectWidget(widget.name)">
                 <span>{{widget.displayableName}}</span>
-            </div>
 
-            <input type="button" ng-click="addWidgets()" value="Add">
+                <input type="button" ng-click="addWidget(widget.name)" value="Add">
+            </div>
         </div>
 
     </div>
