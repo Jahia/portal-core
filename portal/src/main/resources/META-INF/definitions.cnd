@@ -14,9 +14,9 @@
  - j:templateRoot (weakreference) mandatory < jnt:template
  + * (jnt:portalTab)
 
-[jnt:portalModel] > jmix:portal, jnt:content, mix:title, jmix:list
+[jnt:portalModel] > jnt:content, jmix:portal, mix:title, jmix:list
 
-[jnt:portal] > jmix:portal, jnt:content, mix:title, jmix:list
+[jnt:portal] > jnt:content, jmix:portal, mix:title, jmix:list
  - j:model (weakreference) mandatory < jnt:portalModel
 
 [jnt:portalTab] > jnt:content, mix:title, jmix:list, jmix:hasTemplateNode
@@ -26,7 +26,7 @@
 orderable
  + * (jmix:portalComponent)
 
-[jnt:portalArea] > jmix:layoutComponentContent, jmix:studioOnly
+[jnt:portalArea] > jnt:content, jmix:layoutComponentContent, jmix:studioOnly
 
 //---------------------------------------------------------
 // Portal admin
@@ -39,9 +39,3 @@ orderable
 //---------------------------------------------------------
 
 [jmix:portalComponent] > mix:referenceable, mix:title mixin
-
-//---------------------------------------------------------
-// test
-//---------------------------------------------------------
-
-[jnt:testJavascript] > jmix:queryContent, jnt:content, mix:title

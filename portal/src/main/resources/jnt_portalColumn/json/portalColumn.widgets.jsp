@@ -20,18 +20,12 @@
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
+<c:set target="${renderContext}" property="contentType" value="application/json;charset=UTF-8"/>
 
-<template:addResources type="javascript" resources="jquery.min.js,jquery-ui.min.js" />
-<template:addResources type="javascript" resources="jahia-portal.js" />
-
-<div id="portal_area_${currentNode.identifier}" class="portal_area">
-
-</div>
-
-<script type="text/javascript">
-    var portal = window.portal;
-    portal.registerArea("${url.base}",
-            "${jcr:getParentOfType(renderContext.mainResource.node, 'jmix:portal').path}",
-            "${renderContext.mainResource.node.path}",
-            "portal_area_${currentNode.identifier}");
-</script>
+<json:array>
+    <c:forEach items="${jcr:getNodes(currentNode, 'jmix:portalComponent')}" var="widget">
+        <json:object>
+            <json:property name="path" value="${widget.path}"/>
+        </json:object>
+    </c:forEach>
+</json:array>

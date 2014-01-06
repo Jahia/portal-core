@@ -4,6 +4,20 @@ if (!Jahia) {
     var Jahia = [];
 }
 
+Jahia.Utils = {
+    getObjectSize: function(obj){
+        var size = 0, key;
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) size++;
+        }
+        return size;
+    }
+};
+
+/**
+ * Portal object
+ * @constructor
+ */
 Jahia.Portal = function () {
     this.conf = Jahia.Portal.default;
     this.activated = false;
@@ -99,20 +113,84 @@ Jahia.Portal.prototype = {
             });
     },
 
-    registerArea: function (htmlID, jcrPath) {
+    registerArea: function (urlBase, portalPath, portalTabPath, htmlID) {
         var instance = this;
-        instance.areas[htmlID] = new Jahia.Portal.Area(htmlID, jcrPath, instance);
+
+        // init portals relative paths
+        if(!instance.activated){
+            instance.activated = true;
+            instance.portalPath = portalPath;
+            instance.portalTabPath = portalTabPath;
+            instance.urlBase = urlBase;
+        }
+
+        instance.areas[htmlID] = new Jahia.Portal.Area(htmlID, "col-" + Jahia.Utils.getObjectSize(instance.areas), instance);
+    },
+
+    getArea: function(htmlID) {
+        var instance = this;
+        return instance.areas[htmlID];
     }
 };
 
-Jahia.Portal.Area = function (id, path, portal) {
+/**
+ * Portal area object
+ * @param id
+ * @param name
+ * @param portal
+ * @constructor
+ */
+Jahia.Portal.Area = function (id, name, portal) {
     this._id = id;
+    this._name = name;
     this._portal = portal;
-    this._path = path;
+    this.widgets = [];
+
+    this.load();
 };
 
 Jahia.Portal.Area.prototype = {
+    load: function(){
+        var instance = this;
 
+        instance._portal._debug("Load widgets for col: " + instance._name);
+
+        $.ajax(instance._portal.urlBase + instance._portal.portalTabPath + "/" + instance._name + ".widgets.json").done(function(data){
+            instance._portal._debug(data.length + " widgets found");
+
+            data.forEach(function(widget){
+                var widgetHtmlId = instance._name + "_w" + Jahia.Utils.getObjectSize(instance.widgets);
+                instance.widgets[widgetHtmlId] = new Jahia.Portal.Area.Widget(widgetHtmlId, widget.path, instance);
+            });
+        });
+    },
+
+    getWidget: function(htmlId) {
+        var instance = this;
+        return instance.widgets[htmlId];
+    }
+};
+
+Jahia.Portal.Area.Widget = function(id, path, area){
+    this._id = id;
+    this._path = path;
+    this._area = area;
+    this._portal = area._portal;
+
+    this.load();
+};
+
+Jahia.Portal.Area.Widget.prototype = {
+    load: function() {
+        var instance = this;
+        instance._portal._debug("Load widget: " + instance._path);
+
+        var wrapper = "<div id='" + instance._id + "'></div>";
+        $("#" + instance._area._id).append(wrapper);
+        $.ajax(instance._portal.urlBase + instance._path + ".view.html.ajax").done(function(data){
+            $("#" + instance._id).html(data);
+        });
+    }
 };
 
 var portal = new Jahia.Portal();

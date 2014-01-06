@@ -16,9 +16,8 @@ function ToolbarCtrl($scope) {
     $scope.addWidget = function(nodetype) {
         if($scope.desiredName.length > 0){
             portal.addWidget(nodetype, $scope.desiredName);
+            $scope.showWidgetsMenu = false;
+            $scope.desiredName = "";
         }
-
-        $scope.showWidgetsMenu = false;
-        $scope.name = "";
     }
 }
