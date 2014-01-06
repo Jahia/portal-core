@@ -20,6 +20,14 @@
         <property name="applyOnNodeTypes" value="jnt:portalArea"/>
         <property name="description" value="Add portal JavaScript API in the page and disable edition in the page"/>
     </bean -->
+    <bean name="PortalSkinFilter" class="org.jahia.modules.portal.filter.PortalSkinFilter">
+        <property name="skin" value="${portalSkin:skins.portal}"/>
+        <property name="description" value="Filter that add skins to the current resource."/>
+        <property name="priority" value="45"/>
+        <property name="applyOnNodeTypes" value="jmix:portalComponent"/>
+        <property name="skipOnConfigurations" value="include,wrapper"/>
+        <property name="skipOnModes" value="studio"/>
+    </bean>
 
     <!-- Error handlers -->
     <bean name="UserPortalPageHandler" class="org.jahia.modules.portal.error.UserPortalPageHandler"/>
