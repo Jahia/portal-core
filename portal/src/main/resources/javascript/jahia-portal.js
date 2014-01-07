@@ -52,7 +52,9 @@ Jahia.Portal.prototype = {
                 var toArea = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).attr("id"));
                 var widget = instance.getWidget(ui.item.attr("id"));
 
-                widget.performMove(toArea);
+                widget.performMove(toArea, function(){
+                    $areas.sortable('cancel');
+                });
             }
         };
 
@@ -220,7 +222,7 @@ Jahia.Portal.Widget.prototype = {
         });
     },
 
-    performMove: function(toArea) {
+    performMove: function(toArea, failCallBack) {
         var instance = this;
 
         instance._portal._debug("Moved widget " + instance._path + " to " + toArea._colName);
@@ -242,6 +244,10 @@ Jahia.Portal.Widget.prototype = {
                 instance._portal._debug("Widget " + instance._path + " successfully moved to " + newPositionInfo.path);
                 instance._path = newPositionInfo.path;
                 instance._area = instance._portal.getAreaByColName(newPositionInfo.col);
+            }).fail(function(){
+                if(failCallBack) {
+                    failCallBack();
+                }
             });
     }
 };
