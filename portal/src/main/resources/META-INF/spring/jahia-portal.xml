@@ -40,4 +40,8 @@
     <bean class="org.jahia.modules.portal.action.AddWidgetAction">
         <property name="portalService" ref="PortalService"/>
     </bean>
+    <bean class="org.jahia.modules.portal.action.MoveWidgetAction">
+        <property name="portalService" ref="PortalService"/>
+        <property name="contentManager" ref="ContentManagerHelper"/>
+    </bean>
 </beans>

@@ -16,3 +16,8 @@
     visibility: visible !important;
     height: 50px !important;
 }
+
+/* hook for being able to drag widget in empty areas */
+.portal_area{
+    min-height: 5px;
+}

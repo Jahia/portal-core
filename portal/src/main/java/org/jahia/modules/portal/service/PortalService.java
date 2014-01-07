@@ -1,5 +1,6 @@
 package org.jahia.modules.portal.service;
 
+import org.apache.commons.lang.StringUtils;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.services.content.JCRContentUtils;
 import org.jahia.services.content.JCRNodeWrapper;
@@ -190,5 +191,23 @@ public class PortalService {
         }
 
         return null;
+    }
+
+    public JCRNodeWrapper getColumn(String path, JCRSessionWrapper sessionWrapper) {
+        JCRNodeWrapper columnNode;
+        try {
+            columnNode = sessionWrapper.getNode(path);
+        } catch (RepositoryException e) {
+            try {
+                JCRNodeWrapper portalTabNode = sessionWrapper.getNode(StringUtils.substringBeforeLast(path, "/"));
+                columnNode = portalTabNode.addNode(JCRContentUtils.generateNodeName(StringUtils.substringAfterLast(path, "/"), 32), JNT_PORTAL_COLUMN);
+                sessionWrapper.save();
+            } catch (RepositoryException e1) {
+                logger.error(e.getMessage(), e);
+                return null;
+            }
+        }
+
+        return columnNode;
     }
 }

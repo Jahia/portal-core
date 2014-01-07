@@ -6,7 +6,7 @@ function ToolbarCtrl($scope) {
     $scope.openWidgetsMenu = function () {
         $scope.showWidgetsMenu = true;
 
-        portal.getWidgets(function (widgets) {
+        portal.getWidgetTypes(function (widgets) {
             $scope.$apply(function () {
                 $scope.widgets = widgets;
             });
@@ -15,7 +15,7 @@ function ToolbarCtrl($scope) {
 
     $scope.addWidget = function(nodetype) {
         if($scope.desiredName.length > 0){
-            portal.addWidget(nodetype, $scope.desiredName);
+            portal.addNewWidget(nodetype, $scope.desiredName);
             $scope.showWidgetsMenu = false;
             $scope.desiredName = "";
         }

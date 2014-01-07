@@ -1,4 +1,4 @@
-// dependencies: Jquery, Jquery-ui, bootstrap-tabs
+// dependencies: Jquery, Jquery-ui
 
 if (!Jahia) {
     var Jahia = [];
@@ -22,10 +22,10 @@ Jahia.Portal = function () {
     this.conf = Jahia.Portal.default;
     this.activated = false;
     this.areas = [];
-    this.widgets = false;
+    this.widgets = [];
 
-    // TODO execute this, when the page is fully loaded
-    this._init();
+    //register portal in the window object
+    window.portal = this;
 };
 
 Jahia.Portal.constants = {
@@ -36,33 +36,27 @@ Jahia.Portal.constants = {
 Jahia.Portal.default = {
     debug: true,
     sortable_options: {
-        connectWith: ".tab-column",
-        handle: ".portlet-header",
-        revert: true
+        connectWith: ".portal_area",
+        handle: ".portlet-header"
     }
 };
 
 Jahia.Portal.prototype = {
-    _init: function () {
+    initDragDrop: function () {
         var instance = this;
 
-        //init areas
-        var $tab_columns = $(".tab-column");
+        var $areas = $(instance.conf.sortable_options.connectWith);
         instance.conf.sortable_options.update = function (event, ui) {
-            /*
-             var $col = ui.item.parent(".tab-column");
-             var col = instance._cols[$col.attr("id")];
+            // Test if we are on the destination col after sort update
+            if($(event.target).attr("id") == ui.item.parent().attr("id")){
+                var toArea = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).attr("id"));
+                var widget = instance.getWidget(ui.item.attr("id"));
 
-             alert("- Component " + ui.item.attr("id") + " has been dropped in col " + col._id + ". \n" +
-             "- JCR path for the col: " + col._path + ". \n" +
-             "- Index: " + ui.item.index())
-             */
+                widget.performMove(toArea);
+            }
         };
-        $tab_columns.sortable(instance._sortable_options);
-        $tab_columns.disableSelection();
 
-        //register portal in the window object
-        window.portal = this;
+        $areas.sortable(instance.conf.sortable_options);
     },
 
     _debug: function (message) {
@@ -87,7 +81,7 @@ Jahia.Portal.prototype = {
         instance.urlBase = base;
     },
 
-    getWidgets: function (callback) {
+    getWidgetTypes: function (callback) {
         var instance = this;
         $.ajax(instance.urlBase + instance.portalPath + Jahia.Portal.constants.WIDGETS_PORTAL_VIEW).done(function (data) {
             instance._debug(data.length + " widgets loaded");
@@ -95,7 +89,7 @@ Jahia.Portal.prototype = {
         });
     },
 
-    addWidget: function (nodetype, name) {
+    addNewWidget: function (nodetype, name) {
         var instance = this;
         instance._debug("Add widget: " + name + " [" + nodetype + "]");
         var data = {
@@ -109,8 +103,7 @@ Jahia.Portal.prototype = {
             url: instance.urlBase + instance.portalTabPath + Jahia.Portal.constants.ADD_WIDGET_ACTION,
             data: data
         }).done(function (widget) {
-                instance.getAreaByColIndex(0).registerComponent(widget.path);
-                instance._debug("widget added");
+                instance.getAreaByColIndex(0).registerWidget(widget.path);
             });
     },
 
@@ -135,7 +128,17 @@ Jahia.Portal.prototype = {
 
     getAreaByColIndex: function (index) {
         var instance = this;
-        return instance.getArea($(".col-" + index).attr("id"));
+        return instance.getAreaByColName("col-" + index)
+    },
+
+    getAreaByColName: function (colName) {
+        var instance = this;
+        return instance.getArea($("." + colName).attr("id"));
+    },
+
+    getWidget: function (htmlId) {
+        var instance = this;
+        return instance.widgets[htmlId];
     }
 };
 
@@ -148,9 +151,9 @@ Jahia.Portal.prototype = {
  */
 Jahia.Portal.Area = function (id, name, portal) {
     this._id = id;
-    this._name = name;
     this._portal = portal;
-    this.widgets = [];
+    this._colName = name;
+    this._colPath = this._portal.portalTabPath + "/" + this._colName;
 
     this.load();
 };
@@ -160,32 +163,40 @@ Jahia.Portal.Area.prototype = {
         var instance = this;
 
         // Add "col-" jcr name to the html class
-        $("#" + instance._id).addClass(instance._name);
+        $("#" + instance._id).addClass(instance._colName);
 
-        instance._portal._debug("Load widgets for col: " + instance._name);
+        instance._portal._debug("Load widgets for col: " + instance._colName);
 
-        $.ajax(instance._portal.urlBase + instance._portal.portalTabPath + "/" + instance._name + ".widgets.json").done(function (data) {
+        $.ajax(this._portal.urlBase + this._colPath + ".widgets.json").done(function (data) {
             instance._portal._debug(data.length + " widgets found");
 
             data.forEach(function (widget) {
-                instance.registerComponent(widget.path);
+                instance.registerWidget(widget.path);
             });
-        });
+        }).fail(function(){
+                instance._portal._debug("No col: " + instance._colName);
+            });
     },
 
-    registerComponent: function (path) {
+    registerWidget: function (path) {
         var instance = this;
-        var widgetHtmlId = instance._name + "_w" + Jahia.Utils.getObjectSize(instance.widgets);
-        instance.widgets[widgetHtmlId] = new Jahia.Portal.Area.Widget(widgetHtmlId, path, instance);
+        var widgetHtmlId = "w_" + Math.random().toString(36).substring(7);
+        instance._portal.widgets[widgetHtmlId] = new Jahia.Portal.Widget(widgetHtmlId, path, instance);
     },
 
-    getWidget: function (htmlId) {
-        var instance = this;
-        return instance.widgets[htmlId];
+    performMove: function (toArea) {
+
     }
 };
 
-Jahia.Portal.Area.Widget = function (id, path, area) {
+/**
+ * Portal widget object
+ * @param id
+ * @param path
+ * @param area
+ * @constructor
+ */
+Jahia.Portal.Widget = function (id, path, area) {
     this._id = id;
     this._path = path;
     this._area = area;
@@ -194,16 +205,44 @@ Jahia.Portal.Area.Widget = function (id, path, area) {
     this.load();
 };
 
-Jahia.Portal.Area.Widget.prototype = {
+Jahia.Portal.Widget.prototype = {
     load: function () {
         var instance = this;
         instance._portal._debug("Load widget: " + instance._path);
 
-        var wrapper = "<div id='" + instance._id + "'></div>";
+        var wrapper = "<div id='" + instance._id + "' class='portal_widget'></div>";
         $("#" + instance._area._id).append(wrapper);
         $.ajax(instance._portal.urlBase + instance._path + ".view.html.ajax").done(function (data) {
             $("#" + instance._id).html(data);
+
+            instance._portal.initDragDrop();
+            instance._portal._debug("widget " + instance._path + " loaded successfully");
         });
+    },
+
+    performMove: function(toArea) {
+        var instance = this;
+
+        instance._portal._debug("Moved widget " + instance._path + " to " + toArea._colName);
+
+        var onTopOfWidget = instance._portal.getWidget($("#" + instance._id).next(".portal_widget").attr("id"));
+
+        var data = {
+            toArea: toArea._colPath,
+            widget: instance._path,
+            onTopOfWidget: onTopOfWidget ? onTopOfWidget._path : ""
+        };
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            traditional: true,
+            url: instance._portal.urlBase + instance._portal.portalTabPath + ".moveWidget.do",
+            data: data
+        }).done(function (newPositionInfo) {
+                instance._portal._debug("Widget " + instance._path + " successfully moved to " + newPositionInfo.path);
+                instance._path = newPositionInfo.path;
+                instance._area = instance._portal.getAreaByColName(newPositionInfo.col);
+            });
     }
 };
 
