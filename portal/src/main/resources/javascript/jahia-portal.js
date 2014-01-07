@@ -5,7 +5,7 @@ if (!Jahia) {
 }
 
 Jahia.Utils = {
-    getObjectSize: function(obj){
+    getObjectSize: function (obj) {
         var size = 0, key;
         for (key in obj) {
             if (obj.hasOwnProperty(key)) size++;
@@ -77,7 +77,7 @@ Jahia.Portal.prototype = {
         instance.portalPath = path;
     },
 
-    setPortalTabPath: function(path) {
+    setPortalTabPath: function (path) {
         var instance = this;
         instance.portalTabPath = path;
     },
@@ -108,7 +108,8 @@ Jahia.Portal.prototype = {
             traditional: true,
             url: instance.urlBase + instance.portalTabPath + Jahia.Portal.constants.ADD_WIDGET_ACTION,
             data: data
-        }).done(function () {
+        }).done(function (widget) {
+                instance.getAreaByColIndex(0).registerComponent(widget.path);
                 instance._debug("widget added");
             });
     },
@@ -117,7 +118,7 @@ Jahia.Portal.prototype = {
         var instance = this;
 
         // init portals relative paths
-        if(!instance.activated){
+        if (!instance.activated) {
             instance.activated = true;
             instance.portalPath = portalPath;
             instance.portalTabPath = portalTabPath;
@@ -127,9 +128,14 @@ Jahia.Portal.prototype = {
         instance.areas[htmlID] = new Jahia.Portal.Area(htmlID, "col-" + Jahia.Utils.getObjectSize(instance.areas), instance);
     },
 
-    getArea: function(htmlID) {
+    getArea: function (htmlID) {
         var instance = this;
         return instance.areas[htmlID];
+    },
+
+    getAreaByColIndex: function (index) {
+        var instance = this;
+        return instance.getArea($(".col-" + index).attr("id"));
     }
 };
 
@@ -150,28 +156,36 @@ Jahia.Portal.Area = function (id, name, portal) {
 };
 
 Jahia.Portal.Area.prototype = {
-    load: function(){
+    load: function () {
         var instance = this;
+
+        // Add "col-" jcr name to the html class
+        $("#" + instance._id).addClass(instance._name);
 
         instance._portal._debug("Load widgets for col: " + instance._name);
 
-        $.ajax(instance._portal.urlBase + instance._portal.portalTabPath + "/" + instance._name + ".widgets.json").done(function(data){
+        $.ajax(instance._portal.urlBase + instance._portal.portalTabPath + "/" + instance._name + ".widgets.json").done(function (data) {
             instance._portal._debug(data.length + " widgets found");
 
-            data.forEach(function(widget){
-                var widgetHtmlId = instance._name + "_w" + Jahia.Utils.getObjectSize(instance.widgets);
-                instance.widgets[widgetHtmlId] = new Jahia.Portal.Area.Widget(widgetHtmlId, widget.path, instance);
+            data.forEach(function (widget) {
+                instance.registerComponent(widget.path);
             });
         });
     },
 
-    getWidget: function(htmlId) {
+    registerComponent: function (path) {
+        var instance = this;
+        var widgetHtmlId = instance._name + "_w" + Jahia.Utils.getObjectSize(instance.widgets);
+        instance.widgets[widgetHtmlId] = new Jahia.Portal.Area.Widget(widgetHtmlId, path, instance);
+    },
+
+    getWidget: function (htmlId) {
         var instance = this;
         return instance.widgets[htmlId];
     }
 };
 
-Jahia.Portal.Area.Widget = function(id, path, area){
+Jahia.Portal.Area.Widget = function (id, path, area) {
     this._id = id;
     this._path = path;
     this._area = area;
@@ -181,13 +195,13 @@ Jahia.Portal.Area.Widget = function(id, path, area){
 };
 
 Jahia.Portal.Area.Widget.prototype = {
-    load: function() {
+    load: function () {
         var instance = this;
         instance._portal._debug("Load widget: " + instance._path);
 
         var wrapper = "<div id='" + instance._id + "'></div>";
         $("#" + instance._area._id).append(wrapper);
-        $.ajax(instance._portal.urlBase + instance._path + ".view.html.ajax").done(function(data){
+        $.ajax(instance._portal.urlBase + instance._path + ".view.html.ajax").done(function (data) {
             $("#" + instance._id).html(data);
         });
     }

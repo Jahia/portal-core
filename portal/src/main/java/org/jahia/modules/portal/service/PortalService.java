@@ -158,16 +158,20 @@ public class PortalService {
         return portalTabTemplates;
     }
 
-    public void addWidgetToPortal(JCRNodeWrapper portalTabNode, String nodetype, String nodeName, JCRSessionWrapper session) {
+    public JCRNodeWrapper addWidgetToPortal(JCRNodeWrapper portalTabNode, String nodetype, String nodeName, JCRSessionWrapper session) {
         JCRNodeWrapper columnNode = getColumn(portalTabNode, 0);
 
         try {
             JCRNodeWrapper widget = columnNode.addNode(JCRContentUtils.findAvailableNodeName(columnNode, JCRContentUtils.generateNodeName(nodeName)), nodetype);
             widget.setProperty("jcr:title", nodeName);
             session.save();
+
+            return widget;
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
         }
+
+        return null;
     }
 
     public JCRNodeWrapper getColumn(JCRNodeWrapper portalTabNode, int index) {
