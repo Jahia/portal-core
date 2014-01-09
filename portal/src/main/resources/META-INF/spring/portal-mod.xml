@@ -2,13 +2,16 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
        http://www.springframework.org/schema/mvc
-       http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+       http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <!-- Services -->
     <bean id="portalService" name="PortalService" class="org.jahia.modules.portal.service.PortalService"/>
+    <context:annotation-config/>
+    <context:component-scan base-package="org.jahia.modules.portal"/>
 
     <!-- JSR 303 -->
     <mvc:annotation-driven conversion-service="springTypeConversionService"/>
@@ -21,10 +24,10 @@
         <property name="description" value="Add portal JavaScript API in the page and disable edition in the page"/>
     </bean -->
     <bean name="PortalSkinFilter" class="org.jahia.modules.portal.filter.PortalSkinFilter">
-        <property name="skin" value="${portalSkin:skins.portal}"/>
+        <property name="defaultPortalWidgetsSkin" value="${defaultPortalWidgetsSkin:box.basic}"/>
         <property name="description" value="Filter that add skins to the current resource."/>
         <property name="priority" value="45"/>
-        <property name="applyOnNodeTypes" value="jmix:portalComponent"/>
+        <property name="applyOnNodeTypes" value="jmix:portalWidget"/>
         <property name="skipOnConfigurations" value="include,wrapper"/>
         <property name="skipOnModes" value="studio"/>
     </bean>

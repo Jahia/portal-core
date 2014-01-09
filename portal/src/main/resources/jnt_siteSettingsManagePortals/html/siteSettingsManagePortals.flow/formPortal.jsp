@@ -9,6 +9,7 @@
 <%@ taglib prefix="ui" uri="http://www.jahia.org/tags/uiComponentsLib" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="uiComponents" uri="http://www.jahia.org/tags/uiComponentsLib" %>
+<%@ taglib prefix="portal" uri="http://www.jahia.org/tags/portalLib" %>
 <%--@elvariable id="currentNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="out" type="java.io.PrintWriter"--%>
 <%--@elvariable id="script" type="org.jahia.services.render.scripting.Script"--%>
@@ -23,6 +24,7 @@
 <%--@elvariable id="newsletter" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="newslettersRootNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="portalForm" type="org.jahia.modules.portal.sitesettings.form.PortalForm"--%>
+<%--@elvariable id="skin" type="org.jahia.services.render.View"--%>
 
 <template:addResources type="javascript"
                        resources="jquery.min.js,jquery.form.js,jquery-ui.min.js,jquery.blockUI.js,workInProgress.js,admin-bootstrap.js"/>
@@ -48,17 +50,35 @@
         </div>
         <div class="row-fluid">
             <div class="span4">
-                <form:label path="templateRoot">template <span class="text-error"><strong>*</strong></span></form:label>
-                <form:hidden path="templateRoot"/>
+                <form:label path="tabName">tab name <span class="text-error"><strong>*</strong></span></form:label>
+                <form:input class="span12" path="tabName"/>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span4">
+                <form:label path="widgetsSkin">widgets skin <span class="text-error"><strong>*</strong></span></form:label>
+                <form:select path="widgetsSkin">
+                    <c:forEach items="${portal:getPortalWidgetSkins(renderContext.site)}" var="skin">
+                        <form:option value="${skin.key}">
+                            <fmt:message key="${skin.displayName}"/>
+                        </form:option>
+                    </c:forEach>
+                </form:select>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span4">
+                <form:label path="templateRootPath">template <span class="text-error"><strong>*</strong></span></form:label>
+                <form:hidden path="templateRootPath"/>
                 <input type="text" id="templateIdentifierDecoy" class="span12"/>
-                <ui:treeItemSelector fieldId="templateRoot"
+                <ui:treeItemSelector fieldId="templateRootPath"
                                      displayFieldId="templateIdentifierDecoy"
                                      root="${templatesPath}"
                                      nodeTypes="jnt:template"
                                      displayIncludeChildren="false"
                                      selectableNodeTypes="jnt:template"
                                      includeChildren=""
-                                     valueType="identifier"/>
+                                     valueType="path"/>
             </div>
         </div>
 

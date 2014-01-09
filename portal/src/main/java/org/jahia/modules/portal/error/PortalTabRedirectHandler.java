@@ -2,6 +2,7 @@ package org.jahia.modules.portal.error;
 
 import org.apache.commons.lang.StringUtils;
 import org.jahia.bin.errors.ErrorHandler;
+import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
@@ -47,7 +48,7 @@ public class PortalTabRedirectHandler implements ErrorHandler {
             URLResolver urlResolver = urlResolverFactory.createURLResolver(request.getPathInfo(), request.getServerName(), request);
             JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(urlResolver.getWorkspace(), urlResolver.getLocale());
             JCRNodeWrapper portalNode = session.getNode(urlResolver.getPath());
-            if(portalNode != null && portalNode.isNodeType("jmix:portal")){
+            if(portalNode != null && portalNode.isNodeType(PortalConstants.JMIX_PORTAL)){
                 // redirect to first tab
                 List<JCRNodeWrapper> portalTabs = portalService.getPortalTabs(portalNode, session);
                 if(portalTabs.size() > 0){

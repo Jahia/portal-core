@@ -21,4 +21,28 @@
         <function-class>org.jahia.modules.portal.PortalFunctions</function-class>
         <function-signature>java.lang.String getI18nNodetype(org.jahia.data.templates.JahiaTemplatesPackage,java.lang.String,java.util.Locale)</function-signature>
     </function>
+
+    <function>
+        <name>getPortalTabTemplates</name>
+        <function-class>org.jahia.modules.portal.PortalFunctions</function-class>
+        <function-signature>java.util.List getPortalTabTemplates(org.jahia.services.content.JCRNodeWrapper)</function-signature>
+    </function>
+
+    <function>
+        <name>getPortalTabTemplate</name>
+        <function-class>org.jahia.modules.portal.PortalFunctions</function-class>
+        <function-signature>org.jahia.services.content.JCRNodeWrapper getTemplateNodeForName(java.lang.String,org.jahia.services.content.JCRNodeWrapper)</function-signature>
+    </function>
+
+    <function>
+        <name>getPortalWidgetSkins</name>
+        <function-class>org.jahia.modules.portal.PortalFunctions</function-class>
+        <function-signature>java.util.SortedSet getPortalWidgetSkins(org.jahia.services.content.decorator.JCRSiteNode)</function-signature>
+    </function>
+
+    <function>
+        <name>getPortalWidgetSkin</name>
+        <function-class>org.jahia.modules.portal.PortalFunctions</function-class>
+        <function-signature>org.jahia.services.render.View getPortalWidgetSkin(java.lang.String,org.jahia.services.content.decorator.JCRSiteNode)</function-signature>
+    </function>
 </taglib>

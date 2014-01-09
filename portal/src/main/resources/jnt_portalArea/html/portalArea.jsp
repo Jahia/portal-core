@@ -1,3 +1,4 @@
+<%@ page import="org.jahia.modules.portal.PortalConstants" %>
 <%@ page language="java" contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="template" uri="http://www.jahia.org/tags/templateLib" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -20,6 +21,7 @@
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
+<c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
 
 <template:addResources type="javascript" resources="jquery.min.js,jquery-ui.min.js" />
 <template:addResources type="javascript" resources="jahia-portal.js" />
@@ -31,7 +33,7 @@
 <script type="text/javascript">
     var portal = window.portal;
     portal.registerArea("${url.base}",
-            "${jcr:getParentOfType(renderContext.mainResource.node, 'jmix:portal').path}",
+            "${jcr:getParentOfType(renderContext.mainResource.node, portalMixin).path}",
             "${renderContext.mainResource.node.path}",
             "portal_area_${currentNode.identifier}");
 </script>

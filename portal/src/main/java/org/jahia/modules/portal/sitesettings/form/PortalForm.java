@@ -18,15 +18,35 @@ public class PortalForm implements Serializable{
     @NotEmpty
     private String name;
     @NotEmpty
+    private String tabName;
+    @NotEmpty
+    private String widgetsSkin;
+    @NotEmpty
     @PortalTemplates
-    private String templateRoot;
+    private String templateRootPath;
 
-    public String getTemplateRoot() {
-        return templateRoot;
+    public String getWidgetsSkin() {
+        return widgetsSkin;
     }
 
-    public void setTemplateRoot(String templateRoot) {
-        this.templateRoot = templateRoot;
+    public void setWidgetsSkin(String widgetsSkin) {
+        this.widgetsSkin = widgetsSkin;
+    }
+
+    public String getTabName() {
+        return tabName;
+    }
+
+    public void setTabName(String tabName) {
+        this.tabName = tabName;
+    }
+
+    public String getTemplateRootPath() {
+        return templateRootPath;
+    }
+
+    public void setTemplateRootPath(String templateRootPath) {
+        this.templateRootPath = templateRootPath;
     }
 
     public String getName() {

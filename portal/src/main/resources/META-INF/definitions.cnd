@@ -6,13 +6,15 @@
 // Portal
 //---------------------------------------------------------
 
+[jmix:portal] mixin
+ - j:templateRootPath (string) mandatory
+ + * (jnt:portalTab)
+
+[jmix:portalWidget] > mix:referenceable, mix:title mixin
+
 [jnt:portalsFolder] > nt:base
  + * (jnt:portalsFolder)
  + * (jmix:portal)
-
-[jmix:portal] mixin
- - j:templateRoot (weakreference) mandatory < jnt:template
- + * (jnt:portalTab)
 
 [jnt:portalModel] > jnt:content, jmix:portal, mix:title, jmix:list
 
@@ -20,22 +22,19 @@
  - j:model (weakreference) mandatory < jnt:portalModel
 
 [jnt:portalTab] > jnt:content, mix:title, jmix:list, jmix:hasTemplateNode
+ - j:widgetsSkin (string)
  + * (nt:base) = nt:base version
 
 [jnt:portalColumn] > jnt:content, mix:title, jmix:list
 orderable
- + * (jmix:portalComponent)
+ + * (jmix:portalWidget)
 
 [jnt:portalArea] > jnt:content, jmix:layoutComponentContent, jmix:studioOnly
+
+
 
 //---------------------------------------------------------
 // Portal admin
 //---------------------------------------------------------
 
 [jnt:siteSettingsManagePortals] > jnt:content, mix:title, jmix:studioOnly, jmix:siteComponent
-
-//---------------------------------------------------------
-// Portal components
-//---------------------------------------------------------
-
-[jmix:portalComponent] > mix:referenceable, mix:title mixin

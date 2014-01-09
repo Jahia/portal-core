@@ -1,6 +1,7 @@
 package org.jahia.modules.portal.service;
 
 import org.apache.commons.lang.StringUtils;
+import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.services.content.JCRContentUtils;
 import org.jahia.services.content.JCRNodeWrapper;
@@ -25,11 +26,6 @@ import java.util.List;
  */
 public class PortalService {
     private static Logger logger = LoggerFactory.getLogger(PortalService.class);
-    private static final String JNT_PORTAL = "jnt:portal";
-    private static final String JNT_PORTAL_MODEL = "jnt:portalModel";
-    private static final String JNT_PORTALS_FOLDER = "jnt:portalsFolder";
-    private static final String JNT_PORTAL_TAB = "jnt:portalTab";
-    private static final String JNT_PORTAL_COLUMN = "jnt:portalColumn";
 
     public JCRNodeWrapper getSitePortalsRootFolder(JCRSiteNode site, JCRSessionWrapper session) {
         try {
@@ -40,7 +36,7 @@ public class PortalService {
             }
 
             StringBuilder q = new StringBuilder();
-            q.append("select * from [" + JNT_PORTALS_FOLDER + "] where isdescendantnode([").append(site.getPath())
+            q.append("select * from [" + PortalConstants.JNT_PORTALS_FOLDER + "] where isdescendantnode([").append(site.getPath())
                     .append("])");
             Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
             NodeIterator nodes = query.execute().getNodes();
@@ -63,7 +59,7 @@ public class PortalService {
             }
 
             StringBuilder q = new StringBuilder();
-            q.append("select * from [" + JNT_PORTAL_MODEL + "] where isdescendantnode([").append(site.getPath())
+            q.append("select * from [" + PortalConstants.JNT_PORTAL_MODEL + "] where isdescendantnode([").append(site.getPath())
                     .append("])");
             if (orderBy != null) {
                 q.append(" order by [").append(orderBy).append("]").append(orderAscending ? "asc" : "desc");
@@ -89,18 +85,20 @@ public class PortalService {
         // Create portals root folder
         JCRNodeWrapper portalsRootFolderNode = getSitePortalsRootFolder(site, session);
         if (portalsRootFolderNode == null) {
-            portalsRootFolderNode = site.addNode("portals", JNT_PORTALS_FOLDER);
+            portalsRootFolderNode = site.addNode("portals", PortalConstants.JNT_PORTALS_FOLDER);
         }
 
         // Create portal
-        JCRNodeWrapper portalNode = portalsRootFolderNode.addNode(JCRContentUtils.generateNodeName(form.getName(), 32), JNT_PORTAL_MODEL);
-        portalNode.setProperty("j:templateRoot", form.getTemplateRoot());
+        JCRNodeWrapper portalNode = portalsRootFolderNode.addNode(JCRContentUtils.generateNodeName(form.getName(), 32), PortalConstants.JNT_PORTAL_MODEL);
+        portalNode.setProperty(PortalConstants.J_TEMPLATE_ROOT_PATH, form.getTemplateRootPath());
 
         // Create first tab
-        JCRNodeWrapper portalTab = portalNode.addNode(JCRContentUtils.generateNodeName("home", 32), JNT_PORTAL_TAB);
-        List<JCRNodeWrapper> portalTabTemplates = getPortalTabTemplates(form.getTemplateRoot(), session);
+        JCRNodeWrapper portalTab = portalNode.addNode(JCRContentUtils.generateNodeName(form.getTabName(), 32), PortalConstants.JNT_PORTAL_TAB);
+        portalTab.setProperty(PortalConstants.JCR_TITLE, form.getTabName());
+        portalTab.setProperty(PortalConstants.J_WIDGETS_SKIN, form.getWidgetsSkin());
+        List<JCRNodeWrapper> portalTabTemplates = getPortalTabTemplates(form.getTemplateRootPath(), session);
         if (portalTabTemplates.size() > 0) {
-            portalTab.setProperty("j:templateName", portalTabTemplates.get(0).getName());
+            portalTab.setProperty(PortalConstants.J_TEMPLATE_NAME, portalTabTemplates.get(0).getName());
         }
 
         session.save();
@@ -116,7 +114,7 @@ public class PortalService {
 
         try {
             StringBuilder q = new StringBuilder();
-            q.append("select * from [jnt:portalTab] as t where isdescendantnode(t, ['").append(portalNode.getPath())
+            q.append("select * from [" + PortalConstants.JNT_PORTAL_TAB + "] as t where isdescendantnode(t, ['").append(portalNode.getPath())
                     .append("'])");
             Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
 
@@ -132,7 +130,7 @@ public class PortalService {
         return portalTabs;
     }
 
-    public List<JCRNodeWrapper> getPortalTabTemplates(String templateRootNodeUUID, JCRSessionWrapper session) {
+    public List<JCRNodeWrapper> getPortalTabTemplates(String templateRootPath, JCRSessionWrapper session) {
         List<JCRNodeWrapper> portalTabTemplates = new LinkedList<JCRNodeWrapper>();
 
         QueryManager queryManager = session.getWorkspace().getQueryManager();
@@ -141,10 +139,10 @@ public class PortalService {
         }
 
         try {
-            JCRNodeWrapper templateRootNode = session.getNodeByUUID(templateRootNodeUUID);
+            JCRNodeWrapper templateRootNode = session.getNode(templateRootPath);
             StringBuilder q = new StringBuilder();
-            q.append("select * from [jnt:contentTemplate] as t where isdescendantnode(t, ['").append(templateRootNode.getPath())
-                    .append("'])  and contains(t.['j:applyOn'], '" + JNT_PORTAL_TAB + "')");
+            q.append("select * from [" + PortalConstants.JNT_CONTENT_TEMPLATE + "] as t where isdescendantnode(t, ['").append(templateRootNode.getPath())
+                    .append("'])  and contains(t.['" + PortalConstants.J_APPLY_ON + "'], '" + PortalConstants.JNT_PORTAL_TAB + "')");
             Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
 
             NodeIterator nodes = query.execute().getNodes();
@@ -164,7 +162,7 @@ public class PortalService {
 
         try {
             JCRNodeWrapper widget = columnNode.addNode(JCRContentUtils.findAvailableNodeName(columnNode, JCRContentUtils.generateNodeName(nodeName)), nodetype);
-            widget.setProperty("jcr:title", nodeName);
+            widget.setProperty(PortalConstants.JCR_TITLE, nodeName);
             session.save();
 
             return widget;
@@ -183,7 +181,7 @@ public class PortalService {
             return columnNode;
         } catch (RepositoryException e) {
             try {
-                columnNode = portalTabNode.addNode(JCRContentUtils.generateNodeName(columnName, 32), JNT_PORTAL_COLUMN);
+                columnNode = portalTabNode.addNode(JCRContentUtils.generateNodeName(columnName, 32), PortalConstants.JNT_PORTAL_COLUMN);
                 return columnNode;
             } catch (RepositoryException e1) {
                 logger.error(e.getMessage(), e);
@@ -200,7 +198,7 @@ public class PortalService {
         } catch (RepositoryException e) {
             try {
                 JCRNodeWrapper portalTabNode = sessionWrapper.getNode(StringUtils.substringBeforeLast(path, "/"));
-                columnNode = portalTabNode.addNode(JCRContentUtils.generateNodeName(StringUtils.substringAfterLast(path, "/"), 32), JNT_PORTAL_COLUMN);
+                columnNode = portalTabNode.addNode(JCRContentUtils.generateNodeName(StringUtils.substringAfterLast(path, "/"), 32), PortalConstants.JNT_PORTAL_COLUMN);
                 sessionWrapper.save();
             } catch (RepositoryException e1) {
                 logger.error(e.getMessage(), e);
@@ -209,5 +207,29 @@ public class PortalService {
         }
 
         return columnNode;
+    }
+
+    public JCRNodeWrapper getPortalTabTemplateNode(String templateName, String templateRootPath, JCRSessionWrapper sessionWrapper) {
+        QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
+        if (queryManager == null) {
+            logger.error("Unable to obtain QueryManager instance");
+        }
+
+        try {
+            JCRNodeWrapper templateRootNode = sessionWrapper.getNode(templateRootPath);
+            StringBuilder q = new StringBuilder();
+            q.append("select * from [" + PortalConstants.JNT_CONTENT_TEMPLATE + "] as t where isdescendantnode(t, ['").append(templateRootNode.getPath())
+                    .append("'])  and t.['j:nodename'] = '").append(templateName).append("'");
+            Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
+
+            NodeIterator nodes = query.execute().getNodes();
+            while (nodes.hasNext()) {
+                return (JCRNodeWrapper) nodes.next();
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return null;
     }
 }

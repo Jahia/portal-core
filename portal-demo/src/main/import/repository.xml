@@ -1,19 +1,173 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <content xmlns:j="http://www.jahia.org/jahia/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0">
     <modules jcr:primaryType="jnt:modules">
-        <portal-demo j:dependencies="default"
+        <portal-demo j:dependencies="bootstrap bootstrap-components default portal-core"
+                     j:installedModules="portal-demo"
                    j:moduleType="module"
                    j:title="portal demo"
                    jcr:primaryType="jnt:module">
+                
+                <templates j:rootTemplatePath="/base" jcr:primaryType="jnt:templatesFolder">
+                <files jcr:primaryType="jnt:folder">
+                    <themes jcr:primaryType="jnt:folder">
+                        <default jcr:primaryType="jnt:folder"/>
+                    </themes>
+                </files>
+                <contents jcr:primaryType="jnt:contentFolder"/>
+                <base j:theme="/modules/portal-demo/templates/files/themes/default"
+                      j:view="portal-demo"
+                      jcr:mixinTypes="jmix:theme"
+                      jcr:primaryType="jnt:template">
+                    <home jcr:primaryType="jnt:pageTemplate"/>
+                    <simple jcr:primaryType="jnt:pageTemplate"/>
+                        <portal j:hiddenTemplate="false" jcr:primaryType="jnt:template">
+                            <j:translation_en jcr:language="en"
+                                    jcr:mixinTypes="mix:title"
+                                    jcr:primaryType="jnt:translation"
+                                    jcr:title="portal"/>
+                            <col1 j:applyOn="jnt:portalTab"
+                        j:defaultTemplate="false"
+                        j:hiddenTemplate="false"
+                        jcr:primaryType="jnt:contentTemplate">
+                                <j:translation_en jcr:language="en"
+                                       jcr:mixinTypes="mix:title"
+                                       jcr:primaryType="jnt:translation"
+                                       jcr:title="col1"/>
+                                <portal_x0020_content jcr:primaryType="jnt:contentList">
+                                    <bootstrap-layer-container-rows-a jcr:mixinTypes="jmix:bootstrapFullComponentRowPredefined"
+                                                          jcr:primaryType="jnt:bootstrapFullComponent"
+                                                          layout="12"
+                                                          rowType="predefined">
+                                        <bootstrap-layer-container-rows-a jcr:primaryType="jnt:contentList">
+                                            <portalarea jcr:primaryType="jnt:portalArea"/>
+                                    </bootstrap-layer-container-rows-a>
+                                    </bootstrap-layer-container-rows-a>
+                                </portal_x0020_content>
+                            </col1>
+                            <col2-50-50 j:applyOn="jnt:portalTab"
+                              j:defaultTemplate="false"
+                              j:hiddenTemplate="false"
+                              jcr:primaryType="jnt:contentTemplate">
+                                <j:translation_en jcr:language="en"
+                                       jcr:mixinTypes="mix:title"
+                                       jcr:primaryType="jnt:translation"
+                                       jcr:title="col2 50-50"/>
+                                <portal_x0020_content jcr:primaryType="jnt:contentList">
+                                    <bootstrap-layer-container-rows-a jcr:mixinTypes="jmix:bootstrapFullComponentRowPredefined"
+                                                          jcr:primaryType="jnt:bootstrapFullComponent"
+                                                          layout="6_6"
+                                                          rowType="predefined">
+                                        <bootstrap-layer-container-rows-a jcr:primaryType="jnt:contentList">
+                                            <portalarea jcr:primaryType="jnt:portalArea"/>
+                                    </bootstrap-layer-container-rows-a>
+                                        <bootstrap-layer-container-rows-a-side1 jcr:primaryType="jnt:contentList">
+                                            <portalarea jcr:primaryType="jnt:portalArea"/>
+                                        </bootstrap-layer-container-rows-a-side1>
+                                    </bootstrap-layer-container-rows-a>
+                                </portal_x0020_content>
+                            </col2-50-50>
+                            <col2-30-70 j:applyOn="jnt:portalTab"
+                              j:defaultTemplate="false"
+                              j:hiddenTemplate="false"
+                              jcr:primaryType="jnt:contentTemplate">
+                                <j:translation_en jcr:language="en"
+                                       jcr:mixinTypes="mix:title"
+                                       jcr:primaryType="jnt:translation"
+                                       jcr:title="col2 30-70"/>
+                                <portal_x0020_content jcr:primaryType="jnt:contentList">
+                                    <bootstrap-layer-container-rows-a jcr:mixinTypes="jmix:bootstrapFullComponentRowPredefined"
+                                                          jcr:primaryType="jnt:bootstrapFullComponent"
+                                                          layout="4_8"
+                                                          rowType="predefined">
+                                        <bootstrap-layer-container-rows-a-side1 jcr:primaryType="jnt:contentList">
+                                            <portalarea jcr:primaryType="jnt:portalArea"/>
+                                        </bootstrap-layer-container-rows-a-side1>
+                                        <bootstrap-layer-container-rows-a jcr:primaryType="jnt:contentList">
+                                            <portalarea jcr:primaryType="jnt:portalArea"/>
+                                    </bootstrap-layer-container-rows-a>
+                                    </bootstrap-layer-container-rows-a>
+                                </portal_x0020_content>
+                            </col2-30-70>
+                            <col2-70-30 j:applyOn="jnt:portalTab"
+                              j:defaultTemplate="false"
+                              j:hiddenTemplate="false"
+                              jcr:primaryType="jnt:contentTemplate">
+                                <j:translation_en jcr:language="en"
+                                       jcr:mixinTypes="mix:title"
+                                       jcr:primaryType="jnt:translation"
+                                       jcr:title="col2 70-30"/>
+                                <portal_x0020_content jcr:primaryType="jnt:contentList">
+                                    <bootstrap-layer-container-rows-a jcr:mixinTypes="jmix:bootstrapFullComponentRowPredefined"
+                                                          jcr:primaryType="jnt:bootstrapFullComponent"
+                                                          layout="8_4"
+                                                          rowType="predefined">
+                                        <bootstrap-layer-container-rows-a jcr:primaryType="jnt:contentList">
+                                            <portalarea jcr:primaryType="jnt:portalArea"/>
+                                    </bootstrap-layer-container-rows-a>
+                                        <bootstrap-layer-container-rows-a-side1 jcr:primaryType="jnt:contentList">
+                                            <portalarea jcr:primaryType="jnt:portalArea"/>
+                                        </bootstrap-layer-container-rows-a-side1>
+                                    </bootstrap-layer-container-rows-a>
+                                </portal_x0020_content>
+                            </col2-70-30>
+                            <col3 j:applyOn="jnt:portalTab"
+                        j:defaultTemplate="false"
+                        j:hiddenTemplate="false"
+                        jcr:primaryType="jnt:contentTemplate">
+                                <j:translation_en jcr:language="en"
+                                       jcr:mixinTypes="mix:title"
+                                       jcr:primaryType="jnt:translation"
+                                       jcr:title="col3"/>
+                                <portal_x0020_content jcr:primaryType="jnt:contentList">
+                                    <bootstrap-layer-container-rows-a jcr:mixinTypes="jmix:bootstrapFullComponentRowPredefined"
+                                                          jcr:primaryType="jnt:bootstrapFullComponent"
+                                                          layout="4_4_4"
+                                                          rowType="predefined">
+                                        <bootstrap-layer-container-rows-a jcr:primaryType="jnt:contentList">
+                                            <portalarea jcr:primaryType="jnt:portalArea"/>
+                                    </bootstrap-layer-container-rows-a>
+                                        <bootstrap-layer-container-rows-a-side1 jcr:primaryType="jnt:contentList">
+                                            <portalarea jcr:primaryType="jnt:portalArea"/>
+                                        </bootstrap-layer-container-rows-a-side1>
+                                        <bootstrap-layer-container-rows-a-side2 jcr:primaryType="jnt:contentList">
+                                            <portalarea jcr:primaryType="jnt:portalArea"/>
+                                        </bootstrap-layer-container-rows-a-side2>
+                                    </bootstrap-layer-container-rows-a>
+                                </portal_x0020_content>
+                            </col3>
+                            <pagecontent jcr:primaryType="jnt:contentList">
+                                <portal-toolbar jcr:primaryType="jnt:portalToolbar">
+                                    <j:translation_en jcr:language="en"
+                                          jcr:mixinTypes="mix:title"
+                                          jcr:primaryType="jnt:translation"
+                                          jcr:title="portal toolbar"/>
+                                </portal-toolbar>
+                                <portal_x0020_content j:allowedTypes="" jcr:primaryType="jnt:area"/>
+                            </pagecontent>
+                        </portal>
+                </base>
+                <content-template j:applyOn="jnt:content"
+                                  j:hiddenTemplate="true"
+                                  j:priority="1"
+                                  j:view="portal-demo"
+                                  jcr:primaryType="jnt:contentTemplate">
+                    <pagecontent jcr:primaryType="jnt:contentList">
+                        <main-resource-display j:mainResourceView="default" jcr:primaryType="jnt:mainResourceDisplay"/>
+                    </pagecontent>
+                </content-template>
+            </templates>
+
                 <portlets jcr:primaryType="jnt:portletFolder"/>
                 <files jcr:primaryType="jnt:folder"/>
                 <contents jcr:primaryType="jnt:contentFolder"/>
-                <templates j:rootTemplatePath="/base" jcr:primaryType="jnt:templatesFolder">
-                    <files jcr:primaryType="jnt:folder"/>
-                    <contents jcr:primaryType="jnt:contentFolder"/>
-                </templates>
-                
-                
+            <home j:isHomePage="true"
+                  j:templateName="home"
+                  jcr:primaryType="jnt:page">
+                <j:translation_en jcr:language="en"
+                                  jcr:mixinTypes="mix:title"
+                                  jcr:primaryType="jnt:translation"
+                                  jcr:title="Home"/>
+            </home>
             </portal-demo>
     </modules>
 </content>
