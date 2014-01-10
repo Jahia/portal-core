@@ -17,6 +17,7 @@
     <div class="widget-header">
         <h4 class="panel-title">${currentNode.properties["jcr:title"].string}</h4>
         <div class="widget-tools">
+            <i ng-class="_minimize ? 'icon-minus' : 'icon-plus'" ng-click="minimize()"></i>
             <i class="icon-remove" ng-click="delete()"></i>
         </div>
     </div>
@@ -28,8 +29,15 @@
 <script type="text/javascript">
     angular.module("widgetWrapper").factory('widget', function($window) {
         // This is a factory function, and is responsible for
-        // creating the 'greet' service.
-        return portal.getCurrentWidget("w${currentNode.identifier}");
+        // injecting the 'widget' object in the controller.
+        var w = portal.getCurrentWidget("w${currentNode.identifier}");
+
+        //Here we can add specific info in the widget object related to this skin
+        w.contentClass = "widget-content";
+        w.headerClass = "widget-header";
+        w.wrapperClass = "widget";
+
+        return w;
     });
     angular.bootstrap(document.getElementById("w${currentNode.identifier}"),['widgetWrapper']);
 </script>

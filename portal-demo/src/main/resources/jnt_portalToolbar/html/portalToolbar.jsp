@@ -20,11 +20,14 @@
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
 
 <div id="portal_toolbar" ng-app="portalToolbar">
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="#">Home</a></li>
-        <li><a href="#">Profile</a></li>
-        <li><a href="#">Messages</a></li>
-    </ul>
+    <div ng-controller="navCtrl">
+        <ul class="nav nav-tabs" ng-init="loadTabs()">
+            <li ng-class="isCurrentTab(tab.path) ? 'active' : ''" ng-repeat="tab in tabs"><a href="#">{{tab.name}}</a></li>
+            <li><a href="#"><i class="icon-folder-open"></i></a></li>
+            <li><a href="#"><i class="icon-wrench"></i></a></li>
+            <li><a href="#"><i class="icon-plus"></i></a></li>
+        </ul>
+    </div>
 
     <div ng-controller="widgetsCtrl" >
         <input type="button" value="add widget" ng-click="toggleWidgetsMenu()"/>

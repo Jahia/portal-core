@@ -30,6 +30,7 @@ Jahia.Portal = function () {
 
 Jahia.Portal.constants = {
     WIDGETS_PORTAL_VIEW: ".widgets.json",
+    TABS_PORTAL_VIEW: ".tabs.json",
     ADD_WIDGET_ACTION: ".addWidget.do",
     FORM_TAB_VIEW: ".form.json",
 
@@ -187,6 +188,26 @@ Jahia.Portal.prototype = {
                     callback();
                 }
                 window.location.reload();
+            });
+    },
+
+    getCurrentTabPath: function() {
+        var instance = this;
+        return instance.portalTabPath;
+    },
+
+    getTabs: function(callback) {
+        var instance = this;
+        instance._debug("Load tabs for portal tab: " + instance.portalPath);
+        $.ajax({
+            type: "GET",
+            dataType: "json",
+            url: instance.urlBase + instance.portalPath + Jahia.Portal.constants.TABS_PORTAL_VIEW
+        }).done(function (data) {
+                instance._debug(data.length + "portal tabs successfully loaded");
+                if (callback) {
+                    callback(data);
+                }
             });
     },
 

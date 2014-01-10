@@ -62,7 +62,17 @@ portalToolbar.controller('tabCtrl', function test($scope) {
 });
 
 portalToolbar.controller('navCtrl', function test($scope) {
-    $scope.form = [];
+    $scope.tabs = [];
 
+    $scope.loadTabs = function(){
+        portal.getTabs(function(data){
+            $scope.$apply(function () {
+                $scope.tabs = data;
+            });
+        });
+    };
 
+    $scope.isCurrentTab = function(path) {
+        return portal.getCurrentTabPath() == path;
+    }
 });

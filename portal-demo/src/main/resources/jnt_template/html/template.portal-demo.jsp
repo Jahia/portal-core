@@ -26,6 +26,7 @@
 <template:addResources type="javascript" resources="angular.min.js" />
 <template:addResources type="javascript" resources="app/portalToolbar.js" />
 <template:addResources type="javascript" resources="app/portalWidgetWrapper.js" />
+<template:addResources type="css" resources="portal-demo.css" />
 <template:area path="pagecontent"/>
 
 <c:if test="${renderContext.editMode}">
