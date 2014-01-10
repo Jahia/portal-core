@@ -1,0 +1,43 @@
+.widget {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.075);
+    margin-bottom: 20px;
+}
+
+.widget .widget-header {
+    border-bottom: 1px solid;
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+    cursor: move;
+    position: relative;
+}
+
+.widget .widget-header h4{
+    margin-top: 0;
+    padding-top: 10px;
+    margin-left: 15px;
+}
+
+.widget .widget-tools {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.widget .widget-tools i{
+    cursor: pointer;
+}
+
+.ui-sortable-placeholder {
+    border: 1px dotted black;
+    visibility: visible !important;
+    height: 50px !important;
+}
+
+/* hook for being able to drag widget in empty areas */
+.portal_area{
+    margin-top: 20px;
+    min-height: 5px;
+}

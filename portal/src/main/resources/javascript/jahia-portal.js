@@ -30,14 +30,17 @@ Jahia.Portal = function () {
 
 Jahia.Portal.constants = {
     WIDGETS_PORTAL_VIEW: ".widgets.json",
-    ADD_WIDGET_ACTION: ".addWidget.do"
+    ADD_WIDGET_ACTION: ".addWidget.do",
+    FORM_TAB_VIEW: ".form.json",
+
+    PORTAL_WIDGET_CLASS:    "portal_widget"
 };
 
 Jahia.Portal.default = {
     debug: true,
     sortable_options: {
         connectWith: ".portal_area",
-        handle: ".portlet-header"
+        handle: ".widget-header"
     }
 };
 
@@ -48,11 +51,11 @@ Jahia.Portal.prototype = {
         var $areas = $(instance.conf.sortable_options.connectWith);
         instance.conf.sortable_options.update = function (event, ui) {
             // Test if we are on the destination col after sort update
-            if($(event.target).attr("id") == ui.item.parent().attr("id")){
+            if ($(event.target).attr("id") == ui.item.parent().attr("id")) {
                 var toArea = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).attr("id"));
                 var widget = instance.getWidget(ui.item.attr("id"));
 
-                widget.performMove(toArea, function(){
+                widget.performMove(toArea, function () {
                     $areas.sortable('cancel');
                 });
             }
@@ -141,6 +144,59 @@ Jahia.Portal.prototype = {
     getWidget: function (htmlId) {
         var instance = this;
         return instance.widgets[htmlId];
+    },
+
+    getCurrentWidget: function (htmlId) {
+        var instance = this;
+        return instance.getWidget($("#" + htmlId).parent("." + Jahia.Portal.constants.PORTAL_WIDGET_CLASS).attr("id"));
+    },
+
+    deleteWidget: function(widget) {
+        var instance = this;
+        widget.performDelete();
+    },
+
+    getTabFormInfo: function (callback) {
+        var instance = this;
+        instance._debug("Load form infos for portal tab: " + instance.portalTabPath);
+        $.ajax({
+            type: "GET",
+            dataType: "json",
+            url: instance.urlBase + instance.portalTabPath + Jahia.Portal.constants.FORM_TAB_VIEW
+        }).done(function (data) {
+                instance._debug("Portal tab form info successfully loaded");
+                if (callback) {
+                    callback(data);
+                }
+            });
+    },
+
+    saveTabForm: function (form, callback) {
+        var instance = this;
+        instance._debug("Save form for portal tab: " + instance.portalTabPath);
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            traditional: true,
+            url: instance.urlBase + instance.portalTabPath,
+            data: instance._convertTabFormToJCRProps(form)
+        }).done(function (data) {
+                instance._debug("Portal tab form successfully saved");
+                if(callback){
+                    callback();
+                }
+                window.location.reload();
+            });
+    },
+
+    _convertTabFormToJCRProps: function (form) {
+        return {
+            "jcrNodeType": "jnt:portalTab",
+            "jcr:title": form.name,
+            "j:templateName": form.template.key,
+            "j:widgetsSkin": form.widgetsSkin.key
+        };
     }
 };
 
@@ -175,7 +231,7 @@ Jahia.Portal.Area.prototype = {
             data.forEach(function (widget) {
                 instance.registerWidget(widget.path);
             });
-        }).fail(function(){
+        }).fail(function () {
                 instance._portal._debug("No col: " + instance._colName);
             });
     },
@@ -184,10 +240,6 @@ Jahia.Portal.Area.prototype = {
         var instance = this;
         var widgetHtmlId = "w_" + Math.random().toString(36).substring(7);
         instance._portal.widgets[widgetHtmlId] = new Jahia.Portal.Widget(widgetHtmlId, path, instance);
-    },
-
-    performMove: function (toArea) {
-
     }
 };
 
@@ -212,7 +264,7 @@ Jahia.Portal.Widget.prototype = {
         var instance = this;
         instance._portal._debug("Load widget: " + instance._path);
 
-        var wrapper = "<div id='" + instance._id + "' class='portal_widget'></div>";
+        var wrapper = "<div id='" + instance._id + "' class='" + Jahia.Portal.constants.PORTAL_WIDGET_CLASS + "'></div>";
         $("#" + instance._area._id).append(wrapper);
         $.ajax(instance._portal.urlBase + instance._path + ".view.html.ajax").done(function (data) {
             $("#" + instance._id).html(data);
@@ -222,12 +274,12 @@ Jahia.Portal.Widget.prototype = {
         });
     },
 
-    performMove: function(toArea, failCallBack) {
+    performMove: function (toArea, failCallBack) {
         var instance = this;
 
         instance._portal._debug("Moved widget " + instance._path + " to " + toArea._colName);
 
-        var onTopOfWidget = instance._portal.getWidget($("#" + instance._id).next(".portal_widget").attr("id"));
+        var onTopOfWidget = instance._portal.getWidget($("#" + instance._id).next("." + Jahia.Portal.constants.PORTAL_WIDGET_CLASS).attr("id"));
 
         var data = {
             toArea: toArea._colPath,
@@ -244,11 +296,34 @@ Jahia.Portal.Widget.prototype = {
                 instance._portal._debug("Widget " + instance._path + " successfully moved to " + newPositionInfo.path);
                 instance._path = newPositionInfo.path;
                 instance._area = instance._portal.getAreaByColName(newPositionInfo.col);
-            }).fail(function(){
-                if(failCallBack) {
+            }).fail(function () {
+                if (failCallBack) {
                     failCallBack();
                 }
             });
+    },
+
+    performDelete: function() {
+        var instance = this;
+        $.ajax({
+            type: "POST",
+            data: {
+                jcrMethodToCall:"delete"
+            },
+            dataType: "json",
+            traditional: true,
+            url: instance._portal.urlBase + instance._path
+        }).done(function(){
+                instance._portal._debug("Widget " + instance._path + " successfully deleted");
+                // delete from html
+                $("#" + instance._id).remove();
+                // delete from portal
+                delete instance._portal.widgets[instance._id];
+            });
+    },
+
+    sayHello: function(){
+        console.log("blblblblbl");
     }
 };
 

@@ -21,8 +21,11 @@
 </head>
 <body>
 <bootstrap:addCSS/>
-<template:addResources type="javascript" resources="jquery.min.js" />
 <bootstrap:addThemeJS/>
+<template:addResources type="javascript" resources="jquery.min.js" />
+<template:addResources type="javascript" resources="angular.min.js" />
+<template:addResources type="javascript" resources="app/portalToolbar.js" />
+<template:addResources type="javascript" resources="app/portalWidgetWrapper.js" />
 <template:area path="pagecontent"/>
 
 <c:if test="${renderContext.editMode}">

@@ -28,7 +28,7 @@
 
 <json:object>
     <json:property name="name" value="${currentNode.properties['jcr:title'].string}"/>
-    <json:object name="widgetSkin">
+    <json:object name="widgetsSkin">
         <c:set var="skinKey" value="${currentNode.properties['j:widgetsSkin'].string}"/>
         <json:property name="name"
                        value="${functions:escapeJavaScript(portal:getPortalWidgetSkin(skinKey, renderContext.site).displayName)}"/>
@@ -48,7 +48,7 @@
         </json:object>
     </json:array>
 
-    <json:array items="${portal:getPortalWidgetSkins(renderContext.site)}" var="skin" name="allowedSkins">
+    <json:array items="${portal:getPortalWidgetSkins(renderContext.site)}" var="skin" name="allowedWidgetsSkins">
         <fmt:message var="i18Name" key="${skin.displayName}"/>
         <json:object>
             <json:property name="name" value="${functions:escapeJavaScript(i18Name)}"/>

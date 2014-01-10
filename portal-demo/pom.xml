@@ -46,7 +46,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-              <Jahia-Module-Type>templatesSet</Jahia-Module-Type>
+            <Jahia-Module-Type>templatesSet</Jahia-Module-Type>
             <Jahia-Depends>default,bootstrap-components,bootstrap,portal-core</Jahia-Depends>
           </instructions>
         </configuration>
