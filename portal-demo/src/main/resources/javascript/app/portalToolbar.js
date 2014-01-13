@@ -1,30 +1,38 @@
 var portalToolbar = angular.module('portalToolbar', []);
 
 portalToolbar.controller('widgetsCtrl', function ctrl($scope) {
+    $scope.modalId = "";
     $scope.widgets = [];
     $scope.desiredName = "";
-    $scope.showWidgetsMenu = false;
+    $scope.desiredWidget = "";
 
-    $scope.toggleWidgetsMenu = function () {
-        if(!$scope.showWidgetsMenu){
-            $scope.showWidgetsMenu = true;
-
+    $scope.init = function (modalId) {
+        $scope.modalId = modalId;
+        $('#' + modalId).on('show', function () {
             portal.getWidgetTypes(function (widgets) {
                 $scope.$apply(function () {
                     $scope.widgets = widgets;
                 });
             });
-        }else {
-            $scope.showWidgetsMenu = false;
+        });
+
+    };
+
+    $scope.selectWidget = function(nodetype) {
+        $scope.desiredWidget = nodetype;
+    };
+
+    $scope.addWidget = function() {
+        if($scope.desiredName.length > 0 && $scope.desiredWidget.length > 0){
+            portal.addNewWidget($scope.desiredWidget, $scope.desiredName);
+            $scope.cancel();
         }
     };
 
-    $scope.addWidget = function(nodetype) {
-        if($scope.desiredName.length > 0){
-            portal.addNewWidget(nodetype, $scope.desiredName);
-            $scope.showWidgetsMenu = false;
-            $scope.desiredName = "";
-        }
+    $scope.cancel = function() {
+        $('#' + $scope.modalId).modal('hide');
+        $scope.desiredName = "";
+        $scope.desiredWidget = "";
     }
 });
 

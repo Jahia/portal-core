@@ -19,27 +19,43 @@
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
 
-<div id="portal_toolbar" ng-app="portalToolbar">
+<template:addResources type="javascript" resources="bootstrap-modal.js"/>
+<template:addResources type="css" resources="portal-toolbar.css"/>
+
+<div id="portal_toolbar" class="portal_toolbar" ng-app="portalToolbar">
     <div ng-controller="navCtrl">
         <ul class="nav nav-tabs" ng-init="loadTabs()">
-            <li ng-class="isCurrentTab(tab.path) ? 'active' : ''" ng-repeat="tab in tabs"><a href="#">{{tab.name}}</a></li>
+            <li ng-class="isCurrentTab(tab.path) ? 'active' : ''" ng-repeat="tab in tabs"><a href="#">{{tab.name}}</a>
+            </li>
+
             <li><a href="#"><i class="icon-folder-open"></i></a></li>
-            <li><a href="#"><i class="icon-wrench"></i></a></li>
-            <li><a href="#"><i class="icon-plus"></i></a></li>
+            <li class="right"><a href="#"><i class="icon-wrench"></i></a></li>
+            <li class="right"><a href="#widgetsModal" data-toggle="modal"><i class="icon-plus"></i></a></li>
         </ul>
     </div>
 
-    <div ng-controller="widgetsCtrl" >
-        <input type="button" value="add widget" ng-click="toggleWidgetsMenu()"/>
+    <div id="widgetsModal" class="modal hide fade" tabindex="-1" role="dialog"
+         aria-labelledby="widgetModalLabel" ng-controller="widgetsCtrl"
+         ng-init="init('widgetsModal')">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" ng-click="cancel()">×</button>
+            <h3 id="widgetModalLabel">Add new widget</h3>
+        </div>
+        <div class="modal-body">
+            <div>
+                <label for="widget_desiredName">Name:</label>
+                <input id="widget_desiredName" ng-model="desiredName" type="text">
 
-        <div ng-show="showWidgetsMenu">
-            <label for="widget_desiredName">Name:</label>
-            <input id="widget_desiredName" ng-model="desiredName" type="text">
-            <div ng-repeat="widget in widgets">
-                <span>{{widget.displayableName}}</span>
-
-                <input type="button" ng-click="addWidget(widget.name)" value="Add">
+                <ul class="nav nav-pills nav-stacked">
+                    <li ng-repeat="widget in widgets" ng-class="widget.name == desiredWidget ? 'active' : ''">
+                        <a ng-click="selectWidget(widget.name)" href="#">{{widget.displayableName}}</a>
+                    </li>
+                </ul>
             </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" ng-click="cancel()">Close</button>
+            <button class="btn btn-primary" ng-click="addWidget()">Add</button>
         </div>
     </div>
 
@@ -54,7 +70,9 @@
                 <div class="row-fluid">
                     template:
                     <select ng-model="form.template.key">
-                        <option ng-repeat="template in form.allowedTemplates" ng-value="template.key">{{template.name}}</option>
+                        <option ng-repeat="template in form.allowedTemplates" ng-value="template.key">
+                            {{template.name}}
+                        </option>
                     </select>
                 </div>
                 <div class="row-fluid">
