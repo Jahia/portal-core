@@ -28,7 +28,9 @@
     <c:forEach items="${jcr:getChildrenOfType(currentNode, portalTabType)}" var="tab">
         <json:object>
             <json:property name="name" value="${tab.displayableName}"/>
-            <json:property name="path" value="${tab.path}"/>
+            <json:property name="url">
+                <c:url value="${url.base}${tab.path}.html"/>
+            </json:property>
         </json:object>
     </c:forEach>
 </json:array>

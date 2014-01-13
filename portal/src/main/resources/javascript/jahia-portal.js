@@ -172,22 +172,47 @@ Jahia.Portal.prototype = {
             });
     },
 
-    saveTabForm: function (form, callback) {
+    saveTabForm: function (form, callback, isNew) {
         var instance = this;
-        instance._debug("Save form for portal tab: " + instance.portalTabPath);
+        var action = isNew ? "Add new" : "Edit";
+        instance._debug( action + " portal tab: " + form.name);
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            traditional: true,
+            url: isNew ? instance.urlBase + instance.portalPath + "/*" : instance.urlBase + instance.portalTabPath,
+            data: instance._convertTabFormToJCRProps(form)
+        }).done(function (data) {
+                instance._debug("Portal tab form successfully saved");
+                if(callback){
+                    callback(data);
+                }
+                if(isNew){
+                    window.location.href = instance.urlBase + instance.portalPath + "/" + data["j_nodename"] + ".html";
+                }else {
+                    window.location.reload();
+                }
+            });
+    },
+
+    deleteCurrentTab: function(callback) {
+        var instance = this;
+        instance._debug("Delete tab: " + instance.portalTabPath);
 
         $.ajax({
             type: "POST",
             dataType: "json",
             traditional: true,
             url: instance.urlBase + instance.portalTabPath,
-            data: instance._convertTabFormToJCRProps(form)
-        }).done(function (data) {
-                instance._debug("Portal tab form successfully saved");
+            data: {
+                jcrMethodToCall: "delete"
+            }
+        }).done(function(data){
                 if(callback){
-                    callback();
+                    callback(data)
                 }
-                window.location.reload();
+            window.location.href = instance.urlBase + instance.portalPath;
             });
     },
 
@@ -216,7 +241,8 @@ Jahia.Portal.prototype = {
             "jcrNodeType": "jnt:portalTab",
             "jcr:title": form.name,
             "j:templateName": form.template.key,
-            "j:widgetsSkin": form.widgetsSkin.key
+            "j:widgetsSkin": form.widgetsSkin.key,
+            "jcrNormalizeNodeName" : true
         };
     }
 };
@@ -341,10 +367,6 @@ Jahia.Portal.Widget.prototype = {
                 // delete from portal
                 delete instance._portal.widgets[instance._id];
             });
-    },
-
-    sayHello: function(){
-        console.log("blblblblbl");
     }
 };
 
