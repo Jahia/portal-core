@@ -17,10 +17,14 @@
 <template:addResources type="javascript" resources="angular.min.js" />
 <template:addResources type="javascript" resources="app/googleFeedWidget.js" />
 
-<div id="google-feed-${currentNode.identifier}" ng-controller="google-feed-view-ctrl"
-     ng-init="init({feedId: 'google-feed-${currentNode.identifier}', url:'${currentNode.properties["url"].string}'})">
-    <div class="feeds">
-    </div>
+<div id="googleFeed-${currentNode.identifier}" ng-controller="google-feed-edit-ctrl">
+    <form>
+        <div class="row-fluid">
+            URL: <input type="text" name="url" required>
+        </div>
+        <input class="btn" type="button" value="cancel">
+        <input class="btn btn-primary" type="button" value="save">
+    </form>
 </div>
 
 <script type="text/javascript">

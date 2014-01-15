@@ -303,6 +303,7 @@ Jahia.Portal.Widget = function (id, path, area) {
     this._path = path;
     this._area = area;
     this._portal = area._portal;
+    this.state = "view";
 
     this.init();
 };
@@ -317,12 +318,22 @@ Jahia.Portal.Widget.prototype = {
         instance.load();
     },
 
-    load: function () {
+    load: function (view, callback) {
         var instance = this;
+
+        if(!view){
+            view = "view";
+        }
+
         $("#" + instance._id).html("<p>Loading ...</p>");
-        $("#" + instance._id).load(instance._portal.urlBase + instance._path + ".view.html.ajax?includeJavascripts=true", function(){
+        $("#" + instance._id).load(instance._portal.urlBase + instance._path + "." + view + ".html.ajax?includeJavascripts=true", function(){
             instance._portal.initDragDrop();
+            instance.state = view;
             instance._portal._debug("widget " + instance._path + " loaded successfully");
+
+            if(callback){
+                callback();
+            }
         });
     },
 

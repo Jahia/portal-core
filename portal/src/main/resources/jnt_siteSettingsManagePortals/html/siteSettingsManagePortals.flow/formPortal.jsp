@@ -1,3 +1,4 @@
+<%@ page import="org.jahia.modules.portal.PortalConstants" %>
 <%@ page language="java" contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="template" uri="http://www.jahia.org/tags/templateLib" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -25,6 +26,7 @@
 <%--@elvariable id="newslettersRootNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="portalForm" type="org.jahia.modules.portal.sitesettings.form.PortalForm"--%>
 <%--@elvariable id="skin" type="org.jahia.services.render.View"--%>
+<c:set var="portalWidgetMixin" value="<%= PortalConstants.JMIX_PORTAL_WIDGET %>"/>
 
 <template:addResources type="javascript"
                        resources="jquery.min.js,jquery.form.js,jquery-ui.min.js,jquery.blockUI.js,workInProgress.js,admin-bootstrap.js"/>
@@ -58,7 +60,7 @@
             <div class="span4">
                 <form:label path="widgetsSkin">widgets skin <span class="text-error"><strong>*</strong></span></form:label>
                 <form:select path="widgetsSkin">
-                    <c:forEach items="${portal:getPortalWidgetSkins(renderContext.site)}" var="skin">
+                    <c:forEach items="${portal:getViewsSet(portalWidgetMixin, renderContext.site)}" var="skin">
                         <form:option value="${skin.key}">
                             <fmt:message key="${skin.displayName}"/>
                         </form:option>

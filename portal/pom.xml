@@ -53,6 +53,7 @@
         <configuration>
           <instructions>
             <Jahia-Depends>default,siteSettings</Jahia-Depends>
+              <Export-Package>org.jahia.modules.portal.tags</Export-Package>
           </instructions>
         </configuration>
       </plugin>

@@ -1,7 +1,8 @@
-package org.jahia.modules.portal;
+package org.jahia.modules.portal.tags;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.jahia.data.templates.JahiaTemplatesPackage;
+import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.decorator.JCRSiteNode;
@@ -69,23 +70,23 @@ public class PortalFunctions {
         return null;
     }
 
-    public static SortedSet<View> getPortalWidgetSkins(JCRSiteNode site) {
-        try {
-            return RenderService.getInstance().getViewsSet(NodeTypeRegistry.getInstance().getNodeType(PortalConstants.JMIX_PORTAL_WIDGET), site, "html");
-        } catch (NoSuchNodeTypeException e) {
-            logger.error(e.getMessage(), e);
+    public static View getSpecificView(String nt, String view, JCRSiteNode site) {
+        SortedSet<View> skins = getViewSet(nt, site);
+        if (CollectionUtils.isNotEmpty(skins)) {
+            for (View skin : skins) {
+                if (skin.getKey().equals(view)) {
+                    return skin;
+                }
+            }
         }
         return null;
     }
 
-    public static View getPortalWidgetSkin(String name, JCRSiteNode site) {
-        SortedSet<View> skins = getPortalWidgetSkins(site);
-        if (CollectionUtils.isNotEmpty(skins)) {
-            for (View skin : skins) {
-                if (skin.getKey().equals(name)) {
-                    return skin;
-                }
-            }
+    public static SortedSet<View> getViewSet(String nt, JCRSiteNode site){
+        try {
+            return RenderService.getInstance().getViewsSet(NodeTypeRegistry.getInstance().getNodeType(nt), site, "html");
+        } catch (NoSuchNodeTypeException e) {
+            logger.error(e.getMessage(), e);
         }
         return null;
     }

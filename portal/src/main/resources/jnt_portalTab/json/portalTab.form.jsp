@@ -24,6 +24,8 @@
 <%--@elvariable id="skin" type="org.jahia.services.render.View"--%>
 <c:set target="${renderContext}" property="contentType" value="application/json;charset=UTF-8"/>
 <c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
+<c:set var="portalWidgetMixin" value="<%= PortalConstants.JMIX_PORTAL_WIDGET %>"/>
+
 <c:set var="portalNode" value="${jcr:getParentOfType(currentNode, portalMixin)}"/>
 
 <json:object>
@@ -31,7 +33,7 @@
     <json:object name="widgetsSkin">
         <c:set var="skinKey" value="${currentNode.properties['j:widgetsSkin'].string}"/>
         <json:property name="name"
-                       value="${functions:escapeJavaScript(portal:getPortalWidgetSkin(skinKey, renderContext.site).displayName)}"/>
+                       value="${functions:escapeJavaScript(portal:getSpecificView(portalWidgetMixin, skinKey, renderContext.site))}"/>
         <json:property name="key" value="${skinKey}"/>
     </json:object>
     <json:object name="template">
@@ -48,7 +50,7 @@
         </json:object>
     </json:array>
 
-    <json:array items="${portal:getPortalWidgetSkins(renderContext.site)}" var="skin" name="allowedWidgetsSkins">
+    <json:array items="${portal:getViewsSet(portalWidgetMixin, renderContext.site)}" var="skin" name="allowedWidgetsSkins">
         <fmt:message var="i18Name" key="${skin.displayName}"/>
         <json:object>
             <json:property name="name" value="${functions:escapeJavaScript(i18Name)}"/>
