@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<content xmlns:j="http://www.jahia.org/jahia/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0">
+    <modules jcr:primaryType="jnt:modules">
+        <portal-demo-widgets j:dependencies="default portal-core"
+                           j:moduleType="module"
+                           j:title="portal demo widgets"
+                           jcr:mixinTypes="jmix:hasExternalProviderExtension"
+                           jcr:primaryType="jnt:module">
+                
+                <templates j:rootTemplatePath="/base" jcr:primaryType="jnt:templatesFolder">
+                    <files jcr:primaryType="jnt:folder"/>
+                    <contents jcr:primaryType="jnt:contentFolder"/>
+                </templates>
+                
+                <portlets jcr:primaryType="jnt:portletFolder"/>
+                <files jcr:primaryType="jnt:folder"/>
+                <contents jcr:primaryType="jnt:contentFolder"/>
+            </portal-demo-widgets>
+    </modules>
+</content>

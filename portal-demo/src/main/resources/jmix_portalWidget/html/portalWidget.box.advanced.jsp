@@ -11,6 +11,9 @@
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
 
+<template:addResources type="javascript" resources="jquery.min.js" />
+<template:addResources type="javascript" resources="angular.min.js" />
+<template:addResources type="javascript" resources="app/portalWidgetWrapper.js" />
 <template:addResources type="css" resources="box.advanced.red.css"/>
 
 <div class="widget" ng-controller="widgetCtrl" ng-app="widgetWrapper" id="w${currentNode.identifier}">
@@ -27,6 +30,7 @@
 </div>
 
 <script type="text/javascript">
+    // Inject widget object to the angular controller
     angular.module("widgetWrapper").factory('widget', function($window) {
         // This is a factory function, and is responsible for
         // injecting the 'widget' object in the controller.
@@ -39,5 +43,7 @@
 
         return w;
     });
+
+    // Boostrap widget app
     angular.bootstrap(document.getElementById("w${currentNode.identifier}"),['widgetWrapper']);
 </script>

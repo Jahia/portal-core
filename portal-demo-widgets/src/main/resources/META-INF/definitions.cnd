@@ -1,0 +1,11 @@
+<jnt = 'http://www.jahia.org/jahia/nt/1.0'>
+<jmix = 'http://www.jahia.org/jahia/mix/1.0'>
+
+[jnt:googleMapWidget] > jnt:content, jmix:portalWidget
+- j:height (long) = 500 indexed=no autocreated
+
+[jnt:helloWorldWidget] > jnt:content, jmix:portalWidget
+
+[jnt:googleFeedWidget] > jnt:content, jmix:portalWidget
+ - url (string) indexed=no
+ - nbEntries (long) = 10 indexed=no autocreated

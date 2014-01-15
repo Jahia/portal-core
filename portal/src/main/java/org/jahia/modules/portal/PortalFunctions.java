@@ -44,7 +44,11 @@ public class PortalFunctions {
     }
 
     public static String getI18nNodetype(JahiaTemplatesPackage pkg, String key, Locale locale) {
-        return Messages.get(pkg, key, locale);
+        try {
+            return Messages.get(pkg, key, locale);
+        }catch (Exception e){
+            return key;
+        }
     }
 
     public static JCRNodeWrapper getTemplateNodeForName(String name, JCRNodeWrapper portalNode) {

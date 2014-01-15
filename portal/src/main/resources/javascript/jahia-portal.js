@@ -41,7 +41,8 @@ Jahia.Portal.default = {
     debug: true,
     sortable_options: {
         connectWith: ".portal_area",
-        handle: ".widget-header"
+        handle: ".widget-header",
+        iframeFix: false
     }
 };
 
@@ -303,19 +304,23 @@ Jahia.Portal.Widget = function (id, path, area) {
     this._area = area;
     this._portal = area._portal;
 
-    this.load();
+    this.init();
 };
 
 Jahia.Portal.Widget.prototype = {
-    load: function () {
+    init: function () {
         var instance = this;
         instance._portal._debug("Load widget: " + instance._path);
 
         var wrapper = "<div id='" + instance._id + "' class='" + Jahia.Portal.constants.PORTAL_WIDGET_CLASS + "'></div>";
         $("#" + instance._area._id).append(wrapper);
-        $.ajax(instance._portal.urlBase + instance._path + ".view.html.ajax").done(function (data) {
-            $("#" + instance._id).html(data);
+        instance.load();
+    },
 
+    load: function () {
+        var instance = this;
+        $("#" + instance._id).html("<p>Loading ...</p>");
+        $("#" + instance._id).load(instance._portal.urlBase + instance._path + ".view.html.ajax?includeJavascripts=true", function(){
             instance._portal.initDragDrop();
             instance._portal._debug("widget " + instance._path + " loaded successfully");
         });

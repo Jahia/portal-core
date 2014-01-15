@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <content xmlns:j="http://www.jahia.org/jahia/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0">
     <modules jcr:primaryType="jnt:modules">
-        <portal-demo j:dependencies="bootstrap bootstrap-components default portal-core"
+        <portal-demo j:dependencies="bootstrap bootstrap-components default portal-core rss"
                      j:installedModules="portal-demo"
                    j:moduleType="module"
                    j:title="portal demo"

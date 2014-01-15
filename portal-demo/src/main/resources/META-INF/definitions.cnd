@@ -4,7 +4,3 @@
 [jmix:portalComponentContent] > jmix:droppableContent, jmix:accessControllableContent mixin
 
 [jnt:portalToolbar] > jmix:portalComponentContent, jmix:studioOnly, jnt:content, mix:title
-
-[jnt:portalWidgetSample] > jnt:content, jmix:portalWidget
-
-[jnt:portalWidgetSampleAnother] > jnt:content, jmix:portalWidget
