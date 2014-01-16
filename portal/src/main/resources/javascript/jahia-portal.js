@@ -23,6 +23,7 @@ Jahia.Portal = function () {
     this.activated = false;
     this.areas = [];
     this.widgets = [];
+    this.$areas = "";
 
     //register portal in the window object
     window.portal = this;
@@ -32,7 +33,12 @@ Jahia.Portal.constants = {
     WIDGETS_PORTAL_VIEW: ".widgets.json",
     TABS_PORTAL_VIEW: ".tabs.json",
     ADD_WIDGET_ACTION: ".addWidget.do",
+    MOVE_WIDGET_ACTION: ".moveWidget.do",
     FORM_TAB_VIEW: ".form.json",
+
+    WIDGET_EVENT_MOVED_SUCCEEDED: "moveSucceeded",
+    WIDGET_EVENT_MOVED_FAILED: "moveFailed",
+    WIDGET_EVENT_MOVED_CANCELED: "moveCanceled",
 
     PORTAL_WIDGET_CLASS:    "portal_widget"
 };
@@ -42,6 +48,7 @@ Jahia.Portal.default = {
     sortable_options: {
         connectWith: ".portal_area",
         handle: ".widget-header",
+        revert: true,
         iframeFix: false
     }
 };
@@ -51,19 +58,33 @@ Jahia.Portal.prototype = {
         var instance = this;
 
         var $areas = $(instance.conf.sortable_options.connectWith);
+
         instance.conf.sortable_options.update = function (event, ui) {
             // Test if we are on the destination col after sort update
             if ($(event.target).attr("id") == ui.item.parent().attr("id")) {
                 var toArea = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).attr("id"));
                 var widget = instance.getWidget(ui.item.attr("id"));
 
-                widget.performMove(toArea, function () {
-                    $areas.sortable('cancel');
-                });
+                widget.performMove(toArea);
+            }
+        };
+
+        instance.conf.sortable_options.start = function(event, ui) {
+            ui.item.data('start_index', ui.item.index());
+            ui.item.data('start_colId', $(ui.item).parent(instance.conf.sortable_options.connectWith).attr("id"));
+        };
+        instance.conf.sortable_options.stop = function(event, ui) {
+            var start_pos = ui.item.data('start_index');
+            var start_colId = ui.item.data('start_colId');
+            if (start_pos == ui.item.index() && start_colId == $(ui.item).parent(instance.conf.sortable_options.connectWith).attr("id")) {
+                // User have started to drag the widget but this one is at the same place.
+                var widget = instance.getWidget(ui.item.attr("id"));
+                widget.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_CANCELED);
             }
         };
 
         $areas.sortable(instance.conf.sortable_options);
+        instance.$areas = $areas;
     },
 
     _debug: function (message) {
@@ -150,7 +171,7 @@ Jahia.Portal.prototype = {
 
     getCurrentWidget: function (htmlId) {
         var instance = this;
-        return instance.getWidget($("#" + htmlId).parent("." + Jahia.Portal.constants.PORTAL_WIDGET_CLASS).attr("id"));
+        return instance.getWidget($("#" + htmlId).parents("." + Jahia.Portal.constants.PORTAL_WIDGET_CLASS).attr("id"));
     },
 
     deleteWidget: function(widget) {
@@ -315,11 +336,40 @@ Jahia.Portal.Widget.prototype = {
 
         var wrapper = "<div id='" + instance._id + "' class='" + Jahia.Portal.constants.PORTAL_WIDGET_CLASS + "'></div>";
         $("#" + instance._area._id).append(wrapper);
+
         instance.load();
+    },
+
+    attachEvents: function() {
+        var instance = this;
+        //detach
+        instance.getjQueryWidget().off();
+
+        // Append when the server successfully make the move for the widget in the JCR
+        instance.getjQueryWidget().on(Jahia.Portal.constants.WIDGET_EVENT_MOVED_SUCCEEDED, function(){
+            instance._portal._debug("Widget successfully moved to " + instance._path);
+        });
+        // Append when the server failed to perform the move for widget in the JCR
+        instance.getjQueryWidget().on(Jahia.Portal.constants.WIDGET_EVENT_MOVED_FAILED, function(){
+            instance._portal._debug("Widget " + instance._path + " move failed");
+
+            // Server cannot perform the move so rollback it in the page also
+            instance._portal.$areas.sortable('cancel');
+        });
+        // Append when the widget return to his initial position
+        instance.getjQueryWidget().on(Jahia.Portal.constants.WIDGET_EVENT_MOVED_CANCELED, function(){
+            instance._portal._debug("Widget stay at " + instance._path);
+        });
+    },
+
+    getjQueryWidget: function() {
+        var instance = this;
+        return $("#" + instance._id);
     },
 
     load: function (view, callback) {
         var instance = this;
+        instance.attachEvents();
 
         if(!view){
             view = "view";
@@ -337,7 +387,7 @@ Jahia.Portal.Widget.prototype = {
         });
     },
 
-    performMove: function (toArea, failCallBack) {
+    performMove: function (toArea) {
         var instance = this;
 
         instance._portal._debug("Moved widget " + instance._path + " to " + toArea._colName);
@@ -353,16 +403,15 @@ Jahia.Portal.Widget.prototype = {
             type: "POST",
             dataType: "json",
             traditional: true,
-            url: instance._portal.urlBase + instance._portal.portalTabPath + ".moveWidget.do",
+            url: instance._portal.urlBase + instance._portal.portalTabPath + Jahia.Portal.constants.MOVE_WIDGET_ACTION,
             data: data
         }).done(function (newPositionInfo) {
-                instance._portal._debug("Widget " + instance._path + " successfully moved to " + newPositionInfo.path);
                 instance._path = newPositionInfo.path;
                 instance._area = instance._portal.getAreaByColName(newPositionInfo.col);
+
+                instance.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_SUCCEEDED);
             }).fail(function () {
-                if (failCallBack) {
-                    failCallBack();
-                }
+                instance.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_FAILED);
             });
     },
 
