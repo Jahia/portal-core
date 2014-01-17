@@ -1,48 +1,39 @@
 // re use the wrapper app or create a new one
-var googleFeedWidget = (portal && portal.widgetAppWrapper) ? portal.widgetAppWrapper : angular.module('widgetApp', []);
+var googleFeedWidget;
+try {
+    // reuse the same app
+    googleFeedWidget = angular.module('widgetApp');
+} catch (e) {
+    // instantiate a new app
+    googleFeedWidget = angular.module('widgetApp', []);
+}
 
 googleFeedWidget.controller('google-feed-view-ctrl', function ctrl($scope) {
     $scope.feedId = "";
 
-    $scope.init = function(conf){
+    $scope.init = function (conf) {
         $scope.feedId = conf.feedId;
 
-        // Load a bunch of scripts and make sure the DOM is ready.
-        $.when(
-                $.getScript("https://www.google.com/jsapi"),
+        function initFeed(){
+            var feedControl = new google.feeds.FeedControl();
 
-                // DOM ready deferred.
-                //
-                // NOTE: This returns a Deferred object, NOT a promise.
-                $.Deferred(
-                    function (deferred) {
-                        // In addition to the script loading, we also
-                        // want to make sure that the DOM is ready to
-                        // be interacted with. As such, resolve a
-                        // deferred object using the $() function to
-                        // denote that the DOM is ready.
-                        $(deferred.resolve);
-                    }
-                )
-            ).done(
-            function (/* Deferred Results */) {
-                // The DOM is ready to be interacted with AND all
-                // of the scripts have loaded. Let's test to see
-                // that the scripts have loaded.
-                if (google) {
-                    google.load("feeds", "1", {'callback': function () {
-                        var feedControl = new google.feeds.FeedControl();
+            // Add two feeds.
+            feedControl.addFeed("http://www.digg.com/rss/index.xml");
+            feedControl.addFeed("http://feeds.feedburner.com/Techcrunch", "TechCrunch");
 
-                        // Add two feeds.
-                        feedControl.addFeed("http://www.digg.com/rss/index.xml");
-                        feedControl.addFeed("http://feeds.feedburner.com/Techcrunch", "TechCrunch");
+            // Draw it.
+            feedControl.draw($("#" + $scope.feedId).find(".feeds").get(0));
+        }
 
-                        // Draw it.
-                        feedControl.draw($("#" + $scope.feedId).find(".feeds").get(0));
-                    }});
-                }
-            }
-        );
+        // Do not load the scripts twice
+        if((typeof google === 'undefined') || (typeof google.feeds === 'undefined')){
+            $.getScript("https://www.google.com/jsapi").done(function () {
+                google.load("feeds", "1", {'callback': initFeed});
+            });
+        }else {
+            initFeed();
+        }
+
     };
 });
 

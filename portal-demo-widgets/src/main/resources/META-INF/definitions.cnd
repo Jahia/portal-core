@@ -9,3 +9,6 @@
 [jnt:googleFeedWidget] > jnt:content, jmix:portalWidget
  - url (string) indexed=no
  - nbEntries (long) = 10 indexed=no autocreated
+
+[jnt:twitterPortalWidget] > jnt:twitterWidget, jmix:portalWidget
+- widgetId (string) indexed=no

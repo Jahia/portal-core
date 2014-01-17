@@ -13,6 +13,11 @@
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 
+<template:addResources type="javascript" resources="jquery.min.js"/>
+<template:addResources type="javascript" resources="angular.min.js" />
+<template:addResources type="javascript" resources="app/googleMapWidget.js" />
+<template:addResources type="css" resources="twitterWidget.css" />
+
 <style>
     .google-map {
         height: ${currentNode.properties["j:height"].string}px;
@@ -20,30 +25,10 @@
         padding: 0;
     }
 </style>
-<script>
-    function initialize() {
-        var mapOptions = {
-            zoom: 8,
-            center: new google.maps.LatLng(-34.397, 150.644)
-        };
 
-        var map = new google.maps.Map(document.getElementById('map-canvas-${currentNode.identifier}'),
-                mapOptions);
-    }
-
-    function loadScript() {
-        var script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = 'https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&' +
-                'callback=initialize';
-        document.body.appendChild(script);
-    }
-
-    $(document).ready(function(){
-        loadScript();
-    });
-</script>
-
-<div id="map-canvas-${currentNode.identifier}" class="google-map">
-
+<div id="google-map-${currentNode.identifier}" ng-controller="google-map-view-ctrl"
+     ng-init="init('google-map-${currentNode.identifier}', 'canvas-${currentNode.identifier}')">
+    <div id="canvas-${currentNode.identifier}" class="google-map">
+        <p>Map loading ...</p>
+    </div>
 </div>

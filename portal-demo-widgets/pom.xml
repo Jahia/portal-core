@@ -39,7 +39,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Jahia-Depends>default,portal-core</Jahia-Depends>
+            <Jahia-Depends>default,portal-core,twitter</Jahia-Depends>
           </instructions>
         </configuration>
       </plugin>
