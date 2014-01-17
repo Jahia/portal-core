@@ -31,5 +31,5 @@
 
 <script type="text/javascript">
     // Boostrap app
-    angular.bootstrap(document.getElementById("google-feed-${currentNode.identifier}"),['widgetApp']);
+    angular.bootstrap(document.getElementById("google-feed-${currentNode.identifier}"),['googleFeedWidgetApp']);
 </script>

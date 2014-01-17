@@ -1,12 +1,5 @@
-// re use the wrapper app or create a new one
-var googleMapWidget;
-try {
-    // reuse the same app
-    googleMapWidget = angular.module('widgetApp');
-} catch (e) {
-    // instantiate a new app
-    googleMapWidget = angular.module('widgetApp', []);
-}
+
+var googleMapWidget = angular.module('googleMapWidgetApp', []);
 
 function mapApiLoaded(){
     window.map_api_loaded = true;

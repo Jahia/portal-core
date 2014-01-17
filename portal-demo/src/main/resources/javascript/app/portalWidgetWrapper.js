@@ -1,32 +1,53 @@
-var portalWidgetWrapper = angular.module('widgetApp', []);
+Jahia.Portal.AdvancedWidgetWrapper = function (widgetId) {
+    this._minimize = true;
+    this.widget = {};
+    this.$widget = {};
 
-portalWidgetWrapper.controller('widgetCtrl', function test($scope) {
-    $scope._minimize = true;
-    $scope.widget = [];
+    this.init(widgetId);
+};
 
-    $scope.init = function(widgetId){
-        $scope.widget = portal.getCurrentWidget(widgetId);
-    };
+Jahia.Portal.AdvancedWidgetWrapper.prototype = {
+    init: function (widgetId) {
+        var instance = this;
+        instance.widget = portal.getCurrentWidget(widgetId);
+        instance.$widget = instance.widget.getjQueryWidget();
+        instance.switchEditListener();
+        instance.deleteListener();
+        instance.minimizeListener();
+    },
 
-    $scope.delete = function(){
-        portal.deleteWidget($scope.widget)
-    };
+    switchEditListener: function() {
+        var instance = this;
+        instance.$widget.find(".edit_switch").on("click", function(){
+            if (instance.widget.state != "edit") {
+                instance.widget.load("edit");
+            } else {
+                instance.widget.load();
+            }
+        });
+    },
 
-    $scope.minimize = function(){
-        $scope._minimize = !$scope._minimize;
-        $("#"+$scope.widget._id).find(".widget-content").toggle();
-    };
+    deleteListener: function () {
+        var instance = this;
+        instance.$widget.find(".delete_action").on("click", function(){
+            portal.deleteWidget(instance.widget);
+        });
+    },
 
-    $scope.switchEdit = function(){
-        if($scope.widget.state != "edit"){
-            $scope.widget.load("edit");
-        } else {
-            $scope.widget.load();
-        }
+    minimizeListener: function () {
+        var instance = this;
+        instance.$widget.find(".minimize_action").on("click", function(){
+            instance._minimize = !instance._minimize;
+            if(instance._minimize){
+                $(this).removeClass("icon-minus");
+                $(this).addClass("icon-plus");
+            }else {
+                $(this).removeClass("icon-plus");
+                $(this).addClass("icon-minus");
+            }
+            instance.$widget.find(".widget-content").toggle();
+        });
     }
-});
+};
 
-//push widget app to portal API
-if(portal){
-    portal.widgetAppWrapper = portalWidgetWrapper;
-}
+

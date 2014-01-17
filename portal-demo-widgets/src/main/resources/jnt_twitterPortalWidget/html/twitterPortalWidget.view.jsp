@@ -13,9 +13,10 @@
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <template:addResources type="javascript" resources="jquery.min.js"/>
-<template:addResources type="javascript" resources="angular.min.js" />
-<template:addResources type="javascript" resources="app/twitterWidget.js" />
-<template:addResources type="css" resources="twitterWidget.css" />
+<template:addResources type="javascript" resources="angular.min.js"/>
+<template:addResources type="javascript" resources="angular-bootstrap-colorpicker.js"/>
+<template:addResources type="javascript" resources="app/twitterWidget.js"/>
+<template:addResources type="css" resources="colorpicker.css"/>
 <%--
 
 List of properties
@@ -41,10 +42,11 @@ List of properties
 <c:set var="properties" value="${currentNode.properties}"/>
 <div id="twitter-widget-${currentNode.identifier}" ng-controller="twitter-view-ctrl" ng-init="init('twitter-widget-${currentNode.identifier}')">
     <a class="twitter-timeline"
-       data-widget-id="423033586246103040"
+       data-widget-id="${properties.widgetId.string}"
        href="https://twitter.com/twitterapi"
-                width="${properties.width.long}"
-                height="600"
+            <c:if test="${not empty properties.height}">
+                height="${properties.height.long}"
+            </c:if>
             <c:if test="${not empty properties.linkcolor}">
                 data-link-color="${properties.linkcolor.string}"
             </c:if>
@@ -73,6 +75,8 @@ List of properties
 
 <script type="text/javascript">
     // Boostrap app
-    angular.bootstrap(document.getElementById("twitter-widget-${currentNode.identifier}"),['widgetApp']);
+    $(document).ready(function(){
+        angular.bootstrap(document.getElementById("twitter-widget-${currentNode.identifier}"),['twitterWidgetApp']);
+    });
 </script>
 

@@ -35,5 +35,5 @@
 
 <script type="text/javascript">
     // Boostrap app
-    angular.bootstrap(document.getElementById("google-map-${currentNode.identifier}"),['widgetApp']);
+    angular.bootstrap(document.getElementById("google-map-${currentNode.identifier}"),['googleMapWidgetApp']);
 </script>

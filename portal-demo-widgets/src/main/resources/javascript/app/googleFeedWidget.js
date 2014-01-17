@@ -1,12 +1,5 @@
-// re use the wrapper app or create a new one
-var googleFeedWidget;
-try {
-    // reuse the same app
-    googleFeedWidget = angular.module('widgetApp');
-} catch (e) {
-    // instantiate a new app
-    googleFeedWidget = angular.module('widgetApp', []);
-}
+var googleFeedWidget = angular.module('googleFeedWidgetApp', []);
+
 
 googleFeedWidget.controller('google-feed-view-ctrl', function ctrl($scope) {
     $scope.feedId = "";

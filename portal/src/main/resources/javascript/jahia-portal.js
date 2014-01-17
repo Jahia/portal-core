@@ -432,6 +432,23 @@ Jahia.Portal.Widget.prototype = {
                 // delete from portal
                 delete instance._portal.widgets[instance._id];
             });
+    },
+
+    performUpdate: function(data, callback) {
+        var instance = this;
+        $.ajax({
+            type: "POST",
+            data: data,
+            dataType: "json",
+            traditional: true,
+            url: instance._portal.urlBase + instance._path
+        }).done(function(response){
+                instance._portal._debug("Widget " + instance._path + " successfully updated");
+
+                if(callback){
+                    callback(response);
+                }
+            });
     }
 };
 

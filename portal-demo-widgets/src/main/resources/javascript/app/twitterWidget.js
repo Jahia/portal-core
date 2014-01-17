@@ -1,15 +1,7 @@
-// re use the wrapper app or create a new one
-var twitterWidget;
-try {
-    // reuse the same app
-    twitterWidget = angular.module('widgetApp');
-} catch (e) {
-    // instantiate a new app
-    twitterWidget = angular.module('widgetApp', []);
-}
+var twitterWidget = angular.module('twitterWidgetApp', ['colorpicker.module']);
 
 twitterWidget.controller('twitter-view-ctrl', function ctrl($scope) {
-    $scope.widget = [];
+    $scope.widget = {};
 
     $scope.init = function (widgetId) {
 
@@ -47,4 +39,22 @@ twitterWidget.controller('twitter-view-ctrl', function ctrl($scope) {
             twttr.widgets.load();
         }
     }
+});
+
+twitterWidget.controller('twitter-edit-ctrl', function ctrl($scope) {
+    $scope.widget = {};
+
+    $scope.init = function(widgetId){
+        $scope.widget = portal.getCurrentWidget(widgetId);
+    };
+
+    $scope.update = function(form){
+        $scope.widget.performUpdate(form, function(data){
+            $scope.widget.load();
+        })
+    };
+
+    $scope.cancel = function(){
+        $scope.widget.load();
+    };
 });
