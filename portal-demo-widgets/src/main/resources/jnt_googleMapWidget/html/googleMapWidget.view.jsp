@@ -32,3 +32,8 @@
         <p>Map loading ...</p>
     </div>
 </div>
+
+<script type="text/javascript">
+    // Boostrap app
+    angular.bootstrap(document.getElementById("google-map-${currentNode.identifier}"),['widgetApp']);
+</script>

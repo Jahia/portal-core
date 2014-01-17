@@ -18,12 +18,14 @@
 <template:addResources type="javascript" resources="app/googleFeedWidget.js" />
 
 <div id="googleFeed-${currentNode.identifier}" ng-controller="google-feed-edit-ctrl">
-    <form>
+    <form action="${url.base}${currentNode.path}" method="post">
+        <input type="hidden" name="jcrNodeType" value="${currentNode.primaryNodeTypeName}"/>
+        <input type="hidden" name="jcrRedirectTo" value="${url.base}${jcr:getParentOfType(currentNode, "jnt:portalTab").path}">
         <div class="row-fluid">
-            URL: <input type="text" name="url" required>
+            URL: <input type="text" name="url" value="${currentNode.properties['url'].string}" required>
         </div>
         <input class="btn" type="button" value="cancel">
-        <input class="btn btn-primary" type="button" value="save">
+        <input class="btn btn-primary" type="submit" value="save">
     </form>
 </div>
 

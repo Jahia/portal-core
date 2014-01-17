@@ -10,19 +10,18 @@ try {
 
 googleFeedWidget.controller('google-feed-view-ctrl', function ctrl($scope) {
     $scope.feedId = "";
+    $scope.url = "";
 
     $scope.init = function (conf) {
         $scope.feedId = conf.feedId;
+        $scope.url = conf.url;
 
         function initFeed(){
-            var feedControl = new google.feeds.FeedControl();
-
-            // Add two feeds.
-            feedControl.addFeed("http://www.digg.com/rss/index.xml");
-            feedControl.addFeed("http://feeds.feedburner.com/Techcrunch", "TechCrunch");
-
-            // Draw it.
-            feedControl.draw($("#" + $scope.feedId).find(".feeds").get(0));
+            if($scope.url){
+                var feedControl = new google.feeds.FeedControl();
+                feedControl.addFeed("http://www.digg.com/rss/index.xml");
+                feedControl.draw($("#" + $scope.feedId).find(".feeds").get(0));
+            }
         }
 
         // Do not load the scripts twice
