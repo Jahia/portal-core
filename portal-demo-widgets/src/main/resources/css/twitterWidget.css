@@ -1,3 +1,7 @@
 .twitter-timeline{
     width: 100% !important;
 }
+
+.twitter-widget-edit{
+    margin: 20px;
+}

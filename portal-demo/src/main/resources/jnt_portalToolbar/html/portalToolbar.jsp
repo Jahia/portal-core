@@ -19,10 +19,7 @@
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
 
-<template:addResources type="javascript" resources="jquery.min.js" />
-<template:addResources type="javascript" resources="angular.min.js" />
 <template:addResources type="javascript" resources="app/portalToolbar.js" />
-<template:addResources type="javascript" resources="bootstrap-modal.js"/>
 <template:addResources type="css" resources="portal-toolbar.css"/>
 
 <div id="portal_toolbar" class="portal_toolbar" ng-app="portalToolbar">

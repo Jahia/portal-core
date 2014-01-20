@@ -16,6 +16,7 @@
 <template:addResources type="javascript" resources="angular.min.js"/>
 <template:addResources type="javascript" resources="angular-bootstrap-colorpicker.js"/>
 <template:addResources type="javascript" resources="app/twitterWidget.js"/>
+<template:addResources type="css" resources="twitterWidget.css" />
 <template:addResources type="css" resources="colorpicker.css"/>
 <%--
 
@@ -70,7 +71,7 @@ List of properties
                 data-aria-polite="${properties.ariapolite.string}"
             </c:if>
 
-            >test</a>
+            >${currentNode.displayableName}</a>
 </div>
 
 <script type="text/javascript">

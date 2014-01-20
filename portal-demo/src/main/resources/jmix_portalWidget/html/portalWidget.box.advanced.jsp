@@ -16,7 +16,6 @@
 <c:set var="widgetEditable"
        value="${portal:getSpecificView(currentNode.primaryNodeTypeName, 'edit', renderContext.site) != null}"/>
 
-<template:addResources type="javascript" resources="jquery.min.js"/>
 <template:addResources type="javascript" resources="app/portalWidgetWrapper.js"/>
 <template:addResources type="css" resources="box.advanced.red.css"/>
 

@@ -23,7 +23,6 @@
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
 <c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
 
-<template:addResources type="javascript" resources="jquery.min.js,jquery-ui.min.js" />
 <template:addResources type="javascript" resources="jahia-portal.js" />
 
 <div id="portal_area_${currentNode.identifier}" class="portal_area">

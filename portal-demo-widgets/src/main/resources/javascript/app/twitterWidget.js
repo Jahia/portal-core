@@ -46,6 +46,7 @@ twitterWidget.controller('twitter-edit-ctrl', function ctrl($scope) {
 
     $scope.init = function(widgetId){
         $scope.widget = portal.getCurrentWidget(widgetId);
+        $("#" + widgetId).find(".twitter-tooltip").tooltip();
     };
 
     $scope.update = function(form){

@@ -16,7 +16,6 @@
 <template:addResources type="javascript" resources="jquery.min.js"/>
 <template:addResources type="javascript" resources="angular.min.js" />
 <template:addResources type="javascript" resources="app/googleMapWidget.js" />
-<template:addResources type="css" resources="twitterWidget.css" />
 
 <style>
     .google-map {
