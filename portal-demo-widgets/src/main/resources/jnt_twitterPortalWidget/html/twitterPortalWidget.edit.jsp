@@ -18,12 +18,13 @@
 <template:addResources type="javascript" resources="angular-bootstrap-colorpicker.js"/>
 <template:addResources type="javascript" resources="app/twitterWidget.js"/>
 <template:addResources type="css" resources="twitterWidget.css"/>
+<template:addResources type="css" resources="commonsWidget.css"/>
 <template:addResources type="css" resources="colorpicker.css"/>
 
 <c:set var="properties" value="${currentNode.properties}"/>
 
 <div id="twitter-widget-${currentNode.identifier}" ng-controller="twitter-edit-ctrl"
-     ng-init="init('twitter-widget-${currentNode.identifier}')" class="twitter-widget-edit">
+     ng-init="init('twitter-widget-${currentNode.identifier}')" class="widget-edit">
 
 <h2>
     <fmt:message key="jnt_twitterWidget"/>

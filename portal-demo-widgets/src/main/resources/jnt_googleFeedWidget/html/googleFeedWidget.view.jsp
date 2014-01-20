@@ -17,9 +17,13 @@
 <template:addResources type="javascript" resources="angular.min.js" />
 <template:addResources type="javascript" resources="app/googleFeedWidget.js" />
 
-<div id="google-feed-${currentNode.identifier}" ng-controller="google-feed-view-ctrl"
-     ng-init="init({feedId: 'google-feed-${currentNode.identifier}', url:'${currentNode.properties["url"].string}'})">
-    <div class="feeds">
+<div id="google-feed-${currentNode.identifier}" ng-controller="google-feed-view-ctrl">
+    <input type="hidden" ng-model="url" ng-init="url = '${currentNode.properties["url"].string}'"/>
+    <c:if test="${not empty currentNode.properties['nbEntries']}">
+        <input type="hidden" ng-model="nbEntries" ng-init="nbEntries = ${currentNode.properties["nbEntries"].long}"/>
+    </c:if>
+
+    <div class="feeds" ng-init="init('google-feed-${currentNode.identifier}')">
     </div>
 </div>
 

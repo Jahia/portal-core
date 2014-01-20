@@ -448,6 +448,8 @@ Jahia.Portal.Widget.prototype = {
                 if(callback){
                     callback(response);
                 }
+            }).fail(function(response){
+                instance._portal._debug("Widget " + instance._path + " failed to update");
             });
     }
 };
