@@ -16,6 +16,7 @@ public class PortalConstants {
     public static final String JNT_PORTAL_COLUMN = "jnt:portalColumn";
     public static final String JMIX_PORTAL_WIDGET = "jmix:portalWidget";
     public static final String J_TEMPLATE_ROOT_PATH = "j:templateRootPath";
+    public static final String J_ENABLED = "j:enabled";
     public static final String J_WIDGETS_SKIN = "j:widgetsSkin";
 
     public static final String JNT_CONTENT_TEMPLATE = "jnt:contentTemplate";

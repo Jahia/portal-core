@@ -25,10 +25,10 @@
 <template:addResources type="css" resources="jquery-ui.smoothness.css,jquery-ui.smoothness-jahia.css"/>
 <template:addResources>
     <script type="text/javascript">
-        function submitPortalForm(act, newsletter) {
+        function submitPortalForm(act, portal) {
             $('#portalFormAction').val(act);
-            if(newsletter){
-                $('#portalFormSelected').val(newsletter);
+            if(portal){
+                $('#portalFormSelected').val(portal);
             }
             $('#portalForm').submit();
         }
@@ -108,6 +108,20 @@
                                 <a style="margin-bottom:0;" class="btn btn-danger btn-small" title="${i18nRemove}" href="#delete">
                                     <i class="icon-remove icon-white"></i>
                                 </a>
+                                <c:choose>
+                                    <c:when test="${portal.properties['j:enabled'].boolean}">
+                                        <button class="btn btn-danger" type="button" title="${fn:escapeXml(i18nUnresolvedDependencies)}"
+                                                onclick="submitPortalForm('disablePortal', '${portal.identifier}')">
+                                            <i class=" icon-stop icon-white"></i>disable
+                                        </button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <button class="btn btn-success" type="button" title="${fn:escapeXml(i18nUnresolvedDependencies)}"
+                                                onclick="submitPortalForm('enablePortal', '${portal.identifier}')">
+                                            <i class=" icon-play icon-white"></i>enable
+                                        </button>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
                         </tr>
                     </c:forEach>

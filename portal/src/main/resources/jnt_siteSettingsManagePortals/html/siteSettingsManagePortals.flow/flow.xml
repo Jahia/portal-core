@@ -16,6 +16,12 @@
         <transition on="editPortal" to="formPortal" bind="false" validate="false">
             <set name="flowScope.portalIdentifier" value="requestParameters.selectedPortal" type="java.lang.String" />
         </transition>
+        <transition on="enablePortal" to="managePortals" bind="false" validate="false">
+            <evaluate expression="flowHandler.enablePortalModel(flowRequestContext, requestParameters.selectedPortal)"/>
+        </transition>
+        <transition on="disablePortal" to="managePortals" bind="false" validate="false">
+            <evaluate expression="flowHandler.disablePortalModel(flowRequestContext, requestParameters.selectedPortal)"/>
+        </transition>
     </view-state>
 
     <view-state id="formPortal" model="portalForm">

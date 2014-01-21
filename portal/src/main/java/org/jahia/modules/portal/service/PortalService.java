@@ -14,8 +14,10 @@ import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -91,6 +93,7 @@ public class PortalService {
         // Create portal
         JCRNodeWrapper portalNode = portalsRootFolderNode.addNode(JCRContentUtils.generateNodeName(form.getName(), 32), PortalConstants.JNT_PORTAL_MODEL);
         portalNode.setProperty(PortalConstants.J_TEMPLATE_ROOT_PATH, form.getTemplateRootPath());
+        setReadRoleForPortalModel(portalNode, false);
 
         // Create first tab
         JCRNodeWrapper portalTab = portalNode.addNode(JCRContentUtils.generateNodeName(form.getTabName(), 32), PortalConstants.JNT_PORTAL_TAB);
@@ -231,5 +234,32 @@ public class PortalService {
         }
 
         return null;
+    }
+
+    public void switchPortalModelActivation(JCRSessionWrapper sessionWrapper, String portalModelIdentifier, boolean enabled){
+        try {
+            JCRNodeWrapper node = sessionWrapper.getNodeByUUID(portalModelIdentifier);
+            node.setProperty(PortalConstants.J_ENABLED, enabled);
+            setReadRoleForPortalModel(node, enabled);
+            sessionWrapper.save();
+        } catch (RepositoryException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    private void setReadRoleForPortalModel(JCRNodeWrapper portalModelNode, boolean enabled){
+        Set<String> roles = Collections.singleton("reader");
+        try {
+            portalModelNode.denyRoles("u:guest", roles);
+
+            if(enabled){
+                portalModelNode.grantRoles("g:users", roles);
+            } else {
+                portalModelNode.denyRoles("g:users", roles);
+            }
+        }catch (RepositoryException e){
+            logger.error(e.getMessage(), e);
+        }
+
     }
 }

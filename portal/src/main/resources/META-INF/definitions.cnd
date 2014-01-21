@@ -17,6 +17,7 @@
  + * (jmix:portal)
 
 [jnt:portalModel] > jnt:content, jmix:portal, mix:title, jmix:list
+ - j:enabled (boolean) = false autocreated
 
 [jnt:portal] > jnt:content, jmix:portal, mix:title, jmix:list
  - j:model (weakreference) mandatory < jnt:portalModel

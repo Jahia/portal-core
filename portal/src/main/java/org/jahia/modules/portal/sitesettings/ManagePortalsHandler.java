@@ -39,8 +39,18 @@ public class ManagePortalsHandler implements Serializable {
         try {
             portalService.createPortalModel(form, getRenderContext(ctx).getSite(), getCurrentUserSession(ctx, "live"));
         } catch (RepositoryException e) {
-            logger.error("ERROR", e);
+            logger.error(e.getMessage(), e);
         }
+        return true;
+    }
+
+    public boolean enablePortalModel(RequestContext ctx, String selectedPortalModelIdentifier){
+        portalService.switchPortalModelActivation(getCurrentUserSession(ctx, "live"), selectedPortalModelIdentifier, true);
+        return true;
+    }
+
+    public boolean disablePortalModel(RequestContext ctx, String selectedPortalModelIdentifier){
+        portalService.switchPortalModelActivation(getCurrentUserSession(ctx, "live"), selectedPortalModelIdentifier, false);
         return true;
     }
 
