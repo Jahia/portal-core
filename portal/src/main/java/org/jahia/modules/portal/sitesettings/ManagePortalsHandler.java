@@ -32,12 +32,12 @@ public class ManagePortalsHandler implements Serializable {
     private transient PortalService portalService;
 
     public List<JCRNodeWrapper> getSitePortalModels(RequestContext ctx) {
-        return portalService.getSitePortalModels(getRenderContext(ctx).getSite(), null, false, getCurrentUserSession(ctx));
+        return portalService.getSitePortalModels(getRenderContext(ctx).getSite(), null, false, getCurrentUserSession(ctx, "live"));
     }
 
     public boolean createPortalModel(RequestContext ctx, PortalForm form){
         try {
-            portalService.createPortalModel(form, getRenderContext(ctx).getSite(), getCurrentUserSession(ctx));
+            portalService.createPortalModel(form, getRenderContext(ctx).getSite(), getCurrentUserSession(ctx, "live"));
         } catch (RepositoryException e) {
             logger.error("ERROR", e);
         }
@@ -59,9 +59,9 @@ public class ManagePortalsHandler implements Serializable {
         return null;
     }
 
-    private JCRSessionWrapper getCurrentUserSession(String workspace) {
+    private JCRSessionWrapper getCurrentUserSession(RequestContext ctx, String workspace) {
         try {
-            return JCRSessionFactory.getInstance().getCurrentUserSession(workspace);
+            return JCRSessionFactory.getInstance().getCurrentUserSession(workspace, getRenderContext(ctx).getMainResourceLocale());
         } catch (RepositoryException e) {
             logger.error("Error retrieving current user session", e);
         }

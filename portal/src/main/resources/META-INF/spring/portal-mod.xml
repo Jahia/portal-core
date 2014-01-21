@@ -33,7 +33,10 @@
     </bean>
 
     <!-- Error handlers -->
-    <bean name="UserPortalPageHandler" class="org.jahia.modules.portal.error.UserPortalPageHandler"/>
+    <bean name="UserPortalPageHandler" class="org.jahia.modules.portal.error.UserPortalPageHandler">
+        <property name="urlResolverFactory" ref="urlResolverFactory"/>
+        <property name="portalService" ref="PortalService"/>
+    </bean>
     <bean name="PortalTabRedirectHandler" class="org.jahia.modules.portal.error.PortalTabRedirectHandler">
         <property name="urlResolverFactory" ref="urlResolverFactory"/>
         <property name="portalService" ref="PortalService"/>

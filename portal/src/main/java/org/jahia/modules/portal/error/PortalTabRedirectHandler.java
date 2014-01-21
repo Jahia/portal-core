@@ -59,7 +59,6 @@ public class PortalTabRedirectHandler implements ErrorHandler {
                     return true;
                 }
             }
-
         }catch (Exception e1){
             logger.error(e1.getMessage(), e1);
         }

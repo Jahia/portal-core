@@ -90,14 +90,14 @@
                 </c:when>
                 <c:otherwise>
                     <c:forEach items="${portals}" var="portal" varStatus="loopStatus">
-                        <c:url var="portalEditModeURL" value="${url.baseEdit}${portal.path}"/>
+                        <c:url var="portalURL" value="${url.baseLive}${portal.path}"/>
                         <tr>
                             <td>${loopStatus.count}</td>
                             <td>
                                 <a title="${i18nEdit}" href="#details" onclick="submitPortalForm('editPortal', '${portal.identifier}')">${fn:escapeXml(portal.displayableName)}</a>
                             </td>
                             <td>
-                                <a style="margin-bottom:0;" class="btn btn-small" title="${i18nEditMode}" href="${portalEditModeURL}">
+                                <a style="margin-bottom:0;" class="btn btn-small" title="${i18nEditMode}" href="${portalURL}">
                                     <i class="icon-pencil"></i>
                                 </a>
 

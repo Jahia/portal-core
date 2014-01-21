@@ -42,10 +42,24 @@
 <div class="row-fluid">
     <div class="span12">
         <label>
+            <span><fmt:message key="title"/>:</span>
+
+            <input type="text" required name="jcr:title" ng-model="twitter['jcr:title']"
+                        ng-init="twitter['jcr:title'] = '${currentNode.displayableName}'"/>
+        </label>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span12">
+        <label>
             <span><fmt:message key="jnt_twitterWidget.widgetId"/>:</span>
 
             <input type="text" required name="widgetId" ng-model="twitter.widgetId"
-                   ng-init="twitter.widgetId = '${properties.widgetId.string}'"/>
+                    <c:if test="${not empty properties.widgetId}">
+                        ng-init="twitter.widgetId = '${properties.widgetId.string}'"
+                    </c:if>
+                    />
 
             <a href="#" class="twitter-tooltip" data-placement="right" data-toggle="tooltip"
                title="<fmt:message key="jnt_twitterWidget.widgetId.ui.tooltip"/>">
@@ -64,7 +78,11 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.theme"/>:</span>
 
-            <select name="theme" ng-model='twitter.theme' ng-init="twitter.theme = '${properties.theme.string}'">
+            <select name="theme" ng-model='twitter.theme'
+                    <c:if test="${not empty properties.theme}">
+                        ng-init="twitter.theme = '${properties.theme.string}'"
+                    </c:if>
+                    >
                 <option value="dark">dark</option>
                 <option value="light">light</option>
             </select>
@@ -82,7 +100,10 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.height"/>:</span>
             <input type="number" name="height" ng-model="twitter.height"
-                   ng-init="twitter.height = ${properties.height.long}"/>
+                    <c:if test="${not empty properties.height}">
+                        ng-init="twitter.height = ${properties.height.long}"
+                    </c:if>
+                    />
         </label>
     </div>
 </div>
@@ -92,7 +113,10 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.linkcolor"/>:</span>
             <input colorpicker type="text" name="linkcolor" ng-model="twitter.linkcolor"
-                   ng-init="twitter.linkcolor = '${properties.linkcolor.string}'"/>
+                    <c:if test="${not empty properties.linkcolor}">
+                        ng-init="twitter.linkcolor = '${properties.linkcolor.string}'"
+                    </c:if>
+                    />
 
             <a href="#" class="twitter-tooltip" data-placement="right" data-toggle="tooltip"
                title="<fmt:message key="jnt_twitterWidget.linkcolor.ui.tooltip"/>">
@@ -107,7 +131,10 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.bordercolor"/>:</span>
             <input colorpicker type="text" name="bordercolor" ng-model="twitter.bordercolor"
-                   ng-init="twitter.bordercolor = '${properties.bordercolor.string}'"/>
+                    <c:if test="${not empty properties.bordercolor}">
+                        ng-init="twitter.bordercolor = '${properties.bordercolor.string}'"
+                    </c:if>
+                    />
 
             <a href="#" class="twitter-tooltip" data-placement="right" data-toggle="tooltip"
                title="<fmt:message key="jnt_twitterWidget.bordercolor.ui.tooltip"/>">
@@ -122,7 +149,10 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.noheader"/>:</span>
             <input type="checkbox" name="noheader" ng-model="twitter.noheader"
-                   ng-init="twitter.noheader = ${properties.noheader.boolean}"/>
+                    <c:if test="${not empty properties.noheader}">
+                        ng-init="twitter.noheader = ${properties.noheader.boolean}"
+                    </c:if>
+                    />
 
             <a href="#" class="twitter-tooltip" data-placement="right" data-toggle="tooltip"
                title="<fmt:message key="jnt_twitterWidget.noheader.ui.tooltip"/>">
@@ -137,7 +167,10 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.nofooter"/>:</span>
             <input type="checkbox" name="nofooter" ng-model="twitter.nofooter"
-                   ng-init="twitter.nofooter = ${properties.nofooter.boolean}"/>
+                    <c:if test="${not empty properties.nofooter}">
+                        ng-init="twitter.nofooter = ${properties.nofooter.boolean}"
+                    </c:if>
+                    />
 
             <a href="#" class="twitter-tooltip" data-placement="right" data-toggle="tooltip"
                title="<fmt:message key="jnt_twitterWidget.nofooter.ui.tooltip"/>">
@@ -152,7 +185,10 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.noborders"/>:</span>
             <input type="checkbox" name="noborders" ng-model="twitter.noborders"
-                   ng-init="twitter.noborders = ${properties.noborders.boolean}"/>
+                    <c:if test="${not empty properties.noborders}">
+                        ng-init="twitter.noborders = ${properties.noborders.boolean}"
+                    </c:if>
+                    />
 
             <a href="#" class="twitter-tooltip" data-placement="right" data-toggle="tooltip"
                title="<fmt:message key="jnt_twitterWidget.noborders.ui.tooltip"/>">
@@ -167,7 +203,10 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.noscrollbar"/>:</span>
             <input type="checkbox" name="noscrollbar" ng-model="twitter.noscrollbar"
-                   ng-init="twitter.noscrollbar = ${properties.noscrollbar.boolean}"/>
+                    <c:if test="${not empty properties.noscrollbar}">
+                        ng-init="twitter.noscrollbar = ${properties.noscrollbar.boolean}"
+                    </c:if>
+                    />
 
             <a href="#" class="twitter-tooltip" data-placement="right" data-toggle="tooltip"
                title="<fmt:message key="jnt_twitterWidget.noscrollbar.ui.tooltip"/>">
@@ -182,7 +221,10 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.transparant"/>:</span>
             <input type="checkbox" name="transparent" ng-model="twitter.transparent"
-                   ng-init="twitter.transparent = ${properties.transparent.boolean}"/>
+                    <c:if test="${not empty properties.transparent}">
+                        ng-init="twitter.transparent = ${properties.transparent.boolean}"
+                    </c:if>
+                    />
 
             <a href="#" class="twitter-tooltip" data-placement="right" data-toggle="tooltip"
                title="<fmt:message key="jnt_twitterWidget.transparant.ui.tooltip"/>">
@@ -197,7 +239,10 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.language"/>:</span>
             <input type="text" name="language" ng-model="twitter.language"
-                   ng-init="twitter.language = '${properties.language.string}'"/>
+                    <c:if test="${not empty properties.language}">
+                        ng-init="twitter.language = '${properties.language.string}'"
+                    </c:if>
+                    />
 
             <a href="#" class="twitter-tooltip" data-placement="right" data-toggle="tooltip"
                title="<fmt:message key="jnt_twitterWidget.language.ui.tooltip"/>">
@@ -212,7 +257,10 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.related"/>:</span>
             <input type="text" name="related" ng-model="twitter.related"
-                   ng-init="twitter.related = '${properties.related.string}'"/>
+                    <c:if test="${not empty properties.related}">
+                        ng-init="twitter.related = '${properties.related.string}'"
+                    </c:if>
+                    />
 
             <a href="#" class="twitter-tooltip" data-placement="right" data-toggle="tooltip"
                title="<fmt:message key="jnt_twitterWidget.related.ui.tooltip"/>">
@@ -227,7 +275,9 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.tweetlimit"/>:</span>
             <input type="number" name="related" ng-model="twitter.tweetlimit"
-                   ng-init="twitter.tweetlimit = ${properties.tweetlimit.long}"
+                    <c:if test="${not empty properties.tweetlimit}">
+                        ng-init="twitter.tweetlimit = ${properties.tweetlimit.long}"
+                    </c:if>
                    min="1" max="20"/>
 
             <a href="#" class="twitter-tooltip" data-placement="right" data-toggle="tooltip"
@@ -243,7 +293,10 @@
         <label>
             <span><fmt:message key="jnt_twitterWidget.ariapolite"/>:</span>
             <select name="theme" ng-model='twitter.ariapolite'
-                    ng-init="twitter.ariapolite = '${properties.ariapolite.string}'">
+                    <c:if test="${not empty properties.ariapolite}">
+                        ng-init="twitter.ariapolite = '${properties.ariapolite.string}'"
+                    </c:if>
+                    >
                 <option value="assertive">assertive</option>
                 <option value="polite">polite</option>
             </select>
