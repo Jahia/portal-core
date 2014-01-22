@@ -22,6 +22,9 @@
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
 <c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
+<c:set var="portalModelNT" value="<%= PortalConstants.JNT_PORTAL_MODEL %>"/>
+<c:set var="canEditPortal" value="${jcr:hasPermission(renderContext.mainResource.node, 'jcr:write_live')}" />
+<c:set var="portalNode" value="${jcr:getParentOfType(renderContext.mainResource.node, portalMixin)}" />
 
 <template:addResources type="javascript" resources="jahia-portal.js" />
 
@@ -32,7 +35,9 @@
 <script type="text/javascript">
     var portal = window.portal;
     portal.registerArea("${url.base}",
-            "${jcr:getParentOfType(renderContext.mainResource.node, portalMixin).path}",
+            "${portalNode.path}",
             "${renderContext.mainResource.node.path}",
-            "portal_area_${currentNode.identifier}");
+            "portal_area_${currentNode.identifier}",
+            ${canEditPortal},
+            ${jcr:isNodeType(portalNode, portalModelNT)});
 </script>

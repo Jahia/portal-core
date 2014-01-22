@@ -1,7 +1,8 @@
-Jahia.Portal.AdvancedWidgetWrapper = function (widgetId) {
+Jahia.Portal.AdvancedWidgetWrapper = function (widgetId, editable) {
     this._minimize = true;
     this.widget = {};
     this.$widget = {};
+    this.editable = editable;
 
     this.init(widgetId);
 };
@@ -11,8 +12,10 @@ Jahia.Portal.AdvancedWidgetWrapper.prototype = {
         var instance = this;
         instance.widget = portal.getCurrentWidget(widgetId);
         instance.$widget = instance.widget.getjQueryWidget();
-        instance.switchEditListener();
-        instance.deleteListener();
+        if(instance.editable){
+            instance.switchEditListener();
+            instance.deleteListener();
+        }
         instance.minimizeListener();
     },
 

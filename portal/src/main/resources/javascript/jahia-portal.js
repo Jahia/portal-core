@@ -21,6 +21,7 @@ Jahia.Utils = {
 Jahia.Portal = function () {
     this.conf = Jahia.Portal.default;
     this.activated = false;
+    this.isModel = false;
     this.areas = [];
     this.widgets = [];
     this.$areas = "";
@@ -135,7 +136,7 @@ Jahia.Portal.prototype = {
             });
     },
 
-    registerArea: function (urlBase, portalPath, portalTabPath, htmlID) {
+    registerArea: function (urlBase, portalPath, portalTabPath, htmlID, canEditPortal, isModel) {
         var instance = this;
 
         // init portals relative paths
@@ -144,6 +145,8 @@ Jahia.Portal.prototype = {
             instance.portalPath = portalPath;
             instance.portalTabPath = portalTabPath;
             instance.urlBase = urlBase;
+            instance.editable = canEditPortal;
+            instance.isModel = isModel;
         }
 
         instance.areas[htmlID] = new Jahia.Portal.Area(htmlID, "col-" + Jahia.Utils.getObjectSize(instance.areas), instance);
@@ -375,9 +378,10 @@ Jahia.Portal.Widget.prototype = {
             view = "view";
         }
 
-        $("#" + instance._id).html("<p>Loading ...</p>");
         $("#" + instance._id).load(instance._portal.urlBase + instance._path + "." + view + ".html.ajax?includeJavascripts=true", function(){
-            instance._portal.initDragDrop();
+            if(instance._portal.editable){
+                instance._portal.initDragDrop();
+            }
             instance.state = view;
             instance._portal._debug("widget " + instance._path + " loaded successfully");
 

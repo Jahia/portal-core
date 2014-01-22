@@ -21,98 +21,102 @@
 
 <template:addResources type="javascript" resources="app/portalToolbar.js" />
 <template:addResources type="css" resources="portal-toolbar.css"/>
+<c:set var="portalIsEditable" value="${jcr:hasPermission(renderContext.mainResource.node, 'jcr:write_live')}"/>
 
 <div id="portal_toolbar" class="portal_toolbar" ng-app="portalToolbar">
-    <script type="text/ng-template" id="tabFormTemplate">
-        <form>
-            <div class="row-fluid">
-                name: <input type="text" ng-model="form.name" required>
-            </div>
-            <div class="row-fluid">
-                template:
-                <select ng-model='form.template.key' required ng-options='option.key as option.name for option in form.allowedTemplates'></select>
-            </div>
-            <div class="row-fluid">
-                widgets skin:
-                <select ng-model='form.widgetsSkin.key' required ng-options='option.key as option.name for option in form.allowedWidgetsSkins'></select>
-            </div>
-        </form>
-    </script>
-
-
     <div ng-controller="navCtrl">
         <ul class="nav nav-tabs" ng-init="loadTabs()">
             <li ng-class="isCurrentTab(tab.url) ? 'active' : ''" ng-repeat="tab in tabs">
                 <a href="{{tab.url}}">{{tab.name}}</a>
             </li>
 
-            <li><a href="#newTabModal" data-toggle="modal"><i class="icon-folder-open"></i></a></li>
-            <li class="right" ng-show="canBeDeleted"><a href="#" ng-click="deleteTab()"><i class="icon-remove"></i></a></li>
-            <li class="right"><a href="#editTabModal" data-toggle="modal"><i class="icon-wrench"></i></a></li>
-            <li class="right"><a href="#widgetsModal" data-toggle="modal"><i class="icon-plus"></i></a></li>
+            <c:if test="${portalIsEditable}">
+                <li><a href="#newTabModal" data-toggle="modal"><i class="icon-folder-open"></i></a></li>
+                <li class="right" ng-show="canBeDeleted"><a href="#" ng-click="deleteTab()"><i class="icon-remove"></i></a></li>
+                <li class="right"><a href="#editTabModal" data-toggle="modal"><i class="icon-wrench"></i></a></li>
+                <li class="right"><a href="#widgetsModal" data-toggle="modal"><i class="icon-plus"></i></a></li>
+            </c:if>
         </ul>
     </div>
 
-    <div id="widgetsModal" class="modal hide fade" tabindex="-1" role="dialog"
-         aria-labelledby="widgetModalLabel" ng-controller="widgetsCtrl"
-         ng-init="init('widgetsModal')">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" ng-click="cancel()">×</button>
-            <h3 id="widgetModalLabel">Add new widget</h3>
-        </div>
-        <div class="modal-body">
-            <div>
-                <label for="widget_desiredName">Name:</label>
-                <input id="widget_desiredName" ng-model="desiredName" type="text">
+    <c:if test="${portalIsEditable}">
+        <script type="text/ng-template" id="tabFormTemplate">
+            <form>
+                <div class="row-fluid">
+                    name: <input type="text" ng-model="form.name" required>
+                </div>
+                <div class="row-fluid">
+                    template:
+                    <select ng-model='form.template.key' required ng-options='option.key as option.name for option in form.allowedTemplates'></select>
+                </div>
+                <div class="row-fluid">
+                    widgets skin:
+                    <select ng-model='form.widgetsSkin.key' required ng-options='option.key as option.name for option in form.allowedWidgetsSkins'></select>
+                </div>
+            </form>
+        </script>
 
-                <ul class="nav nav-pills nav-stacked">
-                    <li ng-repeat="widget in widgets" ng-class="widget.name == desiredWidget ? 'active' : ''">
-                        <a ng-click="selectWidget(widget.name)" href="#">{{widget.displayableName}}</a>
-                    </li>
-                </ul>
+        <div id="widgetsModal" class="modal hide fade" tabindex="-1" role="dialog"
+             aria-labelledby="widgetModalLabel" ng-controller="widgetsCtrl"
+             ng-init="init('widgetsModal')">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" ng-click="cancel()">×</button>
+                <h3 id="widgetModalLabel">Add new widget</h3>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" ng-click="cancel()">Close</button>
-            <button class="btn btn-primary" ng-click="addWidget()">Add</button>
-        </div>
-    </div>
+            <div class="modal-body">
+                <div>
+                    <label for="widget_desiredName">Name:</label>
+                    <input id="widget_desiredName" ng-model="desiredName" type="text">
 
-    <div id="editTabModal" class="modal hide fade" tabindex="-1" role="dialog"
-         aria-labelledby="editTabModalLabel" ng-controller="tabCtrl" ng-init="init('edit', 'editTabModal')">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" ng-click="cancel()">×</button>
-            <h3 id="editTabModalLabel">Edit tab {{form.name}}</h3>
-        </div>
-        <div class="modal-body">
-            <div>
-                <div ng-include src="'tabFormTemplate'">
-
+                    <ul class="nav nav-pills nav-stacked">
+                        <li ng-repeat="widget in widgets" ng-class="widget.name == desiredWidget ? 'active' : ''">
+                            <a ng-click="selectWidget(widget.name)" href="#">{{widget.displayableName}}</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" ng-click="cancel()">Close</button>
-            <button class="btn btn-primary" ng-click="submit(false)">Save</button>
-        </div>
-    </div>
-
-    <div id="newTabModal" class="modal hide fade" tabindex="-1" role="dialog"
-         aria-labelledby="newTabModalLabel" ng-controller="tabCtrl" ng-init="init('new', 'newTabModal')">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" ng-click="cancel()">×</button>
-            <h3 id="newTabModalLabel">Add new tab</h3>
-        </div>
-        <div class="modal-body">
-            <div>
-                <div ng-include src="'tabFormTemplate'">
-
-                </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" ng-click="cancel()">Close</button>
+                <button class="btn btn-primary" ng-click="addWidget()">Add</button>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" ng-click="cancel()">Close</button>
-            <button class="btn btn-primary" ng-click="submit(true)">Add</button>
+
+        <div id="editTabModal" class="modal hide fade" tabindex="-1" role="dialog"
+             aria-labelledby="editTabModalLabel" ng-controller="tabCtrl" ng-init="init('edit', 'editTabModal')">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" ng-click="cancel()">×</button>
+                <h3 id="editTabModalLabel">Edit tab {{form.name}}</h3>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div ng-include src="'tabFormTemplate'">
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" ng-click="cancel()">Close</button>
+                <button class="btn btn-primary" ng-click="submit(false)">Save</button>
+            </div>
         </div>
-    </div>
+
+        <div id="newTabModal" class="modal hide fade" tabindex="-1" role="dialog"
+             aria-labelledby="newTabModalLabel" ng-controller="tabCtrl" ng-init="init('new', 'newTabModal')">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" ng-click="cancel()">×</button>
+                <h3 id="newTabModalLabel">Add new tab</h3>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div ng-include src="'tabFormTemplate'">
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" ng-click="cancel()">Close</button>
+                <button class="btn btn-primary" ng-click="submit(true)">Add</button>
+            </div>
+        </div>
+    </c:if>
 </div>

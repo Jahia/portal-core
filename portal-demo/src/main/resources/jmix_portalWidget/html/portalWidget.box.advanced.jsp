@@ -13,8 +13,9 @@
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
 
-<c:set var="widgetEditable"
+<c:set var="widgetHasEditView"
        value="${portal:getSpecificView(currentNode.primaryNodeTypeName, 'edit', renderContext.site) != null}"/>
+<c:set var="widgetIsEditable" value="${jcr:hasPermission(currentNode, 'jcr:write_live')}"/>
 
 <template:addResources type="javascript" resources="app/portalWidgetWrapper.js"/>
 <template:addResources type="css" resources="box.advanced.red.css"/>
@@ -22,7 +23,7 @@
 <script type="text/javascript">
     // skin javascript controller
     $(document).ready(function(){
-        new Jahia.Portal.AdvancedWidgetWrapper("w${currentNode.identifier}");
+        new Jahia.Portal.AdvancedWidgetWrapper("w${currentNode.identifier}", ${widgetIsEditable});
     });
 </script>
 
@@ -31,11 +32,13 @@
         <h4 class="panel-title">${currentNode.properties["jcr:title"].string}</h4>
 
         <div class="widget-tools">
-            <c:if test="${widgetEditable}">
+            <c:if test="${widgetHasEditView && widgetIsEditable}">
                 <i class="icon-cog edit_switch"></i>
             </c:if>
             <i class="icon-minus minimize_action"></i>
-            <i class="icon-remove delete_action"></i>
+            <c:if test="${widgetHasEditView && widgetIsEditable}">
+                <i class="icon-remove delete_action"></i>
+            </c:if>
         </div>
     </div>
     <div class="widget-content">

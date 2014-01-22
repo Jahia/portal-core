@@ -83,7 +83,6 @@ portalToolbar.controller('navCtrl', function test($scope) {
                 }
             });
         });
-
     };
 
     $scope.isCurrentTab = function (url) {
