@@ -249,7 +249,10 @@ Jahia.Portal.prototype = {
 
             $.ajax({
                 type: "POST",
-                url: instance.urlBase + instance.portalPath + Jahia.Portal.constants.COPY_PORTALMODEL_ACTION
+                dataType: "json",
+                traditional: true,
+                url: instance.urlBase + instance.portalPath + Jahia.Portal.constants.COPY_PORTALMODEL_ACTION,
+                data: {}
             }).done(function(data){
                     if(callback){
                         callback(data)

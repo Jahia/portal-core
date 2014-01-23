@@ -289,6 +289,10 @@ public class PortalService {
                 tabNode.copy(portal.getPath());
             }
 
+            //set roles
+            portal.denyRoles("g:users", Collections.singleton("reader"));
+            portal.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("owner"));
+
             sessionWrapper.save();
 
             return portal;
