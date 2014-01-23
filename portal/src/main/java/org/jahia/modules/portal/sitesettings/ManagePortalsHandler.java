@@ -1,18 +1,23 @@
 package org.jahia.modules.portal.sitesettings;
 
+import org.apache.commons.lang.StringUtils;
+import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.JCRSessionWrapper;
 import org.jahia.services.content.decorator.JCRSiteNode;
+import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderContext;
+import org.jahia.services.render.RenderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.webflow.execution.RequestContext;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.nodetype.NoSuchNodeTypeException;
 import java.io.Serializable;
 import java.util.List;
 
@@ -42,6 +47,32 @@ public class ManagePortalsHandler implements Serializable {
             logger.error(e.getMessage(), e);
         }
         return true;
+    }
+
+    public PortalForm initPortalForm(RequestContext ctx, String identifier) {
+        JCRSiteNode site = getRenderContext(ctx).getSite();
+
+
+        ctx.getRequestScope().put("templatesPath", site.getTemplatePackage().getRootFolderPath() + "/" + site.getTemplatePackage().getVersion() + "/templates");
+        try {
+            ctx.getRequestScope().put("allowedWidgetsSkin", RenderService.getInstance().getViewsSet(
+                    NodeTypeRegistry.getInstance().getNodeType(PortalConstants.JMIX_PORTAL_WIDGET),
+                    getRenderContext(ctx).getSite(), "html"));
+        } catch (NoSuchNodeTypeException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        PortalForm form = new PortalForm();
+        if(StringUtils.isNotEmpty(identifier)){
+            try {
+                JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(identifier);
+                form.setName(portalNode.getDisplayableName());
+            } catch (RepositoryException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+
+        return form;
     }
 
     public boolean enablePortalModel(RequestContext ctx, String selectedPortalModelIdentifier){

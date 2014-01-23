@@ -37,12 +37,18 @@
     <function>
         <name>getViewsSet</name>
         <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
-        <function-signature>java.util.SortedSet getViewSet(java.lang.String,org.jahia.services.content.decorator.JCRSiteNode)</function-signature>
+        <function-signature>java.util.SortedSet getViewSet(java.lang.String,org.jahia.services.content.JCRNodeWrapper)</function-signature>
     </function>
 
     <function>
         <name>getSpecificView</name>
         <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
-        <function-signature>org.jahia.services.render.View getSpecificView(java.lang.String,java.lang.String,org.jahia.services.content.decorator.JCRSiteNode)</function-signature>
+        <function-signature>org.jahia.services.render.View getSpecificView(java.lang.String,java.lang.String,org.jahia.services.content.JCRNodeWrapper)</function-signature>
+    </function>
+
+    <function>
+        <name>userPortalExist</name>
+        <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
+        <function-signature>boolean userPortalExist(org.jahia.services.content.JCRNodeWrapper)</function-signature>
     </function>
 </taglib>

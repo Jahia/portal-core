@@ -26,6 +26,7 @@
 <%--@elvariable id="newslettersRootNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="portalForm" type="org.jahia.modules.portal.sitesettings.form.PortalForm"--%>
 <%--@elvariable id="skin" type="org.jahia.services.render.View"--%>
+<%--@elvariable id="portalNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <c:set var="portalWidgetMixin" value="<%= PortalConstants.JMIX_PORTAL_WIDGET %>"/>
 
 <template:addResources type="javascript"
@@ -43,7 +44,6 @@
 
 <div class="box-1">
     <form:form action="${flowExecutionUrl}" modelAttribute="portalForm">
-
         <div class="row-fluid">
             <div class="span4">
                 <form:label path="name">name <span class="text-error"><strong>*</strong></span></form:label>
@@ -60,7 +60,7 @@
             <div class="span4">
                 <form:label path="widgetsSkin">widgets skin <span class="text-error"><strong>*</strong></span></form:label>
                 <form:select path="widgetsSkin">
-                    <c:forEach items="${portal:getViewsSet(portalWidgetMixin, renderContext.site)}" var="skin">
+                    <c:forEach items="${allowedWidgetsSkin}" var="skin">
                         <form:option value="${skin.key}">
                             <fmt:message key="${skin.displayName}"/>
                         </form:option>

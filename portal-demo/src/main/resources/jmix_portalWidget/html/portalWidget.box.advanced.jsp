@@ -1,3 +1,4 @@
+<%@ page import="org.jahia.modules.portal.PortalConstants" %>
 <%@ taglib uri="http://www.jahia.org/tags/jcr" prefix="jcr" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="template" uri="http://www.jahia.org/tags/templateLib" %>
@@ -12,9 +13,11 @@
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
+<c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
+<c:set var="portalNode" value="${jcr:getParentOfType(currentNode, portalMixin)}"/>
 
 <c:set var="widgetHasEditView"
-       value="${portal:getSpecificView(currentNode.primaryNodeTypeName, 'edit', renderContext.site) != null}"/>
+       value="${portal:getSpecificView(currentNode.primaryNodeTypeName, 'edit', portalNode) != null}"/>
 <c:set var="widgetIsEditable" value="${jcr:hasPermission(currentNode, 'jcr:write_live')}"/>
 
 <template:addResources type="javascript" resources="app/portalWidgetWrapper.js"/>

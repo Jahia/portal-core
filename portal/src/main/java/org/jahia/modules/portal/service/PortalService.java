@@ -7,10 +7,13 @@ import org.jahia.services.content.JCRContentUtils;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionWrapper;
 import org.jahia.services.content.decorator.JCRSiteNode;
+import org.jahia.services.render.RenderContext;
+import org.jahia.services.render.SiteInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.NodeIterator;
+import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
@@ -29,24 +32,21 @@ import java.util.Set;
 public class PortalService {
     private static Logger logger = LoggerFactory.getLogger(PortalService.class);
 
-    public JCRNodeWrapper getSitePortalsRootFolder(JCRSiteNode site, JCRSessionWrapper session) {
+    public JCRNodeWrapper getPortalFolder(JCRNodeWrapper node, String folderName, boolean createIfNotExist) {
         try {
-            QueryManager queryManager = session.getWorkspace().getQueryManager();
-            if (queryManager == null) {
-                logger.error("Unable to obtain QueryManager instance");
-                return null;
+            JCRNodeWrapper portalFolder;
+            try{
+                return node.getNode(folderName);
+            }catch (PathNotFoundException e){
+                if(createIfNotExist){
+                    return node.addNode(folderName, PortalConstants.JNT_PORTALS_FOLDER);
+                }
             }
-
-            StringBuilder q = new StringBuilder();
-            q.append("select * from [" + PortalConstants.JNT_PORTALS_FOLDER + "] where isdescendantnode([").append(site.getPath())
-                    .append("])");
-            Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
-            NodeIterator nodes = query.execute().getNodes();
-            return nodes.hasNext() ? (JCRNodeWrapper) nodes.next() : null;
         } catch (Exception e) {
-            logger.error("Error retrieving portals root folder for site " + site.getDisplayableName(), e);
+            logger.error("Error retrieving portal folder '" + folderName + "' under node " + node.getPath(), e);
         }
         return null;
+
     }
 
     public List<JCRNodeWrapper> getSitePortalModels(JCRSiteNode site, String orderBy, boolean orderAscending, JCRSessionWrapper session) {
@@ -85,9 +85,9 @@ public class PortalService {
 
     public void createPortalModel(PortalForm form, JCRSiteNode site, JCRSessionWrapper session) throws RepositoryException {
         // Create portals root folder
-        JCRNodeWrapper portalsRootFolderNode = getSitePortalsRootFolder(site, session);
+        JCRNodeWrapper portalsRootFolderNode = getPortalFolder(session.getNode(site.getPath()), "portals", true);
         if (portalsRootFolderNode == null) {
-            portalsRootFolderNode = site.addNode("portals", PortalConstants.JNT_PORTALS_FOLDER);
+            return;
         }
 
         // Create portal
@@ -247,6 +247,75 @@ public class PortalService {
         }
     }
 
+    public JCRNodeWrapper getUserPortalByModel(JCRNodeWrapper modelNode) {
+        try {
+            JCRSessionWrapper sessionWrapper = modelNode.getSession();
+            QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
+            if (queryManager == null) {
+                logger.error("Unable to obtain QueryManager instance");
+            }
+
+            StringBuilder q = new StringBuilder();
+            q.append("select * from [" + PortalConstants.JNT_PORTAL_USER + "] as p where isdescendantnode(p, ['").append(sessionWrapper.getUser().getLocalPath())
+                    .append("'])  and p.['j:model'] = '").append(modelNode.getIdentifier()).append("'");
+            Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
+
+            NodeIterator nodes = query.execute().getNodes();
+            while (nodes.hasNext()) {
+                return (JCRNodeWrapper) nodes.next();
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return null;
+    }
+
+    public JCRNodeWrapper initUserPortalFromModel(JCRNodeWrapper modelNode, JCRSessionWrapper sessionWrapper) {
+        try {
+            // Create/get portal folders
+            JCRNodeWrapper portalFolderRoot = getPortalFolder(sessionWrapper.getNode(sessionWrapper.getUser().getLocalPath()), "portals", true);
+            JCRNodeWrapper sitePortalFolder = getPortalFolder(portalFolderRoot, modelNode.getResolveSite().getSiteKey(), true);
+
+            // Create portal
+            JCRNodeWrapper portal = sitePortalFolder.addNode(modelNode.getName(), PortalConstants.JNT_PORTAL_USER);
+            portal.setProperty(PortalConstants.J_TEMPLATE_ROOT_PATH, modelNode.getPropertyAsString(PortalConstants.J_TEMPLATE_ROOT_PATH));
+            portal.setProperty(PortalConstants.JCR_TITLE, modelNode.getDisplayableName());
+            portal.setProperty(PortalConstants.J_MODEL, modelNode);
+
+            //copy tabs
+            List<JCRNodeWrapper> tabNodes = getPortalTabs(modelNode, sessionWrapper);
+            for(JCRNodeWrapper tabNode : tabNodes){
+                tabNode.copy(portal.getPath());
+            }
+
+            sessionWrapper.save();
+
+            return portal;
+        } catch (Exception e){
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public void fixPortalSiteInContext(RenderContext renderContext, JCRNodeWrapper node) throws RepositoryException {
+        JCRNodeWrapper portalNode = node.isNodeType(PortalConstants.JMIX_PORTAL) ? node : JCRContentUtils.getParentOfType(node, PortalConstants.JMIX_PORTAL);
+
+        if(portalNode.isNodeType(PortalConstants.JMIX_HAS_MODEL)){
+            JCRSiteNode portalSite = getPortalSite(portalNode);
+            renderContext.setSite(portalSite);
+            renderContext.setSiteInfo(new SiteInfo(portalSite));
+        }
+    }
+
+    public JCRSiteNode getPortalSite(JCRNodeWrapper portalNode) throws RepositoryException {
+        if(portalNode.isNodeType(PortalConstants.JMIX_HAS_MODEL)){
+            return ((JCRNodeWrapper) portalNode.getProperty(PortalConstants.J_MODEL).getNode()).getResolveSite();
+        }else {
+            return portalNode.getResolveSite();
+        }
+    }
+
     private void setReadRoleForPortalModel(JCRNodeWrapper portalModelNode, boolean enabled){
         Set<String> roles = Collections.singleton("reader");
         try {
@@ -260,6 +329,5 @@ public class PortalService {
         }catch (RepositoryException e){
             logger.error(e.getMessage(), e);
         }
-
     }
 }

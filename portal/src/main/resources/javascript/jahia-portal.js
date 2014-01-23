@@ -35,6 +35,7 @@ Jahia.Portal.constants = {
     TABS_PORTAL_VIEW: ".tabs.json",
     ADD_WIDGET_ACTION: ".addWidget.do",
     MOVE_WIDGET_ACTION: ".moveWidget.do",
+    COPY_PORTALMODEL_ACTION: ".copyPortalModel.do",
     FORM_TAB_VIEW: ".form.json",
 
     WIDGET_EVENT_MOVED_SUCCEEDED: "moveSucceeded",
@@ -239,6 +240,25 @@ Jahia.Portal.prototype = {
                 }
             window.location.href = instance.urlBase + instance.portalPath;
             });
+    },
+
+    initPortalFromModel: function(callback){
+        var instance = this;
+        if(instance.isModel){
+            instance._debug("Init user portal");
+
+            $.ajax({
+                type: "POST",
+                url: instance.urlBase + instance.portalPath + Jahia.Portal.constants.COPY_PORTALMODEL_ACTION
+            }).done(function(data){
+                    if(callback){
+                        callback(data)
+                    }
+                    //window.location.href = instance.urlBase + data.path;
+                });
+        }else {
+            instance._debug("Impossible to copy this portal, because is not a model");
+        }
     },
 
     getCurrentTabPath: function() {

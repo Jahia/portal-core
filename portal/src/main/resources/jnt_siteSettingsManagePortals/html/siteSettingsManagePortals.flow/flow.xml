@@ -26,7 +26,7 @@
 
     <view-state id="formPortal" model="portalForm">
         <on-render>
-            <evaluate expression="flowHandler.getTemplatesPath(flowRequestContext)" result="requestScope.templatesPath"/>
+            <evaluate expression="flowHandler.initPortalForm(flowRequestContext, flowScope.portalIdentifier)" result="requestScope.portalForm"/>
         </on-render>
         <transition on="submit" to="managePortals">
             <evaluate expression="flowHandler.createPortalModel(flowRequestContext, portalForm)" />

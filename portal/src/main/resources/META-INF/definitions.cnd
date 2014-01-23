@@ -10,6 +10,9 @@
  - j:templateRootPath (string) mandatory
  + * (jnt:portalTab)
 
+[jmix:hasModel] mixin
+ - j:model (weakreference) mandatory < jnt:portalModel
+
 [jmix:portalWidget] > mix:referenceable, mix:title mixin
 
 [jnt:portalsFolder] > nt:base
@@ -19,8 +22,7 @@
 [jnt:portalModel] > jnt:content, jmix:portal, mix:title, jmix:list
  - j:enabled (boolean) = false autocreated
 
-[jnt:portal] > jnt:content, jmix:portal, mix:title, jmix:list
- - j:model (weakreference) mandatory < jnt:portalModel
+[jnt:portalUser] > jnt:content, mix:title, jmix:list, jmix:portal, jmix:hasModel
 
 [jnt:portalTab] > jnt:content, mix:title, jmix:list, jmix:hasTemplateNode
  - j:widgetsSkin (string)

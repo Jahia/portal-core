@@ -5,7 +5,6 @@ import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.services.content.JCRNodeWrapper;
-import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderService;
 import org.jahia.services.render.View;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.nodetype.NodeTypeIterator;
 import java.util.List;
 import java.util.Locale;
@@ -70,8 +68,8 @@ public class PortalFunctions {
         return null;
     }
 
-    public static View getSpecificView(String nt, String view, JCRSiteNode site) {
-        SortedSet<View> skins = getViewSet(nt, site);
+    public static View getSpecificView(String nt, String view, JCRNodeWrapper portalNode) {
+        SortedSet<View> skins = getViewSet(nt, portalNode);
         if (CollectionUtils.isNotEmpty(skins)) {
             for (View skin : skins) {
                 if (skin.getKey().equals(view)) {
@@ -82,13 +80,18 @@ public class PortalFunctions {
         return null;
     }
 
-    public static SortedSet<View> getViewSet(String nt, JCRSiteNode site){
+    public static SortedSet<View> getViewSet(String nt, JCRNodeWrapper portalNode){
         try {
-            return RenderService.getInstance().getViewsSet(NodeTypeRegistry.getInstance().getNodeType(nt), site, "html");
-        } catch (NoSuchNodeTypeException e) {
+            return RenderService.getInstance().getViewsSet(NodeTypeRegistry.getInstance().getNodeType(nt), portalService.getPortalSite(portalNode), "html");
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
         return null;
+    }
+
+    public static boolean userPortalExist(JCRNodeWrapper modelNode){
+        JCRNodeWrapper userPortal = portalService.getUserPortalByModel(modelNode);
+        return userPortal != null;
     }
 
 }

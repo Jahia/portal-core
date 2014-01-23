@@ -1,3 +1,4 @@
+<%@ page import="org.jahia.modules.portal.PortalConstants" %>
 <%@ page language="java" contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="template" uri="http://www.jahia.org/tags/templateLib" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -9,6 +10,7 @@
 <%@ taglib prefix="ui" uri="http://www.jahia.org/tags/uiComponentsLib" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="uiComponents" uri="http://www.jahia.org/tags/uiComponentsLib" %>
+<%@ taglib prefix="portal" uri="http://www.jahia.org/tags/portalLib" %>
 <%--@elvariable id="currentNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="out" type="java.io.PrintWriter"--%>
 <%--@elvariable id="script" type="org.jahia.services.render.scripting.Script"--%>
@@ -18,10 +20,13 @@
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
+<c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
+<c:set var="portalModelNT" value="<%= PortalConstants.JNT_PORTAL_MODEL %>"/>
+<c:set var="portalNode" value="${jcr:getParentOfType(renderContext.mainResource.node, portalMixin)}" />
+<c:set var="portalIsEditable" value="${jcr:hasPermission(renderContext.mainResource.node, 'jcr:write_live')}"/>
 
 <template:addResources type="javascript" resources="app/portalToolbar.js" />
 <template:addResources type="css" resources="portal-toolbar.css"/>
-<c:set var="portalIsEditable" value="${jcr:hasPermission(renderContext.mainResource.node, 'jcr:write_live')}"/>
 
 <div id="portal_toolbar" class="portal_toolbar" ng-app="portalToolbar">
     <div ng-controller="navCtrl">
@@ -30,6 +35,11 @@
                 <a href="{{tab.url}}">{{tab.name}}</a>
             </li>
 
+            <c:if test="${jcr:isNodeType(portalNode, portalModelNT) and !portal:userPortalExist(portalNode)}">
+                <li class="right">
+                    <button type="button" class="customize-btn btn btn-inverse" ng-click="copyModel()">Customize</button>
+                </li>
+            </c:if>
             <c:if test="${portalIsEditable}">
                 <li><a href="#newTabModal" data-toggle="modal"><i class="icon-folder-open"></i></a></li>
                 <li class="right" ng-show="canBeDeleted"><a href="#" ng-click="deleteTab()"><i class="icon-remove"></i></a></li>

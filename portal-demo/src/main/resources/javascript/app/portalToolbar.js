@@ -93,5 +93,9 @@ portalToolbar.controller('navCtrl', function test($scope) {
         if($scope.canBeDeleted){
             portal.deleteCurrentTab();
         }
+    };
+
+    $scope.copyModel = function(){
+        portal.initPortalFromModel();
     }
 });
