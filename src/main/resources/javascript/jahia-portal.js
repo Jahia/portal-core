@@ -254,7 +254,7 @@ Jahia.Portal.prototype = {
                     if(callback){
                         callback(data)
                     }
-                    //window.location.href = instance.urlBase + data.path;
+                    window.location.href = instance.urlBase + data.path;
                 });
         }else {
             instance._debug("Impossible to copy this portal, because is not a model");

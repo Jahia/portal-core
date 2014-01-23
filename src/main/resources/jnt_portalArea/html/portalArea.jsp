@@ -21,23 +21,30 @@
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
-<c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
-<c:set var="portalModelNT" value="<%= PortalConstants.JNT_PORTAL_MODEL %>"/>
-<c:set var="canEditPortal" value="${jcr:hasPermission(renderContext.mainResource.node, 'jcr:write_live')}" />
-<c:set var="portalNode" value="${jcr:getParentOfType(renderContext.mainResource.node, portalMixin)}" />
+<c:choose>
+    <c:when test="${renderContext.editModeConfigName eq 'studiomode'}">
+        portal Area
+    </c:when>
+    <c:when test="${renderContext.liveMode}">
+        <c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
+        <c:set var="portalModelNT" value="<%= PortalConstants.JNT_PORTAL_MODEL %>"/>
+        <c:set var="canEditPortal" value="${jcr:hasPermission(renderContext.mainResource.node, 'jcr:write_live')}"/>
+        <c:set var="portalNode" value="${jcr:getParentOfType(renderContext.mainResource.node, portalMixin)}"/>
 
-<template:addResources type="javascript" resources="jahia-portal.js" />
+        <template:addResources type="javascript" resources="jahia-portal.js"/>
 
-<div id="portal_area_${currentNode.identifier}" class="portal_area">
+        <div id="portal_area_${currentNode.identifier}" class="portal_area">
 
-</div>
+        </div>
 
-<script type="text/javascript">
-    var portal = window.portal;
-    portal.registerArea("${url.base}",
-            "${portalNode.path}",
-            "${renderContext.mainResource.node.path}",
-            "portal_area_${currentNode.identifier}",
-            ${canEditPortal},
-            ${jcr:isNodeType(portalNode, portalModelNT)});
-</script>
+        <script type="text/javascript">
+            var portal = window.portal;
+            portal.registerArea("${url.base}",
+                    "${portalNode.path}",
+                    "${renderContext.mainResource.node.path}",
+                    "portal_area_${currentNode.identifier}",
+                    ${canEditPortal},
+                    ${jcr:isNodeType(portalNode, portalModelNT)});
+        </script>
+    </c:when>
+</c:choose>

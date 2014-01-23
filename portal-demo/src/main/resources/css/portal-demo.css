@@ -1,7 +1,0 @@
-
-
-/* hook for being able to drag widget in empty areas */
-.portal_area{
-    margin-top: 20px;
-    min-height: 5px;
-}
