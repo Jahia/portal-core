@@ -18,16 +18,19 @@ Jahia.Utils = {
  * Portal object
  * @constructor
  */
-Jahia.Portal = function () {
+Jahia.Portal = function (options) {
     this.conf = Jahia.Portal.default;
-    this.activated = false;
-    this.isModel = false;
+    this.debug = options.debug ? options.debug : false;
+    this.isModel = options.isModel ? options.isModel :false;
+    this.isEditable = options.isEditable ? options.isEditable : false;
+
+    this.baseURL = options.baseURL;
+    this.portalPath = options.portalPath;
+    this.portalTabPath = options.portalTabPath;
+
+    this.$areas = [];
     this.areas = [];
     this.widgets = [];
-    this.$areas = "";
-
-    //register portal in the window object
-    window.portal = this;
 };
 
 Jahia.Portal.constants = {
@@ -46,12 +49,11 @@ Jahia.Portal.constants = {
 };
 
 Jahia.Portal.default = {
-    debug: true,
     sortable_options: {
         connectWith: ".portal_area",
         handle: ".widget-header",
         revert: true,
-        iframeFix: false
+        iframeFix: true
     }
 };
 
@@ -91,29 +93,14 @@ Jahia.Portal.prototype = {
 
     _debug: function (message) {
         var instance = this;
-        if (instance.conf.debug) {
+        if (instance.debug) {
             console.debug("Portal: " + message)
         }
     },
 
-    setPortalPath: function (path) {
-        var instance = this;
-        instance.portalPath = path;
-    },
-
-    setPortalTabPath: function (path) {
-        var instance = this;
-        instance.portalTabPath = path;
-    },
-
-    setUrlBase: function (base) {
-        var instance = this;
-        instance.urlBase = base;
-    },
-
     getWidgetTypes: function (callback) {
         var instance = this;
-        $.ajax(instance.urlBase + instance.portalPath + Jahia.Portal.constants.WIDGETS_PORTAL_VIEW).done(function (data) {
+        $.ajax(instance.baseURL + instance.portalPath + Jahia.Portal.constants.WIDGETS_PORTAL_VIEW).done(function (data) {
             instance._debug(data.length + " widgets loaded");
             callback(data);
         });
@@ -130,26 +117,15 @@ Jahia.Portal.prototype = {
             type: "POST",
             dataType: "json",
             traditional: true,
-            url: instance.urlBase + instance.portalTabPath + Jahia.Portal.constants.ADD_WIDGET_ACTION,
+            url: instance.baseURL + instance.portalTabPath + Jahia.Portal.constants.ADD_WIDGET_ACTION,
             data: data
         }).done(function (widget) {
                 instance.getAreaByColIndex(0).registerWidget(widget.path);
             });
     },
 
-    registerArea: function (urlBase, portalPath, portalTabPath, htmlID, canEditPortal, isModel) {
+    registerArea: function (htmlID) {
         var instance = this;
-
-        // init portals relative paths
-        if (!instance.activated) {
-            instance.activated = true;
-            instance.portalPath = portalPath;
-            instance.portalTabPath = portalTabPath;
-            instance.urlBase = urlBase;
-            instance.editable = canEditPortal;
-            instance.isModel = isModel;
-        }
-
         instance.areas[htmlID] = new Jahia.Portal.Area(htmlID, "col-" + Jahia.Utils.getObjectSize(instance.areas), instance);
     },
 
@@ -179,7 +155,6 @@ Jahia.Portal.prototype = {
     },
 
     deleteWidget: function(widget) {
-        var instance = this;
         widget.performDelete();
     },
 
@@ -189,7 +164,7 @@ Jahia.Portal.prototype = {
         $.ajax({
             type: "GET",
             dataType: "json",
-            url: instance.urlBase + instance.portalTabPath + Jahia.Portal.constants.FORM_TAB_VIEW
+            url: instance.baseURL + instance.portalTabPath + Jahia.Portal.constants.FORM_TAB_VIEW
         }).done(function (data) {
                 instance._debug("Portal tab form info successfully loaded");
                 if (callback) {
@@ -207,7 +182,7 @@ Jahia.Portal.prototype = {
             type: "POST",
             dataType: "json",
             traditional: true,
-            url: isNew ? instance.urlBase + instance.portalPath + "/*" : instance.urlBase + instance.portalTabPath,
+            url: isNew ? instance.baseURL + instance.portalPath + "/*" : instance.baseURL + instance.portalTabPath,
             data: instance._convertTabFormToJCRProps(form)
         }).done(function (data) {
                 instance._debug("Portal tab form successfully saved");
@@ -215,7 +190,7 @@ Jahia.Portal.prototype = {
                     callback(data);
                 }
                 if(isNew){
-                    window.location.href = instance.urlBase + instance.portalPath + "/" + data["j_nodename"] + ".html";
+                    window.location.href = instance.baseURL + instance.portalPath + "/" + data["j_nodename"] + ".html";
                 }else {
                     window.location.reload();
                 }
@@ -230,7 +205,7 @@ Jahia.Portal.prototype = {
             type: "POST",
             dataType: "json",
             traditional: true,
-            url: instance.urlBase + instance.portalTabPath,
+            url: instance.baseURL + instance.portalTabPath,
             data: {
                 jcrMethodToCall: "delete"
             }
@@ -238,7 +213,7 @@ Jahia.Portal.prototype = {
                 if(callback){
                     callback(data)
                 }
-            window.location.href = instance.urlBase + instance.portalPath;
+            window.location.href = instance.baseURL + instance.portalPath;
             });
     },
 
@@ -251,22 +226,17 @@ Jahia.Portal.prototype = {
                 type: "POST",
                 dataType: "json",
                 traditional: true,
-                url: instance.urlBase + instance.portalPath + Jahia.Portal.constants.COPY_PORTALMODEL_ACTION,
+                url: instance.baseURL + instance.portalPath + Jahia.Portal.constants.COPY_PORTALMODEL_ACTION,
                 data: {}
             }).done(function(data){
                     if(callback){
                         callback(data)
                     }
-                    window.location.href = instance.urlBase + data.path;
+                    window.location.href = instance.baseURL + data.path;
                 });
         }else {
             instance._debug("Impossible to copy this portal, because is not a model");
         }
-    },
-
-    getCurrentTabPath: function() {
-        var instance = this;
-        return instance.portalTabPath;
     },
 
     getTabs: function(callback) {
@@ -275,7 +245,7 @@ Jahia.Portal.prototype = {
         $.ajax({
             type: "GET",
             dataType: "json",
-            url: instance.urlBase + instance.portalPath + Jahia.Portal.constants.TABS_PORTAL_VIEW
+            url: instance.baseURL + instance.portalPath + Jahia.Portal.constants.TABS_PORTAL_VIEW
         }).done(function (data) {
                 instance._debug(data.length + "portal tabs successfully loaded");
                 if (callback) {
@@ -320,7 +290,7 @@ Jahia.Portal.Area.prototype = {
 
         instance._portal._debug("Load widgets for col: " + instance._colName);
 
-        $.ajax(this._portal.urlBase + this._colPath + ".widgets.json").done(function (data) {
+        $.ajax(this._portal.baseURL + this._colPath + ".widgets.json").done(function (data) {
             instance._portal._debug(data.length + " widgets found");
 
             data.forEach(function (widget) {
@@ -401,8 +371,8 @@ Jahia.Portal.Widget.prototype = {
             view = "view";
         }
 
-        $("#" + instance._id).load(instance._portal.urlBase + instance._path + "." + view + ".html.ajax?includeJavascripts=true", function(){
-            if(instance._portal.editable){
+        $("#" + instance._id).load(instance._portal.baseURL + instance._path + "." + view + ".html.ajax?includeJavascripts=true", function(){
+            if(instance._portal.isEditable){
                 instance._portal.initDragDrop();
             }
             instance.state = view;
@@ -430,7 +400,7 @@ Jahia.Portal.Widget.prototype = {
             type: "POST",
             dataType: "json",
             traditional: true,
-            url: instance._portal.urlBase + instance._portal.portalTabPath + Jahia.Portal.constants.MOVE_WIDGET_ACTION,
+            url: instance._portal.baseURL + instance._portal.portalTabPath + Jahia.Portal.constants.MOVE_WIDGET_ACTION,
             data: data
         }).done(function (newPositionInfo) {
                 instance._path = newPositionInfo.path;
@@ -451,7 +421,7 @@ Jahia.Portal.Widget.prototype = {
             },
             dataType: "json",
             traditional: true,
-            url: instance._portal.urlBase + instance._path
+            url: instance._portal.baseURL + instance._path
         }).done(function(){
                 instance._portal._debug("Widget " + instance._path + " successfully deleted");
                 // delete from html
@@ -468,7 +438,7 @@ Jahia.Portal.Widget.prototype = {
             data: data,
             dataType: "json",
             traditional: true,
-            url: instance._portal.urlBase + instance._path
+            url: instance._portal.baseURL + instance._path
         }).done(function(response){
                 instance._portal._debug("Widget " + instance._path + " successfully updated");
 
@@ -480,7 +450,5 @@ Jahia.Portal.Widget.prototype = {
             });
     }
 };
-
-var portal = new Jahia.Portal();
 
 

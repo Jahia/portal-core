@@ -1,9 +1,11 @@
 package org.jahia.modules.portal.filter;
 
+
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.Resource;
 import org.jahia.services.render.filter.AbstractFilter;
 import org.jahia.services.render.filter.RenderChain;
+import org.slf4j.LoggerFactory;
 
 import java.net.URLEncoder;
 
@@ -14,14 +16,20 @@ import java.net.URLEncoder;
  * Time: 14:15
  * To change this template use File | Settings | File Templates.
  */
-public class PortalTabFilter extends AbstractFilter{
+public class PortalLibFilter extends AbstractFilter {
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(PortalLibFilter.class);
+
     private static final String JS_API_FILE = "jahia-portal.js";
-    private static final String MODULE_NAME = "jahia-portal";
+    private static final String MODULE_NAME = "portal-core";
 
     @Override
     public String execute(String previousOut, RenderContext renderContext, Resource resource, RenderChain chain) throws Exception {
+        String out = previousOut;
+
+        // add portal API lib
         String path = URLEncoder.encode("/modules/" + MODULE_NAME + "/javascript/" + JS_API_FILE, "UTF-8");
-        previousOut += ("<jahia:resource type='javascript' path='" + path + "' insert='false' resource='" + JS_API_FILE + "'/>");
-        return previousOut;
+        out += ("<jahia:resource type='javascript' path='" + path + "' insert='false' resource='" + JS_API_FILE + "'/>");
+
+        return out;
     }
 }

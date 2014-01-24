@@ -18,11 +18,25 @@
     <bean id="messageSource" class="org.jahia.utils.i18n.ModuleMessageSource"/>
 
     <!-- Filters -->
-    <!-- bean name="PortalTabFilter" class="org.jahia.modules.portal.filter.PortalTabFilter">
-        <property name="priority" value="-10"/>
-        <property name="applyOnNodeTypes" value="jnt:portalArea"/>
-        <property name="description" value="Add portal JavaScript API in the page and disable edition in the page"/>
-    </bean -->
+    <bean name="PortalLibFilter" class="org.jahia.modules.portal.filter.PortalLibFilter">
+        <property name="priority" value="1"/>
+        <property name="description" value="Add portal JavaScript API in the page before the static asset filter"/>
+        <property name="applyOnConfigurations" value="page" />
+        <property name="applyOnTemplateTypes" value="html"/>
+        <property name="applyOnModes" value="live" />
+        <property name="applyOnNodeTypes" value="jnt:portalTab"/>
+    </bean>
+    <bean name="PortalInitFilter" class="org.jahia.modules.portal.filter.PortalInitFilter">
+        <property name="priority" value="-1"/>
+        <property name="description" value="Add portal init JavaScript in the header"/>
+        <property name="applyOnConfigurations" value="page" />
+        <property name="applyOnTemplateTypes" value="html"/>
+        <property name="applyOnModes" value="live" />
+        <property name="applyOnNodeTypes" value="jnt:portalTab"/>
+        <property name="scriptEngineUtils" ref="scriptEngineUtils"/>
+        <property name="template" value="${portalInitTemplate:/modules/portal-core/WEB-INF/scripts/portalInit.groovy}"/>
+        <property name="debugEnabled" value="${portalDebugEnabled:true}"/>
+    </bean>
     <bean name="PortalSkinFilter" class="org.jahia.modules.portal.filter.PortalSkinFilter">
         <property name="defaultPortalWidgetsSkin" value="${defaultPortalWidgetsSkin:box.basic}"/>
         <property name="description" value="Filter that add skins to the current resource."/>

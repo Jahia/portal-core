@@ -28,10 +28,10 @@ import java.util.List;
  * Time: 11:38
  * To change this template use File | Settings | File Templates.
  */
-public class ManagePortalsHandler implements Serializable {
+public class PortalFactoryHandler implements Serializable {
     private static final long serialVersionUID = 978219001163542883L;
 
-    private static final Logger logger = LoggerFactory.getLogger(ManagePortalsHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(PortalFactoryHandler.class);
 
     @Autowired
     private transient PortalService portalService;
@@ -51,7 +51,6 @@ public class ManagePortalsHandler implements Serializable {
 
     public PortalForm initPortalForm(RequestContext ctx, String identifier) {
         JCRSiteNode site = getRenderContext(ctx).getSite();
-
 
         ctx.getRequestScope().put("templatesPath", site.getTemplatePackage().getRootFolderPath() + "/" + site.getTemplatePackage().getVersion() + "/templates");
         try {

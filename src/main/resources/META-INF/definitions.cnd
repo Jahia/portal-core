@@ -8,6 +8,7 @@
 
 [jmix:portal] mixin
  - j:templateRootPath (string) mandatory
+ - j:fullTemplate (string)
  + * (jnt:portalTab)
 
 [jmix:hasModel] mixin
@@ -40,4 +41,4 @@ orderable
 // Portal admin
 //---------------------------------------------------------
 
-[jnt:siteSettingsManagePortals] > jnt:content, mix:title, jmix:studioOnly, jmix:siteComponent
+[jnt:siteSettingsPortalFactory] > jnt:content, mix:title, jmix:studioOnly, jmix:siteComponent

@@ -21,6 +21,7 @@
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
+
 <c:choose>
     <c:when test="${renderContext.editModeConfigName eq 'studiomode'}">
         portal Area
@@ -31,20 +32,12 @@
         <c:set var="canEditPortal" value="${jcr:hasPermission(renderContext.mainResource.node, 'jcr:write_live')}"/>
         <c:set var="portalNode" value="${jcr:getParentOfType(renderContext.mainResource.node, portalMixin)}"/>
 
-        <template:addResources type="javascript" resources="jahia-portal.js"/>
-
         <div id="portal_area_${currentNode.identifier}" class="portal_area">
 
         </div>
 
         <script type="text/javascript">
-            var portal = window.portal;
-            portal.registerArea("${url.base}",
-                    "${portalNode.path}",
-                    "${renderContext.mainResource.node.path}",
-                    "portal_area_${currentNode.identifier}",
-                    ${canEditPortal},
-                    ${jcr:isNodeType(portalNode, portalModelNT)});
+            portal.registerArea("portal_area_${currentNode.identifier}");
         </script>
     </c:when>
 </c:choose>
