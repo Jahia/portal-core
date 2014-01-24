@@ -31,6 +31,7 @@
             <json:property name="url">
                 <c:url value="${url.base}${tab.path}.html"/>
             </json:property>
+            <json:property name="path" value="${tab.path}"/>
         </json:object>
     </c:forEach>
 </json:array>
