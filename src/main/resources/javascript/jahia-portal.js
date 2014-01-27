@@ -255,6 +255,34 @@ Jahia.Portal.prototype = {
             });
     },
 
+    loadSingleWidget: function(tabTemplate, widgetIdentifier, widgetState, widgetView){
+        var instance = this;
+        var url = "";
+
+        if(tabTemplate){
+            url = instance.baseURL + instance.portalTabPath + "." + tabTemplate;
+        }else {
+            url = instance.baseURL + instance.portalTabPath;
+        }
+
+        url += (".html?w=" + widgetIdentifier);
+
+        if(widgetState){
+            url += ("&w_state=" + widgetState);
+        }
+
+        if(widgetView){
+            url += ("&w_view=" + widgetView);
+        }
+
+        window.location.href = url;
+    },
+
+    reloadTab: function(){
+        var instance = this;
+        window.location.href = instance.baseURL + instance.portalTabPath + ".html";
+    },
+
     _convertTabFormToJCRProps: function (form) {
         return {
             "jcrNodeType": "jnt:portalTab",
