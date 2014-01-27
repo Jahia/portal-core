@@ -28,16 +28,25 @@
     </c:when>
     <c:when test="${renderContext.liveMode}">
         <c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
-        <c:set var="portalModelNT" value="<%= PortalConstants.JNT_PORTAL_MODEL %>"/>
-        <c:set var="canEditPortal" value="${jcr:hasPermission(renderContext.mainResource.node, 'jcr:write_live')}"/>
         <c:set var="portalNode" value="${jcr:getParentOfType(renderContext.mainResource.node, portalMixin)}"/>
+        <c:set var="widgetIdentifier" value="${not empty renderContext.request.parameterMap['w'] ? renderContext.request.parameterMap['w'][0] : null}"/>
+        <c:set var="widgetState" value="${not empty renderContext.request.parameterMap['w_state'] ? renderContext.request.parameterMap['w_state'][0] : ''}"/>
+        <c:set var="widgetView" value="${not empty renderContext.request.parameterMap['w_view'] ? renderContext.request.parameterMap['w_view'][0] : ''}"/>
 
         <div id="portal_area_${currentNode.identifier}" class="portal_area">
 
         </div>
 
         <script type="text/javascript">
-            portal.registerArea("portal_area_${currentNode.identifier}");
+            <c:choose>
+                <c:when test="${widgetIdentifier != null}">
+                    <c:set var="widgetNode" value="${portal:getWidget(widgetIdentifier, portalNode)}"/>
+                    portal.registerArea("portal_area_${currentNode.identifier}", "${widgetNode.path}", "${widgetState}", "${widgetView}");
+                </c:when>
+                <c:otherwise>
+                    portal.registerArea("portal_area_${currentNode.identifier}");
+                </c:otherwise>
+            </c:choose>
         </script>
     </c:when>
 </c:choose>

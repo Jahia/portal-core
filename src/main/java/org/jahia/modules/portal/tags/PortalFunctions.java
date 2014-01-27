@@ -94,4 +94,14 @@ public class PortalFunctions {
         return userPortal != null;
     }
 
+    public static JCRNodeWrapper getWidgetNode(String widgetId, JCRNodeWrapper portalNode){
+        JCRNodeWrapper widgetNode = null;
+        try {
+            widgetNode = portalNode.getSession().getNodeByIdentifier(widgetId);
+        } catch (RepositoryException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return widgetNode;
+    }
+
 }

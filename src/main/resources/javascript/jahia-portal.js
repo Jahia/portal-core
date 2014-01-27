@@ -23,6 +23,7 @@ Jahia.Portal = function (options) {
     this.debug = options.debug ? options.debug : false;
     this.isModel = options.isModel ? options.isModel :false;
     this.isEditable = options.isEditable ? options.isEditable : false;
+    this.fullTemplate = options.fullTemplate ? options.fullTemplate : false;
 
     this.baseURL = options.baseURL;
     this.portalPath = options.portalPath;
@@ -124,9 +125,9 @@ Jahia.Portal.prototype = {
             });
     },
 
-    registerArea: function (htmlID) {
+    registerArea: function (htmlID, widgetPath, widgetState, widgetView) {
         var instance = this;
-        instance.areas[htmlID] = new Jahia.Portal.Area(htmlID, "col-" + Jahia.Utils.getObjectSize(instance.areas), instance);
+        instance.areas[htmlID] = new Jahia.Portal.Area(htmlID, "col-" + Jahia.Utils.getObjectSize(instance.areas), instance, widgetPath, widgetState, widgetView);
     },
 
     getArea: function (htmlID) {
@@ -270,19 +271,37 @@ Jahia.Portal.prototype = {
  * @param id
  * @param name
  * @param portal
+ * @param path
  * @constructor
  */
-Jahia.Portal.Area = function (id, name, portal) {
+Jahia.Portal.Area = function (id, name, portal, widgetPath, widgetState, widgetView) {
     this._id = id;
     this._portal = portal;
     this._colName = name;
     this._colPath = this._portal.portalTabPath + "/" + this._colName;
 
-    this.load();
+    if(widgetPath){
+        // load a specific single widget
+        this.load(widgetPath, widgetState, widgetView)
+    }else {
+        // load all coll widget
+        this.loadAll();
+    }
 };
 
 Jahia.Portal.Area.prototype = {
-    load: function () {
+    load: function (path, state, view) {
+        var instance = this;
+
+        // Add "col-" jcr name to the html class
+        $("#" + instance._id).addClass(instance._colName);
+
+        instance._portal._debug("Load widget: " + path);
+
+        instance.registerWidget(path, state, view);
+    },
+
+    loadAll: function () {
         var instance = this;
 
         // Add "col-" jcr name to the html class
@@ -301,10 +320,10 @@ Jahia.Portal.Area.prototype = {
             });
     },
 
-    registerWidget: function (path) {
+    registerWidget: function (path, state, view) {
         var instance = this;
         var widgetHtmlId = "w_" + Math.random().toString(36).substring(7);
-        instance._portal.widgets[widgetHtmlId] = new Jahia.Portal.Widget(widgetHtmlId, path, instance);
+        instance._portal.widgets[widgetHtmlId] = new Jahia.Portal.Widget(widgetHtmlId, path, state, view, instance);
     }
 };
 
@@ -315,12 +334,14 @@ Jahia.Portal.Area.prototype = {
  * @param area
  * @constructor
  */
-Jahia.Portal.Widget = function (id, path, area) {
+Jahia.Portal.Widget = function (id, path, state, view, area) {
     this._id = id;
     this._path = path;
     this._area = area;
     this._portal = area._portal;
-    this.state = "view";
+    this._state = state ? state : "box";
+    this._originalView = view ? view : "view";
+    this._currentView = this._originalView;
 
     this.init();
 };
@@ -368,14 +389,14 @@ Jahia.Portal.Widget.prototype = {
         instance.attachEvents();
 
         if(!view){
-            view = "view";
+            view = instance._originalView;
         }
 
         $("#" + instance._id).load(instance._portal.baseURL + instance._path + "." + view + ".html.ajax?includeJavascripts=true", function(){
             if(instance._portal.isEditable){
                 instance._portal.initDragDrop();
             }
-            instance.state = view;
+            instance._currentView = view;
             instance._portal._debug("widget " + instance._path + " loaded successfully");
 
             if(callback){

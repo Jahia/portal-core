@@ -51,4 +51,10 @@
         <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
         <function-signature>boolean userPortalExist(org.jahia.services.content.JCRNodeWrapper)</function-signature>
     </function>
+
+    <function>
+        <name>getWidget</name>
+        <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
+        <function-signature>org.jahia.services.content.JCRNodeWrapper getWidgetNode(java.lang.String,org.jahia.services.content.JCRNodeWrapper)</function-signature>
+    </function>
 </taglib>

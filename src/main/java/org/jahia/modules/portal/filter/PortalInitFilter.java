@@ -40,6 +40,7 @@ public class PortalInitFilter extends AbstractFilter{
     public static final String PORTAL_INIT_DEBUG = "debug";
     public static final String PORTAL_INIT_IS_EDITABLE = "isEditable";
     public static final String PORTAL_INIT_IS_MODEL = "isModel";
+    public static final String PORTAL_INIT_FULL_TEMPLATE = "fullTemplate";
     public static final String PORTAL_INIT_PORTAL_PATH = "portalPath";
     public static final String PORTAL_INIT_PORTAL_TAB_PATH = "portalTabPath";
 
@@ -93,6 +94,7 @@ public class PortalInitFilter extends AbstractFilter{
         bindingMap.put(PORTAL_INIT_PORTAL_TAB_PATH, stringifyJsParam(resource.getNode().getPath()));
         bindingMap.put(PORTAL_INIT_IS_EDITABLE, resource.getNode().hasPermission("jcr:write_live"));
         bindingMap.put(PORTAL_INIT_IS_MODEL, portalNode.isNodeType(PortalConstants.JNT_PORTAL_MODEL));
+        bindingMap.put(PORTAL_INIT_FULL_TEMPLATE, stringifyJsParam(portalNode.getProperty(PortalConstants.J_FULL_TEMPLATE).getString()));
         bindingMap.put(PORTAL_INIT_DEBUG, debugEnabled);
         return bindingMap;
     }

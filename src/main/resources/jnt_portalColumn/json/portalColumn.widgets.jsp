@@ -21,6 +21,7 @@
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
+<%--@elvariable id="widget" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <c:set target="${renderContext}" property="contentType" value="application/json;charset=UTF-8"/>
 <c:set var="portalWidgetMixin" value="<%= PortalConstants.JMIX_PORTAL_WIDGET %>"/>
 

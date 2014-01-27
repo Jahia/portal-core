@@ -70,7 +70,7 @@
         </div>
         <div class="row-fluid">
             <div class="span4">
-                <form:label path="templateRootPath">template <span class="text-error"><strong>*</strong></span></form:label>
+                <form:label path="templateRootPath">root template for portal tabs <span class="text-error"><strong>*</strong></span></form:label>
                 <form:hidden path="templateRootPath"/>
                 <input type="text" id="templateIdentifierDecoy" class="span12"/>
                 <ui:treeItemSelector fieldId="templateRootPath"
@@ -81,6 +81,22 @@
                                      selectableNodeTypes="jnt:template"
                                      includeChildren=""
                                      valueType="path"/>
+            </div>
+        </div>
+
+        <div class="row-fluid">
+            <div class="span4">
+                <form:label path="templateRootPath">template full</form:label>
+                <form:hidden path="templateFull"/>
+                <input type="text" id="templateFullDecoy" class="span12"/>
+                <ui:treeItemSelector fieldId="templateFull"
+                                     displayFieldId="templateFullDecoy"
+                                     root="${templatesPath}"
+                                     nodeTypes="jnt:template"
+                                     displayIncludeChildren="false"
+                                     selectableNodeTypes="jnt:template"
+                                     includeChildren=""
+                                     valueType="title"/>
             </div>
         </div>
 

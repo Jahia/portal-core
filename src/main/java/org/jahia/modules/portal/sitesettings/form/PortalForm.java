@@ -24,6 +24,7 @@ public class PortalForm implements Serializable{
     @NotEmpty
     @PortalTemplates
     private String templateRootPath;
+    private String templateFull;
 
     public String getWidgetsSkin() {
         return widgetsSkin;
@@ -55,5 +56,13 @@ public class PortalForm implements Serializable{
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTemplateFull() {
+        return templateFull;
+    }
+
+    public void setTemplateFull(String templateFull) {
+        this.templateFull = templateFull;
     }
 }
