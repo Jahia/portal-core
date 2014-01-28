@@ -5,6 +5,7 @@ import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.services.content.JCRContentUtils;
 import org.jahia.services.content.JCRNodeWrapper;
+import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.JCRSessionWrapper;
 import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.render.RenderContext;
@@ -17,10 +18,7 @@ import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,14 +29,22 @@ import java.util.Set;
  */
 public class PortalService {
     private static Logger logger = LoggerFactory.getLogger(PortalService.class);
+    private static final Comparator<? super JCRNodeWrapper> PORTALS_COMPARATOR = new Comparator<JCRNodeWrapper>() {
+
+        public int compare(JCRNodeWrapper portalNode1, JCRNodeWrapper portalNode2) {
+            // we invert the order to sort with most recent dates on top.
+            return portalNode1.getDisplayableName().compareTo(portalNode2.getDisplayableName());
+        }
+
+    };
 
     public JCRNodeWrapper getPortalFolder(JCRNodeWrapper node, String folderName, boolean createIfNotExist) {
         try {
             JCRNodeWrapper portalFolder;
-            try{
+            try {
                 return node.getNode(folderName);
-            }catch (PathNotFoundException e){
-                if(createIfNotExist){
+            } catch (PathNotFoundException e) {
+                if (createIfNotExist) {
                     return node.addNode(folderName, PortalConstants.JNT_PORTALS_FOLDER);
                 }
             }
@@ -181,7 +187,7 @@ public class PortalService {
         String columnName = "col-" + index;
         JCRNodeWrapper columnNode;
         try {
-             columnNode = portalTabNode.getNode(columnName);
+            columnNode = portalTabNode.getNode(columnName);
             return columnNode;
         } catch (RepositoryException e) {
             try {
@@ -237,7 +243,7 @@ public class PortalService {
         return null;
     }
 
-    public void switchPortalModelActivation(JCRSessionWrapper sessionWrapper, String portalModelIdentifier, boolean enabled){
+    public void switchPortalModelActivation(JCRSessionWrapper sessionWrapper, String portalModelIdentifier, boolean enabled) {
         try {
             JCRNodeWrapper node = sessionWrapper.getNodeByUUID(portalModelIdentifier);
             node.setProperty(PortalConstants.J_ENABLED, enabled);
@@ -272,6 +278,38 @@ public class PortalService {
         return null;
     }
 
+    public SortedSet<JCRNodeWrapper> getUserPortalsBySite(String siteKey) {
+        SortedSet<JCRNodeWrapper> portals = new TreeSet<JCRNodeWrapper>(PORTALS_COMPARATOR);
+        try {
+            JCRSessionWrapper sessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession("live");
+            QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
+            if (queryManager == null) {
+                logger.error("Unable to obtain QueryManager instance");
+            }
+
+            StringBuilder q = new StringBuilder();
+            q.append("select * from [" + PortalConstants.JNT_PORTAL_MODEL + "] as p where isdescendantnode(p, ['").append("/sites/" + siteKey)
+                    .append("'])");
+            NodeIterator result = queryManager.createQuery(q.toString(), Query.JCR_SQL2).execute().getNodes();
+
+            while (result.hasNext()) {
+                JCRNodeWrapper modelNode = (JCRNodeWrapper) result.next();
+                JCRNodeWrapper userPortalNode = getUserPortalByModel(modelNode);
+                if (userPortalNode != null) {
+                    // return user portal if exist
+                    portals.add(userPortalNode);
+                } else if (modelNode.hasProperty(PortalConstants.J_ENABLED) && modelNode.getProperty(PortalConstants.J_ENABLED).getBoolean()) {
+                    // return model portal if this one is enabled
+                    portals.add(modelNode);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return portals;
+    }
+
     public JCRNodeWrapper initUserPortalFromModel(JCRNodeWrapper modelNode, JCRSessionWrapper sessionWrapper) {
         try {
             // Create/get portal folders
@@ -282,22 +320,24 @@ public class PortalService {
             JCRNodeWrapper portal = sitePortalFolder.addNode(modelNode.getName(), PortalConstants.JNT_PORTAL_USER);
             portal.setProperty(PortalConstants.J_TEMPLATE_ROOT_PATH, modelNode.getPropertyAsString(PortalConstants.J_TEMPLATE_ROOT_PATH));
             portal.setProperty(PortalConstants.JCR_TITLE, modelNode.getDisplayableName());
+            portal.setProperty(PortalConstants.J_FULL_TEMPLATE, modelNode.getPropertyAsString(PortalConstants.J_FULL_TEMPLATE));
             portal.setProperty(PortalConstants.J_MODEL, modelNode);
 
             //copy tabs
             List<JCRNodeWrapper> tabNodes = getPortalTabs(modelNode, sessionWrapper);
-            for(JCRNodeWrapper tabNode : tabNodes){
+            for (JCRNodeWrapper tabNode : tabNodes) {
                 tabNode.copy(portal.getPath());
             }
 
             //set roles
             portal.denyRoles("g:users", Collections.singleton("reader"));
+            portal.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("reader"));
             portal.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("owner"));
 
             sessionWrapper.save();
 
             return portal;
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
         return null;
@@ -306,7 +346,7 @@ public class PortalService {
     public void fixPortalSiteInContext(RenderContext renderContext, JCRNodeWrapper node) throws RepositoryException {
         JCRNodeWrapper portalNode = node.isNodeType(PortalConstants.JMIX_PORTAL) ? node : JCRContentUtils.getParentOfType(node, PortalConstants.JMIX_PORTAL);
 
-        if(portalNode.isNodeType(PortalConstants.JMIX_HAS_MODEL)){
+        if (portalNode.isNodeType(PortalConstants.JMIX_HAS_MODEL)) {
             JCRSiteNode portalSite = getPortalSite(portalNode);
             renderContext.setSite(portalSite);
             renderContext.setSiteInfo(new SiteInfo(portalSite));
@@ -314,24 +354,24 @@ public class PortalService {
     }
 
     public JCRSiteNode getPortalSite(JCRNodeWrapper portalNode) throws RepositoryException {
-        if(portalNode.isNodeType(PortalConstants.JMIX_HAS_MODEL)){
+        if (portalNode.isNodeType(PortalConstants.JMIX_HAS_MODEL)) {
             return ((JCRNodeWrapper) portalNode.getProperty(PortalConstants.J_MODEL).getNode()).getResolveSite();
-        }else {
+        } else {
             return portalNode.getResolveSite();
         }
     }
 
-    private void setReadRoleForPortalModel(JCRNodeWrapper portalModelNode, boolean enabled){
+    private void setReadRoleForPortalModel(JCRNodeWrapper portalModelNode, boolean enabled) {
         Set<String> roles = Collections.singleton("reader");
         try {
             portalModelNode.denyRoles("u:guest", roles);
 
-            if(enabled){
+            if (enabled) {
                 portalModelNode.grantRoles("g:users", roles);
             } else {
                 portalModelNode.denyRoles("g:users", roles);
             }
-        }catch (RepositoryException e){
+        } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
         }
     }

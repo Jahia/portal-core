@@ -18,6 +18,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.nodetype.NodeTypeIterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.SortedSet;
 
 /**
@@ -34,7 +35,7 @@ public class PortalFunctions {
     private static PortalService portalService;
 
     @Autowired(required = true)
-    public void setUserAccessor(PortalService portalService) {
+    public void setPortalService(PortalService portalService) {
         PortalFunctions.portalService = portalService;
     }
 
@@ -104,4 +105,7 @@ public class PortalFunctions {
         return widgetNode;
     }
 
+    public static Set<JCRNodeWrapper> getUserPortalsBySite(String siteKey) {
+        return portalService.getUserPortalsBySite(siteKey);
+    }
 }
