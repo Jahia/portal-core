@@ -45,21 +45,21 @@
 <div class="box-1">
     <form:form action="${flowExecutionUrl}" modelAttribute="portalForm">
         <div class="row-fluid">
-            <div class="span4">
+            <div class="span12">
                 <form:label path="name">name <span class="text-error"><strong>*</strong></span></form:label>
-                <form:input class="span12" path="name"/>
+                <form:input class="span4" path="name"/>
             </div>
         </div>
         <div class="row-fluid">
-            <div class="span4">
+            <div class="span12">
                 <form:label path="tabName">tab name <span class="text-error"><strong>*</strong></span></form:label>
-                <form:input class="span12" path="tabName"/>
+                <form:input class="span4" path="tabName"/>
             </div>
         </div>
         <div class="row-fluid">
-            <div class="span4">
-                <form:label path="widgetsSkin">widgets skin <span class="text-error"><strong>*</strong></span></form:label>
-                <form:select path="widgetsSkin">
+            <div class="span12">
+                <form:label path="tabWidgetsSkin">tab widgets skin <span class="text-error"><strong>*</strong></span></form:label>
+                <form:select path="tabWidgetsSkin">
                     <c:forEach items="${allowedWidgetsSkin}" var="skin">
                         <form:option value="${skin.key}">
                             <fmt:message key="${skin.displayName}"/>
@@ -69,10 +69,10 @@
             </div>
         </div>
         <div class="row-fluid">
-            <div class="span4">
+            <div class="span12">
                 <form:label path="templateRootPath">root template for portal tabs <span class="text-error"><strong>*</strong></span></form:label>
                 <form:hidden path="templateRootPath"/>
-                <input type="text" id="templateIdentifierDecoy" class="span12"/>
+                <input type="text" id="templateIdentifierDecoy" class="span4"/>
                 <ui:treeItemSelector fieldId="templateRootPath"
                                      displayFieldId="templateIdentifierDecoy"
                                      root="${templatesPath}"
@@ -85,10 +85,10 @@
         </div>
 
         <div class="row-fluid">
-            <div class="span4">
+            <div class="span12">
                 <form:label path="templateRootPath">template full</form:label>
                 <form:hidden path="templateFull"/>
-                <input type="text" id="templateFullDecoy" class="span12"/>
+                <input type="text" id="templateFullDecoy" class="span4"/>
                 <ui:treeItemSelector fieldId="templateFull"
                                      displayFieldId="templateFullDecoy"
                                      root="${templatesPath}"

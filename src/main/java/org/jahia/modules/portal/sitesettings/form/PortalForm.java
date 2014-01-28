@@ -4,6 +4,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.jahia.modules.portal.sitesettings.form.constraint.PortalTemplates;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,21 +18,24 @@ public class PortalForm implements Serializable{
 
     @NotEmpty
     private String name;
-    @NotEmpty
-    private String tabName;
-    @NotEmpty
-    private String widgetsSkin;
+    private List<String> allowedwidgetsType;
     @NotEmpty
     @PortalTemplates
     private String templateRootPath;
     private String templateFull;
 
-    public String getWidgetsSkin() {
-        return widgetsSkin;
+    @NotEmpty
+    private String tabName;
+    @NotEmpty
+    private String tabWidgetsSkin;
+
+
+    public String getTabWidgetsSkin() {
+        return tabWidgetsSkin;
     }
 
-    public void setWidgetsSkin(String widgetsSkin) {
-        this.widgetsSkin = widgetsSkin;
+    public void setTabWidgetsSkin(String widgetsSkin) {
+        this.tabWidgetsSkin = widgetsSkin;
     }
 
     public String getTabName() {
