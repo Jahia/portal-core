@@ -98,6 +98,7 @@ public class PortalService {
 
         // Create portal
         JCRNodeWrapper portalNode = portalsRootFolderNode.addNode(JCRContentUtils.generateNodeName(form.getName(), 32), PortalConstants.JNT_PORTAL_MODEL);
+        portalNode.setProperty(PortalConstants.JCR_TITLE, form.getName());
         portalNode.setProperty(PortalConstants.J_TEMPLATE_ROOT_PATH, form.getTemplateRootPath());
         portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, form.getTemplateFull());
         setReadRoleForPortalModel(portalNode, false);
