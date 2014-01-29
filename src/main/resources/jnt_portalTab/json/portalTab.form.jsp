@@ -29,8 +29,8 @@
 
 <json:object>
     <json:property name="name" value="${currentNode.properties['jcr:title'].string}"/>
-    <json:object name="widgetsSkin">
-        <c:set var="skinKey" value="${currentNode.properties['j:widgetsSkin'].string}"/>
+    <json:object name="widgetSkin">
+        <c:set var="skinKey" value="${currentNode.properties['j:widgetSkin'].string}"/>
         <json:property name="name"
                        value="${functions:escapeJavaScript(portal:getSpecificView(portalWidgetMixin, skinKey, portalNode))}"/>
         <json:property name="key" value="${skinKey}"/>

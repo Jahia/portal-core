@@ -106,7 +106,7 @@ public class PortalService {
         // Create first tab
         JCRNodeWrapper portalTab = portalNode.addNode(JCRContentUtils.generateNodeName(form.getTabName(), 32), PortalConstants.JNT_PORTAL_TAB);
         portalTab.setProperty(PortalConstants.JCR_TITLE, form.getTabName());
-        portalTab.setProperty(PortalConstants.J_WIDGETS_SKIN, form.getTabWidgetsSkin());
+        portalTab.setProperty(PortalConstants.J_WIDGET_SKIN, form.getTabWidgetSkin());
         List<JCRNodeWrapper> portalTabTemplates = getPortalTabTemplates(form.getTemplateRootPath(), session);
         if (portalTabTemplates.size() > 0) {
             portalTab.setProperty(PortalConstants.J_TEMPLATE_NAME, portalTabTemplates.get(0).getName());

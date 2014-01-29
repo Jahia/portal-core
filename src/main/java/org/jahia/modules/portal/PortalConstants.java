@@ -11,6 +11,7 @@ public class PortalConstants {
     public static final String JNT_PORTAL_USER = "jnt:portalUser";
     public static final String JMIX_PORTAL = "jmix:portal";
     public static final String JMIX_HAS_MODEL = "jmix:hasModel";
+    public static final String JMIX_PORTAL_WIDGET_SKIN = "jmix:portalWidgetSkin";
     public static final String JNT_PORTAL_MODEL = "jnt:portalModel";
     public static final String JNT_PORTALS_FOLDER = "jnt:portalsFolder";
     public static final String JNT_PORTAL_TAB = "jnt:portalTab";
@@ -19,7 +20,7 @@ public class PortalConstants {
     public static final String J_TEMPLATE_ROOT_PATH = "j:templateRootPath";
     public static final String J_FULL_TEMPLATE = "j:fullTemplate";
     public static final String J_ENABLED = "j:enabled";
-    public static final String J_WIDGETS_SKIN = "j:widgetsSkin";
+    public static final String J_WIDGET_SKIN = "j:widgetSkin";
     public static final String J_MODEL = "j:model";
 
     public static final String JNT_CONTENT_TEMPLATE = "jnt:contentTemplate";

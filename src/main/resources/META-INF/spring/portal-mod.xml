@@ -38,7 +38,6 @@
         <property name="debugEnabled" value="${portalDebugEnabled:true}"/>
     </bean>
     <bean name="PortalSkinFilter" class="org.jahia.modules.portal.filter.PortalSkinFilter">
-        <property name="defaultPortalWidgetsSkin" value="${defaultPortalWidgetsSkin:box.basic}"/>
         <property name="description" value="Filter that add skins to the current resource."/>
         <property name="priority" value="45"/>
         <property name="applyOnNodeTypes" value="jmix:portalWidget"/>
@@ -53,10 +52,6 @@
     </bean>
 
     <!-- Error handlers -->
-    <bean name="UserPortalPageHandler" class="org.jahia.modules.portal.error.UserPortalPageHandler">
-        <property name="urlResolverFactory" ref="urlResolverFactory"/>
-        <property name="portalService" ref="PortalService"/>
-    </bean>
     <bean name="PortalTabRedirectHandler" class="org.jahia.modules.portal.error.PortalTabRedirectHandler">
         <property name="urlResolverFactory" ref="urlResolverFactory"/>
         <property name="portalService" ref="PortalService"/>

@@ -46,26 +46,13 @@
     <form:form action="${flowExecutionUrl}" modelAttribute="portalForm">
         <div class="row-fluid">
             <div class="span12">
+                <h3>Portal info</h3>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span12">
                 <form:label path="name">name <span class="text-error"><strong>*</strong></span></form:label>
                 <form:input class="span4" path="name"/>
-            </div>
-        </div>
-        <div class="row-fluid">
-            <div class="span12">
-                <form:label path="tabName">tab name <span class="text-error"><strong>*</strong></span></form:label>
-                <form:input class="span4" path="tabName"/>
-            </div>
-        </div>
-        <div class="row-fluid">
-            <div class="span12">
-                <form:label path="tabWidgetsSkin">tab widgets skin <span class="text-error"><strong>*</strong></span></form:label>
-                <form:select path="tabWidgetsSkin">
-                    <c:forEach items="${allowedWidgetsSkin}" var="skin">
-                        <form:option value="${skin.key}">
-                            <fmt:message key="${skin.displayName}"/>
-                        </form:option>
-                    </c:forEach>
-                </form:select>
             </div>
         </div>
         <div class="row-fluid">
@@ -83,7 +70,6 @@
                                      valueType="path"/>
             </div>
         </div>
-
         <div class="row-fluid">
             <div class="span12">
                 <form:label path="templateRootPath">template full</form:label>
@@ -97,6 +83,30 @@
                                      selectableNodeTypes="jnt:template"
                                      includeChildren=""
                                      valueType="title"/>
+            </div>
+        </div>
+
+        <div class="row-fluid">
+            <div class="span12">
+                <h3>Auto created tab info</h3>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span12">
+                <form:label path="tabName">tab name <span class="text-error"><strong>*</strong></span></form:label>
+                <form:input class="span4" path="tabName"/>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span12">
+                <form:label path="tabWidgetSkin">default widget skin for tab<span class="text-error"><strong>*</strong></span></form:label>
+                <form:select path="tabWidgetSkin">
+                    <c:forEach items="${allowedWidgetsSkin}" var="skin">
+                        <form:option value="${skin.key}">
+                            <fmt:message key="${skin.displayName}"/>
+                        </form:option>
+                    </c:forEach>
+                </form:select>
             </div>
         </div>
 

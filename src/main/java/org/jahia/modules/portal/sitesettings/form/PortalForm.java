@@ -27,15 +27,15 @@ public class PortalForm implements Serializable{
     @NotEmpty
     private String tabName;
     @NotEmpty
-    private String tabWidgetsSkin;
+    private String tabWidgetSkin;
 
 
-    public String getTabWidgetsSkin() {
-        return tabWidgetsSkin;
+    public String getTabWidgetSkin() {
+        return tabWidgetSkin;
     }
 
-    public void setTabWidgetsSkin(String widgetsSkin) {
-        this.tabWidgetsSkin = widgetsSkin;
+    public void setTabWidgetSkin(String widgetsSkin) {
+        this.tabWidgetSkin = widgetsSkin;
     }
 
     public String getTabName() {
