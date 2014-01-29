@@ -58,7 +58,8 @@
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <form:label path="templateRootPath">root template for portal tabs <span class="text-error"><strong>*</strong></span></form:label>
+                <form:label path="templateRootPath">root template for portal tabs <span
+                        class="text-error"><strong>*</strong></span></form:label>
                 <form:hidden path="templateRootPath"/>
                 <input type="text" id="templateIdentifierDecoy" class="span4"/>
                 <ui:treeItemSelector fieldId="templateRootPath"
@@ -88,14 +89,14 @@
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <form:label path="templateRootPath">allowed widget types</form:label>
-                <form:select path="allowedWidgetTypes" multiple="true">
-                    <c:forEach items="${portal:getWidgetNodeTypes()}" var="widgetNodeType">
-                        <form:option value="${widgetNodeType.name}">
+                <p>allowed widget types</p>
+
+                <c:forEach items="${portal:getWidgetNodeTypes()}" var="widgetNodeType">
+                    <label for="widgetType_${widgetNodeType.name}">
+                        <form:checkbox path="allowedWidgetTypes" value="${widgetNodeType.name}" id="widgetType_${widgetNodeType.name}"/>
                             ${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}
-                        </form:option>
-                    </c:forEach>
-                </form:select>
+                        </label>
+                </c:forEach>
             </div>
         </div>
 
