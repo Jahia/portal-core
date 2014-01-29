@@ -4,7 +4,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.jahia.modules.portal.sitesettings.form.constraint.PortalTemplates;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,7 +17,7 @@ public class PortalForm implements Serializable{
 
     @NotEmpty
     private String name;
-    private List<String> allowedwidgetsType;
+    private String[] allowedWidgetTypes;
     @NotEmpty
     @PortalTemplates
     private String templateRootPath;
@@ -68,5 +67,13 @@ public class PortalForm implements Serializable{
 
     public void setTemplateFull(String templateFull) {
         this.templateFull = templateFull;
+    }
+
+    public String[] getAllowedWidgetTypes() {
+        return allowedWidgetTypes;
+    }
+
+    public void setAllowedWidgetTypes(String[] allowedWidgetTypes) {
+        this.allowedWidgetTypes = allowedWidgetTypes;
     }
 }

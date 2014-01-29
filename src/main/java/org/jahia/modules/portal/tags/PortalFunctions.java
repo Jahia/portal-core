@@ -1,10 +1,10 @@
 package org.jahia.modules.portal.tags;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.services.content.JCRNodeWrapper;
+import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderService;
 import org.jahia.services.render.View;
@@ -15,11 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.jcr.RepositoryException;
-import javax.jcr.nodetype.NodeTypeIterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.SortedSet;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,15 +35,19 @@ public class PortalFunctions {
         PortalFunctions.portalService = portalService;
     }
 
-    public static NodeTypeIterator getNodeTypes() {
-        return NodeTypeRegistry.getInstance().getAllNodeTypes();
+    public static Collection<ExtendedNodeType> getWidgetNodeTypes() {
+        return portalService.getWidgetNodeTypes();
     }
 
-    public static String getI18nNodetype(JahiaTemplatesPackage pkg, String key, Locale locale) {
+    public static Collection<ExtendedNodeType> getPortalWidgetNodeTypes(JCRNodeWrapper portalNode) {
+        return portalService.getPortalWidgetNodeTypes(portalNode);
+    }
+
+    public static String getI18nNodetypeName(ExtendedNodeType nodeType, Locale locale) {
         try {
-            return Messages.get(pkg, key, locale);
+            return Messages.get(nodeType.getTemplatePackage(), nodeType.getName().replace(":", "_"), locale);
         }catch (Exception e){
-            return key;
+            return nodeType.getName();
         }
     }
 

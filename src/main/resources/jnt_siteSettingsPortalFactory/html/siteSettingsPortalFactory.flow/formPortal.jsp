@@ -27,6 +27,7 @@
 <%--@elvariable id="portalForm" type="org.jahia.modules.portal.sitesettings.form.PortalForm"--%>
 <%--@elvariable id="skin" type="org.jahia.services.render.View"--%>
 <%--@elvariable id="portalNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
+<%--@elvariable id="widgetNodeType" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
 <c:set var="portalWidgetMixin" value="<%= PortalConstants.JMIX_PORTAL_WIDGET %>"/>
 
 <template:addResources type="javascript"
@@ -85,6 +86,19 @@
                                      valueType="title"/>
             </div>
         </div>
+        <div class="row-fluid">
+            <div class="span12">
+                <form:label path="templateRootPath">allowed widget types</form:label>
+                <form:select path="allowedWidgetTypes" multiple="true">
+                    <c:forEach items="${portal:getWidgetNodeTypes()}" var="widgetNodeType">
+                        <form:option value="${widgetNodeType.name}">
+                            ${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}
+                        </form:option>
+                    </c:forEach>
+                </form:select>
+            </div>
+        </div>
+
 
         <div class="row-fluid">
             <div class="span12">

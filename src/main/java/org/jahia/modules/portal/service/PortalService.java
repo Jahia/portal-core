@@ -1,21 +1,24 @@
 package org.jahia.modules.portal.service;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
-import org.jahia.services.content.JCRContentUtils;
-import org.jahia.services.content.JCRNodeWrapper;
-import org.jahia.services.content.JCRSessionFactory;
-import org.jahia.services.content.JCRSessionWrapper;
+import org.jahia.services.content.*;
 import org.jahia.services.content.decorator.JCRSiteNode;
+import org.jahia.services.content.nodetypes.ExtendedNodeType;
+import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.SiteInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
+import javax.jcr.nodetype.NodeTypeIterator;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import java.util.*;
@@ -32,10 +35,16 @@ public class PortalService {
     private static final Comparator<? super JCRNodeWrapper> PORTALS_COMPARATOR = new Comparator<JCRNodeWrapper>() {
 
         public int compare(JCRNodeWrapper portalNode1, JCRNodeWrapper portalNode2) {
-            // we invert the order to sort with most recent dates on top.
             return portalNode1.getDisplayableName().compareTo(portalNode2.getDisplayableName());
         }
 
+    };
+
+    private static final Comparator<? super ExtendedNodeType> NODE_TYPES_COMPARATOR = new Comparator<ExtendedNodeType>() {
+
+        public int compare(ExtendedNodeType nodeType1, ExtendedNodeType nodeType2) {
+            return nodeType1.getName().compareTo(nodeType2.getName());
+        }
     };
 
     public JCRNodeWrapper getPortalFolder(JCRNodeWrapper node, String folderName, boolean createIfNotExist) {
@@ -101,6 +110,7 @@ public class PortalService {
         portalNode.setProperty(PortalConstants.JCR_TITLE, form.getName());
         portalNode.setProperty(PortalConstants.J_TEMPLATE_ROOT_PATH, form.getTemplateRootPath());
         portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, form.getTemplateFull());
+        portalNode.setProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES, form.getAllowedWidgetTypes());
         setReadRoleForPortalModel(portalNode, false);
 
         // Create first tab
@@ -347,7 +357,7 @@ public class PortalService {
     public void fixPortalSiteInContext(RenderContext renderContext, JCRNodeWrapper node) throws RepositoryException {
         JCRNodeWrapper portalNode = node.isNodeType(PortalConstants.JMIX_PORTAL) ? node : JCRContentUtils.getParentOfType(node, PortalConstants.JMIX_PORTAL);
 
-        if (portalNode.isNodeType(PortalConstants.JMIX_HAS_MODEL)) {
+        if (portalHasModel(portalNode)) {
             JCRSiteNode portalSite = getPortalSite(portalNode);
             renderContext.setSite(portalSite);
             renderContext.setSiteInfo(new SiteInfo(portalSite));
@@ -355,11 +365,79 @@ public class PortalService {
     }
 
     public JCRSiteNode getPortalSite(JCRNodeWrapper portalNode) throws RepositoryException {
-        if (portalNode.isNodeType(PortalConstants.JMIX_HAS_MODEL)) {
-            return ((JCRNodeWrapper) portalNode.getProperty(PortalConstants.J_MODEL).getNode()).getResolveSite();
-        } else {
-            return portalNode.getResolveSite();
+        if (portalHasModel(portalNode)) {
+            JCRNodeWrapper portalModelNode = getPortalModel(portalNode);
+            if (portalModelNode != null) {
+                return portalModelNode.getResolveSite();
+            }
         }
+        return portalNode.getResolveSite();
+    }
+
+    public boolean portalIsModel(JCRNodeWrapper portalNode) throws RepositoryException {
+        return portalNode.isNodeType(PortalConstants.JNT_PORTAL_MODEL);
+    }
+
+    public boolean portalHasModel(JCRNodeWrapper portalNode) throws RepositoryException {
+        return portalNode.isNodeType(PortalConstants.JMIX_HAS_MODEL);
+    }
+
+    public JCRNodeWrapper getPortalModel(JCRNodeWrapper portalNode) throws RepositoryException {
+        if (portalHasModel(portalNode)) {
+            return (JCRNodeWrapper) portalNode.getProperty(PortalConstants.J_MODEL).getNode();
+        }
+        return null;
+    }
+
+    public Collection<ExtendedNodeType> getWidgetNodeTypes() {
+        SortedSet<ExtendedNodeType> widgetTypes = new TreeSet<ExtendedNodeType>(NODE_TYPES_COMPARATOR);
+
+        NodeTypeIterator nodeTypes = NodeTypeRegistry.getInstance().getAllNodeTypes();
+        while (nodeTypes.hasNext()) {
+            ExtendedNodeType nodeType = (ExtendedNodeType) nodeTypes.next();
+            for (ExtendedNodeType superType : nodeType.getSupertypes()) {
+                if (superType.getName().equals(PortalConstants.JMIX_PORTAL_WIDGET)) {
+                    widgetTypes.add(nodeType);
+                    break;
+                }
+            }
+        }
+        return widgetTypes;
+    }
+
+    public Collection<ExtendedNodeType> getPortalWidgetNodeTypes(JCRNodeWrapper portalNode) {
+        try {
+            if (!portalIsModel(portalNode) && portalHasModel(portalNode)) {
+                portalNode = getPortalModel(portalNode);
+            }
+            final JCRNodeWrapper portalModelNode = portalNode;
+            if (portalModelNode != null && portalIsModel(portalModelNode)) {
+                if (portalModelNode.hasProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES)) {
+                    Predicate<ExtendedNodeType> isAllowedWidgetPredicate = new Predicate<ExtendedNodeType>() {
+                        @Override
+                        public boolean apply(@Nullable ExtendedNodeType input) {
+                            try {
+                                JCRValueWrapper[] values = portalModelNode.getProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES).getValues();
+                                for (JCRValueWrapper value : values) {
+                                    if (input != null && input.getName().equals(value.getString())) {
+                                        return true;
+                                    }
+                                }
+                            } catch (RepositoryException e) {
+                                logger.error(e.getMessage(), e);
+                            }
+                            return false;
+                        }
+                    };
+
+                    return Collections2.filter(getWidgetNodeTypes(), isAllowedWidgetPredicate);
+                }
+            }
+        } catch (RepositoryException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return Collections.emptySet();
     }
 
     private void setReadRoleForPortalModel(JCRNodeWrapper portalModelNode, boolean enabled) {

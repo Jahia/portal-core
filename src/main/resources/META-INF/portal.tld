@@ -11,15 +11,22 @@
     <uri>http://www.jahia.org/tags/portalLib</uri>
 
     <function>
-        <name>getNodeTypes</name>
+        <name>getWidgetNodeTypes</name>
         <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
-        <function-signature>javax.jcr.nodetype.NodeTypeIterator getNodeTypes()</function-signature>
+        <function-signature>java.util.Collection getWidgetNodeTypes()</function-signature>
     </function>
+
+    <function>
+        <name>getPortalWidgetNodeTypes</name>
+        <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
+        <function-signature>java.util.Collection getPortalWidgetNodeTypes(org.jahia.services.content.JCRNodeWrapper)</function-signature>
+    </function>
+
 
     <function>
         <name>getNodeTypeDisplayableName</name>
         <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
-        <function-signature>java.lang.String getI18nNodetype(org.jahia.data.templates.JahiaTemplatesPackage,java.lang.String,java.util.Locale)</function-signature>
+        <function-signature>java.lang.String getI18nNodetypeName(org.jahia.services.content.nodetypes.ExtendedNodeType,java.util.Locale)</function-signature>
     </function>
 
     <function>
