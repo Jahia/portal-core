@@ -288,7 +288,7 @@ Jahia.Portal.prototype = {
             "jcrNodeType": "jnt:portalTab",
             "jcr:title": form.name,
             "j:templateName": form.template.key,
-            "j:widgetsSkin": form.widgetsSkin.key,
+            "j:widgetSkin": form.widgetSkin.key,
             "jcrNormalizeNodeName" : true
         };
     }
