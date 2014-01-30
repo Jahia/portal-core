@@ -24,7 +24,7 @@
 <%--@elvariable id="flowExecutionUrl" type="java.lang.String"--%>
 <%--@elvariable id="newsletter" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="newslettersRootNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
-<%--@elvariable id="portalForm" type="org.jahia.modules.portal.sitesettings.form.PortalForm"--%>
+<%--@elvariable id="portalModelForm" type="org.jahia.modules.portal.sitesettings.form.PortalModelForm"--%>
 <%--@elvariable id="skin" type="org.jahia.services.render.View"--%>
 <%--@elvariable id="portalNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="widgetNodeType" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
@@ -44,7 +44,7 @@
 </c:forEach>
 
 <div class="box-1">
-    <form:form action="${flowExecutionUrl}" modelAttribute="portalForm">
+    <form:form action="${flowExecutionUrl}" modelAttribute="portalModelForm">
         <div class="row-fluid">
             <div class="span12">
                 <h3><fmt:message key="newPortalModelForm.portal.info"/></h3>
@@ -52,8 +52,8 @@
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <form:label path="name"><fmt:message key="newPortalModelForm.portal.form.name"/> <span class="text-error"><strong>*</strong></span></form:label>
-                <form:input class="span4" path="name"/>
+                <form:label path="portal.name"><fmt:message key="newPortalModelForm.portal.form.name"/> <span class="text-error"><strong>*</strong></span></form:label>
+                <form:input class="span4" path="portal.name"/>
             </div>
         </div>
         <div class="row-fluid">
@@ -63,7 +63,7 @@
                     <span class="text-error"><strong>*</strong></span>
                 </form:label>
                 <form:hidden path="templateRootPath"/>
-                <input type="text" id="templateIdentifierDecoy" class="span4"/>
+                <input type="text" id="templateIdentifierDecoy" class="span4" readonly="readonly"/>
                 <ui:treeItemSelector fieldId="templateRootPath"
                                      displayFieldId="templateIdentifierDecoy"
                                      root="${templatesPath}"
@@ -76,9 +76,9 @@
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <form:label path="templateRootPath"><fmt:message key="newPortalModelForm.portal.form.fullTemplate"/></form:label>
-                <form:hidden path="templateFull"/>
-                <input type="text" id="templateFullDecoy" class="span4"/>
+                <form:label path="portal.templateFull"><fmt:message key="newPortalModelForm.portal.form.fullTemplate"/></form:label>
+                <form:hidden path="portal.templateFull" id="templateFull"/>
+                <input type="text" id="templateFullDecoy" class="span4" readonly="readonly"/>
                 <ui:treeItemSelector fieldId="templateFull"
                                      displayFieldId="templateFullDecoy"
                                      root="${templatesPath}"
@@ -95,7 +95,7 @@
 
                 <c:forEach items="${portal:getWidgetNodeTypes()}" var="widgetNodeType">
                     <label for="widgetType_${widgetNodeType.name}">
-                        <form:checkbox path="allowedWidgetTypes" value="${widgetNodeType.name}" id="widgetType_${widgetNodeType.name}"/>
+                        <form:checkbox path="portal.allowedWidgetTypes" value="${widgetNodeType.name}" id="widgetType_${widgetNodeType.name}"/>
                             ${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}
                         </label>
                 </c:forEach>

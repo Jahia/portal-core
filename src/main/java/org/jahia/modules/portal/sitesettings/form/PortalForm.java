@@ -1,58 +1,26 @@
 package org.jahia.modules.portal.sitesettings.form;
 
 import org.hibernate.validator.constraints.NotEmpty;
-import org.jahia.modules.portal.sitesettings.form.constraint.PortalTemplates;
 
 import java.io.Serializable;
 
 /**
  * Created with IntelliJ IDEA.
  * User: kevan
- * Date: 23/12/13
- * Time: 15:26
+ * Date: 30/01/14
+ * Time: 15:23
  * To change this template use File | Settings | File Templates.
  */
-public class PortalForm implements Serializable{
-    private static final long serialVersionUID = -2739282645546704933L;
+public class PortalForm implements Serializable {
+    private static final long serialVersionUID = -5905664285663810283L;
+
+    private String portalModelIdentifier;
 
     @NotEmpty
     private String name;
     @NotEmpty
     private String[] allowedWidgetTypes;
-    @NotEmpty
-    @PortalTemplates
-    private String templateRootPath;
     private String templateFull;
-
-    @NotEmpty
-    private String tabName;
-    @NotEmpty
-    private String tabWidgetSkin;
-
-
-    public String getTabWidgetSkin() {
-        return tabWidgetSkin;
-    }
-
-    public void setTabWidgetSkin(String widgetsSkin) {
-        this.tabWidgetSkin = widgetsSkin;
-    }
-
-    public String getTabName() {
-        return tabName;
-    }
-
-    public void setTabName(String tabName) {
-        this.tabName = tabName;
-    }
-
-    public String getTemplateRootPath() {
-        return templateRootPath;
-    }
-
-    public void setTemplateRootPath(String templateRootPath) {
-        this.templateRootPath = templateRootPath;
-    }
 
     public String getName() {
         return name;
@@ -60,6 +28,14 @@ public class PortalForm implements Serializable{
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String[] getAllowedWidgetTypes() {
+        return allowedWidgetTypes;
+    }
+
+    public void setAllowedWidgetTypes(String[] allowedWidgetTypes) {
+        this.allowedWidgetTypes = allowedWidgetTypes;
     }
 
     public String getTemplateFull() {
@@ -70,11 +46,11 @@ public class PortalForm implements Serializable{
         this.templateFull = templateFull;
     }
 
-    public String[] getAllowedWidgetTypes() {
-        return allowedWidgetTypes;
+    public String getPortalModelIdentifier() {
+        return portalModelIdentifier;
     }
 
-    public void setAllowedWidgetTypes(String[] allowedWidgetTypes) {
-        this.allowedWidgetTypes = allowedWidgetTypes;
+    public void setPortalModelIdentifier(String portalModelIdentifier) {
+        this.portalModelIdentifier = portalModelIdentifier;
     }
 }

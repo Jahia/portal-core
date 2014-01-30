@@ -4,9 +4,8 @@ import org.apache.commons.lang.StringUtils;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
-import org.jahia.services.content.JCRNodeWrapper;
-import org.jahia.services.content.JCRSessionFactory;
-import org.jahia.services.content.JCRSessionWrapper;
+import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
+import org.jahia.services.content.*;
 import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderContext;
@@ -19,6 +18,7 @@ import org.springframework.webflow.execution.RequestContext;
 import javax.jcr.RepositoryException;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,7 +40,7 @@ public class PortalFactoryHandler implements Serializable {
         return portalService.getSitePortalModels(getRenderContext(ctx).getSite(), null, false, getCurrentUserSession(ctx, "live"));
     }
 
-    public boolean createPortalModel(RequestContext ctx, PortalForm form){
+    public boolean createPortalModel(RequestContext ctx, PortalModelForm form){
         try {
             portalService.createPortalModel(form, getRenderContext(ctx).getSite(), getCurrentUserSession(ctx, "live"));
         } catch (RepositoryException e) {
@@ -48,8 +48,18 @@ public class PortalFactoryHandler implements Serializable {
         }
         return true;
     }
+    
+    public boolean updatePortalModel(RequestContext ctx, PortalForm form, String portalModelIdentifier){
+        try {
+            form.setPortalModelIdentifier(portalModelIdentifier);
+            portalService.updatePortalModel(form, getCurrentUserSession(ctx, "live"));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return true;
+    }
 
-    public PortalForm initPortalForm(RequestContext ctx, String identifier) {
+    public void initPortalForm(RequestContext ctx){
         JCRSiteNode site = getRenderContext(ctx).getSite();
 
         ctx.getRequestScope().put("templatesPath", site.getTemplatePackage().getRootFolderPath() + "/" + site.getTemplatePackage().getVersion() + "/templates");
@@ -60,12 +70,26 @@ public class PortalFactoryHandler implements Serializable {
         } catch (NoSuchNodeTypeException e) {
             logger.error(e.getMessage(), e);
         }
+    }
+
+    public PortalForm initEditPortalForm(RequestContext ctx, String identifier) {
+        JCRSiteNode site = getRenderContext(ctx).getSite();
+
+        ctx.getRequestScope().put("templatesPath", site.getTemplatePackage().getRootFolderPath() + "/" + site.getTemplatePackage().getVersion() + "/templates");
 
         PortalForm form = new PortalForm();
         if(StringUtils.isNotEmpty(identifier)){
             try {
                 JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(identifier);
                 form.setName(portalNode.getDisplayableName());
+                
+                List<String> allowedWidgetTypes = new ArrayList<String>();
+                JCRPropertyWrapper allowedWidgetTypesProp = portalNode.getProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES);
+                for(JCRValueWrapper allowedWidgetType : allowedWidgetTypesProp.getValues()){
+                    allowedWidgetTypes.add(allowedWidgetType.getString());
+                }
+                form.setAllowedWidgetTypes(allowedWidgetTypes.toArray(new String[allowedWidgetTypes.size()]));
+                form.setTemplateFull(portalNode.getPropertyAsString(PortalConstants.J_FULL_TEMPLATE));
             } catch (RepositoryException e) {
                 logger.error(e.getMessage(), e);
             }

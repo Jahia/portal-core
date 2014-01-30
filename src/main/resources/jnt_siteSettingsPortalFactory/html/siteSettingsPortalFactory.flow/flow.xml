@@ -6,6 +6,7 @@
 		http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
 
     <var name="flowHandler" class="org.jahia.modules.portal.sitesettings.PortalFactoryHandler"/>
+    <var name="portalModelForm" class="org.jahia.modules.portal.sitesettings.form.PortalModelForm"/>
     <var name="portalForm" class="org.jahia.modules.portal.sitesettings.form.PortalForm"/>
 
     <view-state id="portalFactory">
@@ -13,7 +14,7 @@
             <evaluate expression="flowHandler.getSitePortalModels(flowRequestContext)" result="requestScope.portals"/>
         </on-render>
         <transition on="createPortal" to="newPortalModelForm" bind="false" validate="false"/>
-        <transition on="editPortal" to="formPortal" bind="false" validate="false">
+        <transition on="editPortal" to="updatePortalModelForm" bind="false" validate="false">
             <set name="flowScope.portalIdentifier" value="requestParameters.selectedPortal" type="java.lang.String" />
         </transition>
         <transition on="enablePortal" to="portalFactory" bind="false" validate="false">
@@ -24,12 +25,22 @@
         </transition>
     </view-state>
 
-    <view-state id="newPortalModelForm" model="portalForm">
+    <view-state id="newPortalModelForm" model="portalModelForm">
         <on-render>
-            <evaluate expression="flowHandler.initPortalForm(flowRequestContext, flowScope.portalIdentifier)" result="requestScope.portalForm"/>
+            <evaluate expression="flowHandler.initPortalForm(flowRequestContext)"/>
         </on-render>
         <transition on="submit" to="portalFactory">
-            <evaluate expression="flowHandler.createPortalModel(flowRequestContext, portalForm)" />
+            <evaluate expression="flowHandler.createPortalModel(flowRequestContext, portalModelForm)" />
+        </transition>
+        <transition on="cancel" to="portalFactory" bind="false" validate="false"/>
+    </view-state>
+
+    <view-state id="updatePortalModelForm" model="portalForm">
+        <on-render>
+            <evaluate expression="flowHandler.initEditPortalForm(flowRequestContext, flowScope.portalIdentifier)" result="requestScope.portalForm"/>
+        </on-render>
+        <transition on="submit" to="portalFactory">
+            <evaluate expression="flowHandler.updatePortalModel(flowRequestContext, portalForm, flowScope.portalIdentifier)" />
         </transition>
         <transition on="cancel" to="portalFactory" bind="false" validate="false"/>
     </view-state>

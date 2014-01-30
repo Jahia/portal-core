@@ -5,6 +5,7 @@ import com.google.common.collect.Collections2;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
+import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
 import org.jahia.services.content.*;
 import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.ExtendedNodeType;
@@ -98,7 +99,7 @@ public class PortalService {
         return portalsNode;
     }
 
-    public void createPortalModel(PortalForm form, JCRSiteNode site, JCRSessionWrapper session) throws RepositoryException {
+    public void createPortalModel(PortalModelForm form, JCRSiteNode site, JCRSessionWrapper session) throws RepositoryException {
         // Create portals root folder
         JCRNodeWrapper portalsRootFolderNode = getPortalFolder(session.getNode(site.getPath()), "portals", true);
         if (portalsRootFolderNode == null) {
@@ -106,11 +107,11 @@ public class PortalService {
         }
 
         // Create portal
-        JCRNodeWrapper portalNode = portalsRootFolderNode.addNode(JCRContentUtils.generateNodeName(form.getName(), 32), PortalConstants.JNT_PORTAL_MODEL);
-        portalNode.setProperty(PortalConstants.JCR_TITLE, form.getName());
+        JCRNodeWrapper portalNode = portalsRootFolderNode.addNode(JCRContentUtils.generateNodeName(form.getPortal().getName(), 32), PortalConstants.JNT_PORTAL_MODEL);
+        portalNode.setProperty(PortalConstants.JCR_TITLE, form.getPortal().getName());
         portalNode.setProperty(PortalConstants.J_TEMPLATE_ROOT_PATH, form.getTemplateRootPath());
-        portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, form.getTemplateFull());
-        portalNode.setProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES, form.getAllowedWidgetTypes());
+        portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, form.getPortal().getTemplateFull());
+        portalNode.setProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES, form.getPortal().getAllowedWidgetTypes());
         setReadRoleForPortalModel(portalNode, false);
 
         // Create first tab
@@ -123,6 +124,14 @@ public class PortalService {
         }
 
         session.save();
+    }
+
+    public void updatePortalModel(PortalForm form, JCRSessionWrapper sessionWrapper) throws RepositoryException {
+        JCRNodeWrapper portalModelNode = sessionWrapper.getNodeByIdentifier(form.getPortalModelIdentifier());
+        portalModelNode.setProperty(PortalConstants.JCR_TITLE, form.getName());
+        portalModelNode.setProperty(PortalConstants.J_FULL_TEMPLATE, form.getTemplateFull());
+        portalModelNode.setProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES, form.getAllowedWidgetTypes());
+        sessionWrapper.save();
     }
 
     public List<JCRNodeWrapper> getPortalTabs(JCRNodeWrapper portalNode, JCRSessionWrapper session) {
