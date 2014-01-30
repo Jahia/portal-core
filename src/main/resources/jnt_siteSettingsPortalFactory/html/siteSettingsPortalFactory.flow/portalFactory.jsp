@@ -6,6 +6,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="functions" uri="http://www.jahia.org/tags/functions" %>
 <%@ taglib prefix="user" uri="http://www.jahia.org/tags/user" %>
+<%@ taglib prefix="portal" uri="http://www.jahia.org/tags/portalLib" %>
 <%--@elvariable id="currentNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="out" type="java.io.PrintWriter"--%>
 <%--@elvariable id="script" type="org.jahia.services.render.scripting.Script"--%>
@@ -22,7 +23,7 @@
 
 <template:addResources type="javascript" resources="jquery.min.js,jquery-ui.min.js,jquery.blockUI.js,workInProgress.js,admin-bootstrap.js"/>
 <template:addResources type="css" resources="admin-bootstrap.css"/>
-<template:addResources type="css" resources="jquery-ui.smoothness.css,jquery-ui.smoothness-jahia.css"/>
+<template:addResources type="css" resources="jquery-ui.smoothness.css,jquery-ui.smoothness-jahia.css,tablecloth.css"/>
 <template:addResources>
     <script type="text/javascript">
         function submitPortalForm(act, portal) {
@@ -37,7 +38,7 @@
 
 <c:set var="site" value="${renderContext.mainResource.node.resolveSite}"/>
 
-<h2>Manage portals - ${fn:escapeXml(site.displayableName)}</h2>
+<h2><fmt:message key="portalFactory.title"/> - ${fn:escapeXml(site.displayableName)}</h2>
 
 <form action="${flowExecutionUrl}" method="post" style="display: inline;" id="portalForm">
     <input type="hidden" name="selectedPortal" id="portalFormSelected"/>
@@ -48,7 +49,7 @@
     <div>
         <button class="btn" onclick="submitPortalForm('createPortal')">
             <i class="icon-plus"></i>
-                Create portal
+                <fmt:message key="newPortalModelForm.title"/>
         </button>
     </div>
 
@@ -77,8 +78,10 @@
             <thead>
             <tr>
                 <th width="3%">#</th>
-                <th><fmt:message key="portal.label"/></th>
-                <th width="20%"><fmt:message key="label.actions"/></th>
+                <th><fmt:message key="portalFactory.name"/></th>
+                <th width="10%"><fmt:message key="portalFactory.userPortalsNbr"/></th>
+                <th width="15%"><fmt:message key="label.actions"/></th>
+                <th width="10%"><fmt:message key="portalFactory.state"/></th>
             </tr>
             </thead>
             <tbody>
@@ -90,14 +93,20 @@
                 </c:when>
                 <c:otherwise>
                     <c:forEach items="${portals}" var="portal" varStatus="loopStatus">
+                        <fmt:message var="i18nRemove" key="label.remove"/><c:set var="i18nRemove" value="${functions:escapeJavaScript(i18nRemove)}"/>
+                        <fmt:message var="i18nEdit" key="label.edit"/><c:set var="i18nEdit" value="${functions:escapeJavaScript(i18nEdit)}"/>
+                        <fmt:message var="i18nLiveMode" key="portalFactory.goToLive"/><c:set var="i18nLiveMode" value="${functions:escapeJavaScript(i18nLiveMode)}"/>
                         <c:url var="portalURL" value="${url.baseLive}${portal.path}"/>
                         <tr>
-                            <td>${loopStatus.count}</td>
+                            <td align="center" class="center">${loopStatus.count}</td>
                             <td>
                                 <a title="${i18nEdit}" href="#details" onclick="submitPortalForm('editPortal', '${portal.identifier}')">${fn:escapeXml(portal.displayableName)}</a>
                             </td>
+                            <td align="center" class="center">
+                                ${fn:length(portal:userPortalsByModel(portal))}
+                            </td>
                             <td>
-                                <a style="margin-bottom:0;" class="btn btn-small" title="${i18nEditMode}" href="${portalURL}">
+                                <a style="margin-bottom:0;" class="btn btn-small" title="${i18nLiveMode}" href="${portalURL}">
                                     <i class="icon-pencil"></i>
                                 </a>
 
@@ -108,17 +117,19 @@
                                 <a style="margin-bottom:0;" class="btn btn-danger btn-small" title="${i18nRemove}" href="#delete">
                                     <i class="icon-remove icon-white"></i>
                                 </a>
+                            </td>
+                            <td>
                                 <c:choose>
                                     <c:when test="${portal.properties['j:enabled'].boolean}">
-                                        <button class="btn btn-danger" type="button" title="${fn:escapeXml(i18nUnresolvedDependencies)}"
+                                        <button class="btn btn-danger" type="button"
                                                 onclick="submitPortalForm('disablePortal', '${portal.identifier}')">
-                                            <i class=" icon-stop icon-white"></i>disable
+                                            <i class=" icon-stop icon-white"></i><fmt:message key="portalFactory.disable"/>
                                         </button>
                                     </c:when>
                                     <c:otherwise>
-                                        <button class="btn btn-success" type="button" title="${fn:escapeXml(i18nUnresolvedDependencies)}"
+                                        <button class="btn btn-success" type="button"
                                                 onclick="submitPortalForm('enablePortal', '${portal.identifier}')">
-                                            <i class=" icon-play icon-white"></i>enable
+                                            <i class=" icon-play icon-white"></i><fmt:message key="portalFactory.enable"/>
                                         </button>
                                     </c:otherwise>
                                 </c:choose>

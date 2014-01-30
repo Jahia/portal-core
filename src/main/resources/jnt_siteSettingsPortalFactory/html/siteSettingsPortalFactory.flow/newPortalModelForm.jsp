@@ -35,7 +35,7 @@
 <template:addResources type="css" resources="admin-bootstrap.css"/>
 <template:addResources type="css" resources="jquery-ui.smoothness.css,jquery-ui.smoothness-jahia.css"/>
 
-<h2>Create new portal</h2>
+<h2><fmt:message key="newPortalModelForm.title"/></h2>
 
 <c:forEach var="msg" items="${flowRequestContext.messageContext.allMessages}">
     <div class="${msg.severity == 'ERROR' ? 'validationError' : ''} alert ${msg.severity == 'ERROR' ? 'alert-error' : 'alert-success'}">
@@ -47,19 +47,21 @@
     <form:form action="${flowExecutionUrl}" modelAttribute="portalForm">
         <div class="row-fluid">
             <div class="span12">
-                <h3>Portal info</h3>
+                <h3><fmt:message key="newPortalModelForm.portal.info"/></h3>
             </div>
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <form:label path="name">name <span class="text-error"><strong>*</strong></span></form:label>
+                <form:label path="name"><fmt:message key="newPortalModelForm.portal.form.name"/> <span class="text-error"><strong>*</strong></span></form:label>
                 <form:input class="span4" path="name"/>
             </div>
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <form:label path="templateRootPath">root template for portal tabs <span
-                        class="text-error"><strong>*</strong></span></form:label>
+                <form:label path="templateRootPath">
+                    <fmt:message key="newPortalModelForm.portal.form.rootTemplates"/>
+                    <span class="text-error"><strong>*</strong></span>
+                </form:label>
                 <form:hidden path="templateRootPath"/>
                 <input type="text" id="templateIdentifierDecoy" class="span4"/>
                 <ui:treeItemSelector fieldId="templateRootPath"
@@ -74,7 +76,7 @@
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <form:label path="templateRootPath">template full</form:label>
+                <form:label path="templateRootPath"><fmt:message key="newPortalModelForm.portal.form.fullTemplate"/></form:label>
                 <form:hidden path="templateFull"/>
                 <input type="text" id="templateFullDecoy" class="span4"/>
                 <ui:treeItemSelector fieldId="templateFull"
@@ -89,7 +91,7 @@
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <p>allowed widget types</p>
+                <p><fmt:message key="newPortalModelForm.portal.form.allowedWidgetTypes"/> <span class="text-error"><strong>*</strong></span></p>
 
                 <c:forEach items="${portal:getWidgetNodeTypes()}" var="widgetNodeType">
                     <label for="widgetType_${widgetNodeType.name}">
@@ -103,18 +105,20 @@
 
         <div class="row-fluid">
             <div class="span12">
-                <h3>Auto created tab info</h3>
+                <h3><fmt:message key="newPortalModelForm.tab.info"/></h3>
             </div>
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <form:label path="tabName">tab name <span class="text-error"><strong>*</strong></span></form:label>
+                <form:label path="tabName"><fmt:message key="newPortalModelForm.tab.form.name"/>
+                    <span class="text-error"><strong>*</strong></span></form:label>
                 <form:input class="span4" path="tabName"/>
             </div>
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <form:label path="tabWidgetSkin">default widget skin for tab<span class="text-error"><strong>*</strong></span></form:label>
+                <form:label path="tabWidgetSkin"><fmt:message key="newPortalModelForm.tab.form.widgetSkin"/>
+                    <span class="text-error"><strong>*</strong></span></form:label>
                 <form:select path="tabWidgetSkin">
                     <c:forEach items="${allowedWidgetsSkin}" var="skin">
                         <form:option value="${skin.key}">

@@ -17,6 +17,7 @@ public class PortalForm implements Serializable{
 
     @NotEmpty
     private String name;
+    @NotEmpty
     private String[] allowedWidgetTypes;
     @NotEmpty
     @PortalTemplates

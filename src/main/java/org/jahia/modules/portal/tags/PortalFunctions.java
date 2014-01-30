@@ -108,4 +108,8 @@ public class PortalFunctions {
     public static Set<JCRNodeWrapper> getUserPortalsBySite(String siteKey) {
         return portalService.getUserPortalsBySite(siteKey);
     }
+
+    public static Collection<JCRNodeWrapper> getUserPortalsByModel(JCRNodeWrapper portalModelNode) {
+        return portalService.getUserPortalsInstanceByModel(portalModelNode);
+    }
 }

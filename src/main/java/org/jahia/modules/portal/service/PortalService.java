@@ -321,6 +321,34 @@ public class PortalService {
         return portals;
     }
 
+    public Collection<JCRNodeWrapper> getUserPortalsInstanceByModel(JCRNodeWrapper portalModelNode) {
+        SortedSet<JCRNodeWrapper> portals = new TreeSet<JCRNodeWrapper>(PORTALS_COMPARATOR);
+
+
+        try {
+            if (portalIsModel(portalModelNode)) {
+                JCRSessionWrapper sessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession("live");
+                QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
+                if (queryManager == null) {
+                    logger.error("Unable to obtain QueryManager instance");
+                }
+
+                StringBuilder q = new StringBuilder();
+                q.append("select * from [" + PortalConstants.JNT_PORTAL_USER + "] as p where p.[" + PortalConstants.J_MODEL + "] = '"
+                        + portalModelNode.getIdentifier() + "'");
+                NodeIterator result = queryManager.createQuery(q.toString(), Query.JCR_SQL2).execute().getNodes();
+
+                while (result.hasNext()) {
+                    portals.add((JCRNodeWrapper) result.next());
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return portals;
+    }
+
     public JCRNodeWrapper initUserPortalFromModel(JCRNodeWrapper modelNode, JCRSessionWrapper sessionWrapper) {
         try {
             // Create/get portal folders

@@ -12,7 +12,7 @@
         <on-render>
             <evaluate expression="flowHandler.getSitePortalModels(flowRequestContext)" result="requestScope.portals"/>
         </on-render>
-        <transition on="createPortal" to="formPortal" bind="false" validate="false"/>
+        <transition on="createPortal" to="newPortalModelForm" bind="false" validate="false"/>
         <transition on="editPortal" to="formPortal" bind="false" validate="false">
             <set name="flowScope.portalIdentifier" value="requestParameters.selectedPortal" type="java.lang.String" />
         </transition>
@@ -24,7 +24,7 @@
         </transition>
     </view-state>
 
-    <view-state id="formPortal" model="portalForm">
+    <view-state id="newPortalModelForm" model="portalForm">
         <on-render>
             <evaluate expression="flowHandler.initPortalForm(flowRequestContext, flowScope.portalIdentifier)" result="requestScope.portalForm"/>
         </on-render>
