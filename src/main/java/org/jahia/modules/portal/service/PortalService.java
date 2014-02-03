@@ -110,7 +110,11 @@ public class PortalService {
         JCRNodeWrapper portalNode = portalsRootFolderNode.addNode(JCRContentUtils.generateNodeName(form.getPortal().getName(), 32), PortalConstants.JNT_PORTAL_MODEL);
         portalNode.setProperty(PortalConstants.JCR_TITLE, form.getPortal().getName());
         portalNode.setProperty(PortalConstants.J_TEMPLATE_ROOT_PATH, form.getTemplateRootPath());
-        portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, form.getPortal().getTemplateFull());
+		if(StringUtils.isNotEmpty(form.getPortal().getTemplateFull())){
+			portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, getPortalTabTemplate(form.getPortal().getTemplateFull(), session).getName());
+		}else {
+			portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, "");
+		}
         portalNode.setProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES, form.getPortal().getAllowedWidgetTypes());
         setReadRoleForPortalModel(portalNode, false);
 
@@ -186,6 +190,22 @@ public class PortalService {
 
         return portalTabTemplates;
     }
+
+	public JCRNodeWrapper getPortalTabTemplate(String templatePath, JCRSessionWrapper sessionWrapper) {
+		JCRNodeWrapper templatePortalNode = null;
+		try{
+			JCRNodeWrapper templateNode = sessionWrapper.getNode(templatePath);
+			for (JCRValueWrapper value : templateNode.getProperty(PortalConstants.J_APPLY_ON).getValues()){
+				if(value.getString().equals(PortalConstants.JNT_PORTAL_TAB)){
+					templatePortalNode = templateNode;
+				}
+			}
+		}catch (RepositoryException e){
+			logger.error(e.getMessage(), e);
+		}
+
+		return templatePortalNode;
+	}
 
     public JCRNodeWrapper addWidgetToPortal(JCRNodeWrapper portalTabNode, String nodetype, String nodeName, JCRSessionWrapper session) {
         JCRNodeWrapper columnNode = getColumn(portalTabNode, 0);

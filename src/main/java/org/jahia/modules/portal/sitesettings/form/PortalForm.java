@@ -3,6 +3,7 @@ package org.jahia.modules.portal.sitesettings.form;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import java.io.Serializable;
+import org.jahia.modules.portal.sitesettings.form.constraint.PortalTemplate;
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,6 +21,7 @@ public class PortalForm implements Serializable {
     private String name;
     @NotEmpty
     private String[] allowedWidgetTypes;
+	@PortalTemplate
     private String templateFull;
 
     public String getName() {

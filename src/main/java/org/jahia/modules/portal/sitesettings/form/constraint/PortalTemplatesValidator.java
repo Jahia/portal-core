@@ -25,7 +25,6 @@ import java.util.List;
 public class PortalTemplatesValidator implements ConstraintValidator<PortalTemplates, String> {
     private static final Logger logger = LoggerFactory.getLogger(PortalTemplatesValidator.class);
 
-
     private PortalService portalService;
 
     @Override
