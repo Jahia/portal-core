@@ -21,6 +21,8 @@ import javax.jcr.RepositoryException;
 public class PortalSkinFilter extends AbstractFilter {
 
     public String prepare(RenderContext renderContext, Resource resource, RenderChain chain) throws Exception {
+        // Add cache dependancy to portal tab
+        resource.getDependencies().add(JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JNT_PORTAL_TAB).getCanonicalPath());
         pushWidgetSkinWrapperForNode(resource.getNode(), resource);
         return null;
     }
