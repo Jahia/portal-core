@@ -88,7 +88,12 @@ Jahia.Portal.prototype = {
             }
         };
 
-        $areas.sortable(instance.conf.sortable_options);
+        if($areas.sortable){
+            $areas.sortable(instance.conf.sortable_options);
+        }else {
+            console.error("Missing portal dependency 'jquery-ui sortable, draggable'")
+        }
+
         instance.$areas = $areas;
     },
 
