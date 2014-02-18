@@ -37,9 +37,10 @@ public class AddWidgetAction extends Action{
     public ActionResult doExecute(HttpServletRequest req, RenderContext renderContext, Resource resource,
                                   JCRSessionWrapper session, Map<String, List<String>> parameters, URLResolver urlResolver) throws Exception {
         List<String> nodetype =  parameters.get(NODETYPE_PARAM);
-        List<String> name =  parameters.get(NAME_PARAM);
-        if(CollectionUtils.isNotEmpty(nodetype) && CollectionUtils.isNotEmpty(name)){
-            JCRNodeWrapper widgetNode = portalService.addWidgetToPortal(resource.getNode(), nodetype.get(0), name.get(0), session);
+        List<String> names =  parameters.get(NAME_PARAM);
+        if(CollectionUtils.isNotEmpty(nodetype)){
+            String name = CollectionUtils.isNotEmpty(names) ? names.get(0) : null;
+            JCRNodeWrapper widgetNode = portalService.addWidgetToPortal(resource.getNode(), nodetype.get(0), name, session);
             if(widgetNode != null){
                 JSONObject result = new JSONObject();
                 result.put("path", widgetNode.getPath());

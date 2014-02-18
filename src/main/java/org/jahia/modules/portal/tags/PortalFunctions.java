@@ -8,7 +8,6 @@ import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderService;
 import org.jahia.services.render.View;
-import org.jahia.utils.i18n.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,11 +43,7 @@ public class PortalFunctions {
     }
 
     public static String getI18nNodetypeName(ExtendedNodeType nodeType, Locale locale) {
-        try {
-            return Messages.get(nodeType.getTemplatePackage(), nodeType.getName().replace(":", "_"), locale);
-        }catch (Exception e){
-            return nodeType.getName();
-        }
+        return portalService.getI18NodeTypeName(nodeType, locale);
     }
 
     public static JCRNodeWrapper getTemplateNodeForName(String name, JCRNodeWrapper portalNode) {

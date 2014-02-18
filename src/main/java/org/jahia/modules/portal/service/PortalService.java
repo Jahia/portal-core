@@ -12,6 +12,7 @@ import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.SiteInfo;
+import org.jahia.utils.i18n.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,11 +208,15 @@ public class PortalService {
 		return templatePortalNode;
 	}
 
-    public JCRNodeWrapper addWidgetToPortal(JCRNodeWrapper portalTabNode, String nodetype, String nodeName, JCRSessionWrapper session) {
+    public JCRNodeWrapper addWidgetToPortal(JCRNodeWrapper portalTabNode, String nodetypeName, String nodeName, JCRSessionWrapper session) {
         JCRNodeWrapper columnNode = getColumn(portalTabNode, 0);
 
         try {
-            JCRNodeWrapper widget = columnNode.addNode(JCRContentUtils.findAvailableNodeName(columnNode, JCRContentUtils.generateNodeName(nodeName)), nodetype);
+            if(StringUtils.isEmpty(nodeName)){
+                ExtendedNodeType nodetype = NodeTypeRegistry.getInstance().getNodeType(nodetypeName);
+                nodeName = getI18NodeTypeName(nodetype, session.getLocale());
+            }
+            JCRNodeWrapper widget = columnNode.addNode(JCRContentUtils.findAvailableNodeName(columnNode, JCRContentUtils.generateNodeName(nodeName)), nodetypeName);
             widget.setProperty(PortalConstants.JCR_TITLE, nodeName);
             session.save();
 
@@ -221,6 +226,14 @@ public class PortalService {
         }
 
         return null;
+    }
+
+    public String getI18NodeTypeName(ExtendedNodeType nodeType, Locale locale) {
+        try {
+            return Messages.get(nodeType.getTemplatePackage(), nodeType.getName().replace(":", "_"), locale);
+        }catch (Exception e){
+            return nodeType.getName();
+        }
     }
 
     public JCRNodeWrapper getColumn(JCRNodeWrapper portalTabNode, int index) {
@@ -325,12 +338,11 @@ public class PortalService {
             QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
             if (queryManager == null) {
                 logger.error("Unable to obtain QueryManager instance");
+                return portals;
             }
 
-            StringBuilder q = new StringBuilder();
-            q.append("select * from [" + PortalConstants.JNT_PORTAL_MODEL + "] as p where isdescendantnode(p, ['").append("/sites/" + siteKey)
-                    .append("'])");
-            NodeIterator result = queryManager.createQuery(q.toString(), Query.JCR_SQL2).execute().getNodes();
+            NodeIterator result = queryManager.createQuery("select * from [" + PortalConstants.JNT_PORTAL_MODEL
+                    + "] as p where isdescendantnode(p, ['" + "/sites/" + siteKey + "'])", Query.JCR_SQL2).execute().getNodes();
 
             while (result.hasNext()) {
                 JCRNodeWrapper modelNode = (JCRNodeWrapper) result.next();
@@ -360,12 +372,12 @@ public class PortalService {
                 QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
                 if (queryManager == null) {
                     logger.error("Unable to obtain QueryManager instance");
+                    return portals;
                 }
 
-                StringBuilder q = new StringBuilder();
-                q.append("select * from [" + PortalConstants.JNT_PORTAL_USER + "] as p where p.[" + PortalConstants.J_MODEL + "] = '"
-                        + portalModelNode.getIdentifier() + "'");
-                NodeIterator result = queryManager.createQuery(q.toString(), Query.JCR_SQL2).execute().getNodes();
+                NodeIterator result = queryManager.createQuery(("select * from [" + PortalConstants.JNT_PORTAL_USER +
+                        "] as p where p.[" + PortalConstants.J_MODEL + "] = '") + portalModelNode.getIdentifier() +
+                        "'", Query.JCR_SQL2).execute().getNodes();
 
                 while (result.hasNext()) {
                     portals.add((JCRNodeWrapper) result.next());
