@@ -64,13 +64,18 @@ Jahia.Portal.prototype = {
 
         var $areas = $(instance.conf.sortable_options.connectWith);
 
+        var newWidget = false;
         instance.conf.sortable_options.update = function (event, ui) {
             // Test if we are on the destination col after sort update
             if ($(event.target).attr("id") == ui.item.parent().attr("id")) {
                 var toArea = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).attr("id"));
                 var widget = instance.getWidget(ui.item.attr("id"));
 
-                widget.performMove(toArea);
+                if(widget){
+                    widget.performMove(toArea);
+                }else {
+                    newWidget = true;
+                }
             }
         };
 
@@ -78,13 +83,32 @@ Jahia.Portal.prototype = {
             ui.item.data('start_index', ui.item.index());
             ui.item.data('start_colId', $(ui.item).parent(instance.conf.sortable_options.connectWith).attr("id"));
         };
+
         instance.conf.sortable_options.stop = function(event, ui) {
-            var start_pos = ui.item.data('start_index');
-            var start_colId = ui.item.data('start_colId');
-            if (start_pos == ui.item.index() && start_colId == $(ui.item).parent(instance.conf.sortable_options.connectWith).attr("id")) {
-                // User have started to drag the widget but this one is at the same place.
-                var widget = instance.getWidget(ui.item.attr("id"));
-                widget.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_CANCELED);
+            if(newWidget){
+                //search for nodetype data in this item
+                var nodetypeEl = ui.item.find(".widget_nodetype");
+                if(nodetypeEl.length > 0){
+                    var nodetype = nodetypeEl.data("nodetype");
+                    if(nodetype){
+                        //get next widget if exist
+                        var next = ui.item.next();
+                        var area = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).attr("id"));
+                        var beforeWidget = undefined;
+                        if(next.length > 0){
+                            beforeWidget = instance.getWidget(next.attr("id"));
+                        }
+                        instance.addNewWidget(nodetype, undefined, area, beforeWidget);
+                    }
+                }
+            }else {
+                var start_pos = ui.item.data('start_index');
+                var start_colId = ui.item.data('start_colId');
+                if (start_pos == ui.item.index() && start_colId == $(ui.item).parent(instance.conf.sortable_options.connectWith).attr("id")) {
+                    // User have started to drag the widget but this one is at the same place.
+                    var widget = instance.getWidget(ui.item.attr("id"));
+                    widget.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_CANCELED);
+                }
             }
         };
 
@@ -112,12 +136,24 @@ Jahia.Portal.prototype = {
         });
     },
 
-    addNewWidget: function (nodetype, name) {
+    addNewWidget: function (nodetype, name, toArea, beforeWidget) {
         var instance = this;
+
+        var col = 0;
+        if(toArea){
+            col = toArea._colIndex;
+        }
+
+        var beforeWidgetPath = undefined;
+        if(beforeWidget){
+            beforeWidgetPath = beforeWidget._path;
+        }
         instance._debug("Add widget: " + name + " [" + nodetype + "]");
         var data = {
             nodetype: nodetype,
-            name: name
+            name: name,
+            col: col,
+            beforeWidget: beforeWidgetPath
         };
         $.ajax({
             type: "POST",
@@ -126,13 +162,18 @@ Jahia.Portal.prototype = {
             url: instance.baseURL + instance.portalTabPath + Jahia.Portal.constants.ADD_WIDGET_ACTION,
             data: data
         }).done(function (widget) {
+            if(toArea){
+                toArea.registerWidget(widget.path);
+            }else {
                 instance.getAreaByColIndex(0).registerWidget(widget.path);
-            });
+            }
+        });
     },
 
     registerArea: function (htmlID, widgetPath, widgetState, widgetView) {
         var instance = this;
-        instance.areas[htmlID] = new Jahia.Portal.Area(htmlID, "col-" + Jahia.Utils.getObjectSize(instance.areas), instance, widgetPath, widgetState, widgetView);
+        instance.areas[htmlID] = new Jahia.Portal.Area(htmlID, Jahia.Utils.getObjectSize(instance.areas), instance, widgetPath, widgetState, widgetView);
+        instance.initDragDrop();
     },
 
     getArea: function (htmlID) {
@@ -302,15 +343,18 @@ Jahia.Portal.prototype = {
 /**
  * Portal area object
  * @param id
- * @param name
  * @param portal
- * @param path
  * @constructor
+ * @param index
+ * @param widgetPath
+ * @param widgetState
+ * @param widgetView
  */
-Jahia.Portal.Area = function (id, name, portal, widgetPath, widgetState, widgetView) {
+Jahia.Portal.Area = function (id, index, portal, widgetPath, widgetState, widgetView) {
     this._id = id;
     this._portal = portal;
-    this._colName = name;
+    this._colIndex = index;
+    this._colName = "col-" + index;
     this._colPath = this._portal.portalTabPath + "/" + this._colName;
 
     if(widgetPath){

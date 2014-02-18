@@ -9,7 +9,9 @@
        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <!-- Services -->
-    <bean id="portalService" name="PortalService" class="org.jahia.modules.portal.service.PortalService"/>
+    <bean id="portalService" name="PortalService" class="org.jahia.modules.portal.service.PortalService">
+        <property name="contentManager" ref="ContentManagerHelper"/>
+    </bean>
     <context:annotation-config/>
     <context:component-scan base-package="org.jahia.modules.portal"/>
 

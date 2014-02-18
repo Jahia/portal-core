@@ -3,6 +3,7 @@ package org.jahia.modules.portal.service;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import org.apache.commons.lang.StringUtils;
+import org.jahia.ajax.gwt.helper.ContentManagerHelper;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
@@ -48,6 +49,12 @@ public class PortalService {
             return nodeType1.getName().compareTo(nodeType2.getName());
         }
     };
+
+    private ContentManagerHelper contentManager;
+
+    public void setContentManager(ContentManagerHelper contentManager) {
+        this.contentManager = contentManager;
+    }
 
     public JCRNodeWrapper getPortalFolder(JCRNodeWrapper node, String folderName, boolean createIfNotExist) {
         try {
@@ -208,8 +215,8 @@ public class PortalService {
 		return templatePortalNode;
 	}
 
-    public JCRNodeWrapper addWidgetToPortal(JCRNodeWrapper portalTabNode, String nodetypeName, String nodeName, JCRSessionWrapper session) {
-        JCRNodeWrapper columnNode = getColumn(portalTabNode, 0);
+    public JCRNodeWrapper addWidgetToPortal(JCRNodeWrapper portalTabNode, String nodetypeName, String nodeName, Long colIndex, String beforeNodePath, JCRSessionWrapper session) {
+        JCRNodeWrapper columnNode = getColumn(portalTabNode, colIndex);
 
         try {
             if(StringUtils.isEmpty(nodeName)){
@@ -217,11 +224,14 @@ public class PortalService {
                 nodeName = getI18NodeTypeName(nodetype, session.getLocale());
             }
             JCRNodeWrapper widget = columnNode.addNode(JCRContentUtils.findAvailableNodeName(columnNode, JCRContentUtils.generateNodeName(nodeName)), nodetypeName);
+            if(StringUtils.isNotEmpty(beforeNodePath)){
+                contentManager.moveOnTopOf(widget.getPath(), beforeNodePath, session);
+            }
             widget.setProperty(PortalConstants.JCR_TITLE, nodeName);
             session.save();
 
             return widget;
-        } catch (RepositoryException e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
 
@@ -236,7 +246,7 @@ public class PortalService {
         }
     }
 
-    public JCRNodeWrapper getColumn(JCRNodeWrapper portalTabNode, int index) {
+    public JCRNodeWrapper getColumn(JCRNodeWrapper portalTabNode, Long index) {
         String columnName = "col-" + index;
         JCRNodeWrapper columnNode;
         try {
@@ -276,13 +286,19 @@ public class PortalService {
         QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
         if (queryManager == null) {
             logger.error("Unable to obtain QueryManager instance");
+            return null;
         }
 
         try {
             JCRNodeWrapper templateRootNode = sessionWrapper.getNode(templateRootPath);
             StringBuilder q = new StringBuilder();
-            q.append("select * from [" + PortalConstants.JNT_CONTENT_TEMPLATE + "] as t where isdescendantnode(t, ['").append(templateRootNode.getPath())
-                    .append("'])  and t.['j:nodename'] = '").append(templateName).append("'");
+            q.append("select * from [")
+                    .append(PortalConstants.JNT_CONTENT_TEMPLATE)
+                    .append("] as t where isdescendantnode(t, ['")
+                    .append(templateRootNode.getPath())
+                    .append("'])  and t.['j:nodename'] = '")
+                    .append(templateName)
+                    .append("'");
             Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
 
             NodeIterator nodes = query.execute().getNodes();

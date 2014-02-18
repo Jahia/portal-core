@@ -26,6 +26,8 @@ import java.util.Map;
 public class AddWidgetAction extends Action{
     private static final String NODETYPE_PARAM = "nodetype";
     private static final String NAME_PARAM = "name";
+    private static final String COL_PARAM = "col";
+    private static final String BEFORE_WIDGET_PARAM = "beforeWidget";
 
     private PortalService portalService;
 
@@ -38,9 +40,14 @@ public class AddWidgetAction extends Action{
                                   JCRSessionWrapper session, Map<String, List<String>> parameters, URLResolver urlResolver) throws Exception {
         List<String> nodetype =  parameters.get(NODETYPE_PARAM);
         List<String> names =  parameters.get(NAME_PARAM);
+        List<String> col =  parameters.get(COL_PARAM);
+        List<String> beforeWidget =  parameters.get(BEFORE_WIDGET_PARAM);
+
         if(CollectionUtils.isNotEmpty(nodetype)){
             String name = CollectionUtils.isNotEmpty(names) ? names.get(0) : null;
-            JCRNodeWrapper widgetNode = portalService.addWidgetToPortal(resource.getNode(), nodetype.get(0), name, session);
+            Long colIndex = CollectionUtils.isNotEmpty(col) ? Long.valueOf(col.get(0)) : 0;
+            String beforeWidgetPath = CollectionUtils.isNotEmpty(beforeWidget) ? beforeWidget.get(0) : null;
+            JCRNodeWrapper widgetNode = portalService.addWidgetToPortal(resource.getNode(), nodetype.get(0), name, colIndex, beforeWidgetPath, session);
             if(widgetNode != null){
                 JSONObject result = new JSONObject();
                 result.put("path", widgetNode.getPath());
