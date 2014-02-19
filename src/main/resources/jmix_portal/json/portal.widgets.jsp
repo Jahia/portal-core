@@ -20,14 +20,24 @@
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 <%--@elvariable id="widgetNodeType" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
+<%--@elvariable id="view" type="org.jahia.services.render.View"--%>
 <c:set target="${renderContext}" property="contentType" value="application/json;charset=UTF-8"/>
 
 <json:array>
     <c:forEach items="${portal:getPortalWidgetNodeTypes(currentNode)}" var="widgetNodeType">
+        <c:set var="views" value=""/>
         <json:object>
             <json:property name="name" value="${widgetNodeType.name}"/>
             <json:property name="displayableName"
                            value="${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}"/>
+            <json:array name="views">
+                <c:forEach items="${portal:getViewsSet(widgetNodeType.name, currentNode)}" var="view">
+                    <json:object>
+                        <json:property name="path" value="${view.path}"/>
+                        <json:property name="key" value="${view.key}"/>
+                    </json:object>
+                </c:forEach>
+            </json:array>
         </json:object>
     </c:forEach>
 </json:array>

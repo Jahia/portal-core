@@ -87,9 +87,10 @@ Jahia.Portal.prototype = {
         instance.conf.sortable_options.stop = function(event, ui) {
             if(newWidget){
                 //search for nodetype data in this item
-                var nodetypeEl = ui.item.find(".widget_nodetype");
+                var nodetypeEl = ui.item.hasClass("widget_nodetype") ? ui.item : ui.item.find(".widget_nodetype");
                 if(nodetypeEl.length > 0){
-                    var nodetype = nodetypeEl.data("nodetype");
+                    var nodetype = nodetypeEl.data("widget_nodetype");
+                    var view = nodetypeEl.data("widget_view");
                     if(nodetype){
                         //get next widget if exist
                         var next = ui.item.next();
@@ -98,7 +99,7 @@ Jahia.Portal.prototype = {
                         if(next.length > 0){
                             beforeWidget = instance.getWidget(next.attr("id"));
                         }
-                        instance.addNewWidget(nodetype, undefined, area, beforeWidget);
+                        instance.addNewWidget(nodetype, undefined, area, view, beforeWidget, ui.item);
                     }
                 }
             }else {
@@ -136,8 +137,9 @@ Jahia.Portal.prototype = {
         });
     },
 
-    addNewWidget: function (nodetype, name, toArea, beforeWidget) {
+    addNewWidget: function (nodetype, name, toArea, view, beforeWidget, $htmlToReplace) {
         var instance = this;
+        instance._debug("Add widget:[" + name + "] nodetype:[" + nodetype + "] area:[" + toArea + "] beforeWidget:[" + beforeWidget + "]");
 
         var col = 0;
         if(toArea){
@@ -148,7 +150,7 @@ Jahia.Portal.prototype = {
         if(beforeWidget){
             beforeWidgetPath = beforeWidget._path;
         }
-        instance._debug("Add widget: " + name + " [" + nodetype + "]");
+
         var data = {
             nodetype: nodetype,
             name: name,
@@ -163,7 +165,7 @@ Jahia.Portal.prototype = {
             data: data
         }).done(function (widget) {
             if(toArea){
-                toArea.registerWidget(widget.path);
+                toArea.registerWidget(widget.path, $htmlToReplace, undefined, view, "view");
             }else {
                 instance.getAreaByColIndex(0).registerWidget(widget.path);
             }
@@ -375,7 +377,7 @@ Jahia.Portal.Area.prototype = {
 
         instance._portal._debug("Load widget: " + path);
 
-        instance.registerWidget(path, state, view);
+        instance.registerWidget(path, undefined, state, view);
     },
 
     loadAll: function () {
@@ -397,10 +399,10 @@ Jahia.Portal.Area.prototype = {
             });
     },
 
-    registerWidget: function (path, state, view) {
+    registerWidget: function (path, $htmlToReplace, state, view, forcedOriginalView) {
         var instance = this;
         var widgetHtmlId = "w_" + Math.random().toString(36).substring(7);
-        instance._portal.widgets[widgetHtmlId] = new Jahia.Portal.Widget(widgetHtmlId, path, state, view, instance);
+        instance._portal.widgets[widgetHtmlId] = new Jahia.Portal.Widget(widgetHtmlId, path, $htmlToReplace, state, view, forcedOriginalView, instance);
     }
 };
 
@@ -411,27 +413,32 @@ Jahia.Portal.Area.prototype = {
  * @param area
  * @constructor
  */
-Jahia.Portal.Widget = function (id, path, state, view, area) {
+Jahia.Portal.Widget = function (id, path, $htmlToReplace, state, view, forcedOriginalView, area) {
     this._id = id;
     this._path = path;
     this._area = area;
     this._portal = area._portal;
     this._state = state ? state : "box";
-    this._originalView = view ? view : "view";
+    this._originalView = forcedOriginalView ? forcedOriginalView : (view ? view : "view");
+    this._initView = view ? view : "view";
     this._currentView = this._originalView;
 
-    this.init();
+    this.init($htmlToReplace);
 };
 
 Jahia.Portal.Widget.prototype = {
-    init: function () {
+    init: function ($htmlToReplace) {
         var instance = this;
         instance._portal._debug("Load widget: " + instance._path);
 
         var wrapper = "<div id='" + instance._id + "' class='" + Jahia.Portal.constants.PORTAL_WIDGET_CLASS + "'></div>";
-        $("#" + instance._area._id).append(wrapper);
+        if($htmlToReplace){
+            $htmlToReplace.replaceWith(wrapper);
+        }else {
+            $("#" + instance._area._id).append(wrapper);
+        }
 
-        instance.load();
+        instance.load(instance._initView);
     },
 
     attachEvents: function() {
