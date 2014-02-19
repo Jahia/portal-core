@@ -20,14 +20,14 @@ public class PortalLibFilter extends AbstractFilter {
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(PortalLibFilter.class);
 
     private static final String JS_API_FILE = "jahia-portal.js";
-    private static final String MODULE_NAME = "portal-core";
 
     @Override
     public String execute(String previousOut, RenderContext renderContext, Resource resource, RenderChain chain) throws Exception {
         String out = previousOut;
 
         // add portal API lib
-        String path = URLEncoder.encode("/modules/" + MODULE_NAME + "/javascript/" + JS_API_FILE, "UTF-8");
+        String path = URLEncoder.encode("/modules/" + renderContext.getMainResource().getNode().getPrimaryNodeType().getTemplatePackage().getBundle().getSymbolicName()
+                + "/javascript/" + JS_API_FILE, "UTF-8");
         out += ("<jahia:resource type='javascript' path='" + path + "' insert='false' resource='" + JS_API_FILE + "'/>");
 
         return out;

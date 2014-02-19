@@ -1,8 +1,11 @@
 // dependencies: Jquery, Jquery-ui
+// This file is automatically added to the html page when a portal is detected
+// Take a look at the PortalInitFilter jahia filter
 
-if (!Jahia) {
-    var Jahia = [];
-}
+/**
+ * @namespace
+ */
+var Jahia = Jahia || {};
 
 Jahia.Utils = {
     getObjectSize: function (obj) {
@@ -15,8 +18,10 @@ Jahia.Utils = {
 };
 
 /**
- * Portal object
- * @constructor
+ * This object is automatically instantiate by the Jahia filter PortalInitFilter
+ *
+ * @class Portal
+ * @author kevan
  */
 Jahia.Portal = function (options) {
     this.conf = Jahia.Portal.default;
@@ -34,6 +39,10 @@ Jahia.Portal = function (options) {
     this.widgets = [];
 };
 
+/**
+ * portal constants
+ * @type {{WIDGETS_PORTAL_VIEW: string, TABS_PORTAL_VIEW: string, ADD_WIDGET_ACTION: string, MOVE_WIDGET_ACTION: string, COPY_PORTALMODEL_ACTION: string, FORM_TAB_VIEW: string, WIDGET_EVENT_MOVED_SUCCEEDED: string, WIDGET_EVENT_MOVED_FAILED: string, WIDGET_EVENT_MOVED_CANCELED: string, PORTAL_WIDGET_CLASS: string}}
+ */
 Jahia.Portal.constants = {
     WIDGETS_PORTAL_VIEW: ".widgets.json",
     TABS_PORTAL_VIEW: ".tabs.json",
@@ -46,9 +55,16 @@ Jahia.Portal.constants = {
     WIDGET_EVENT_MOVED_FAILED: "moveFailed",
     WIDGET_EVENT_MOVED_CANCELED: "moveCanceled",
 
+    EXTERNAL_WIDGET_DROP_CLASS: "widget_nodetype",
+    EXTERNAL_WIDGET_DROP_NODEYPE: "widget_nodetype",
+    EXTERNAL_WIDGET_DROP_VIEW: "widget_view",
+
     PORTAL_WIDGET_CLASS:    "portal_widget"
 };
-
+/**
+ * portal conf
+ * @type {{sortable_options: {connectWith: string, handle: string, revert: boolean, iframeFix: boolean}}}
+ */
 Jahia.Portal.default = {
     sortable_options: {
         connectWith: ".portal_area",
@@ -58,13 +74,21 @@ Jahia.Portal.default = {
     }
 };
 
+
 Jahia.Portal.prototype = {
+    /**
+     * Init or re-init the drag&drop in all the portal areas, also attach the portal events to drag&drop actions
+     *
+     * @this {Portal}
+     */
     initDragDrop: function () {
         var instance = this;
 
+        // get all areas
         var $areas = $(instance.conf.sortable_options.connectWith);
 
         var newWidget = false;
+        // sortable update callback
         instance.conf.sortable_options.update = function (event, ui) {
             // Test if we are on the destination col after sort update
             if ($(event.target).attr("id") == ui.item.parent().attr("id")) {
@@ -79,18 +103,20 @@ Jahia.Portal.prototype = {
             }
         };
 
+        // sortable start callback, used for store initial state of the item, allow to do some check in others callbacks
         instance.conf.sortable_options.start = function(event, ui) {
             ui.item.data('start_index', ui.item.index());
             ui.item.data('start_colId', $(ui.item).parent(instance.conf.sortable_options.connectWith).attr("id"));
         };
 
+        // sortable stop callback
         instance.conf.sortable_options.stop = function(event, ui) {
             if(newWidget){
-                //search for nodetype data in this item
-                var nodetypeEl = ui.item.hasClass("widget_nodetype") ? ui.item : ui.item.find(".widget_nodetype");
+                //search for widget related datas in the item html
+                var nodetypeEl = ui.item.hasClass(Jahia.Portal.constants.EXTERNAL_WIDGET_DROP_CLASS) ? ui.item : ui.item.find("." + Jahia.Portal.constants.EXTERNAL_WIDGET_DROP_CLASS);
                 if(nodetypeEl.length > 0){
-                    var nodetype = nodetypeEl.data("widget_nodetype");
-                    var view = nodetypeEl.data("widget_view");
+                    var nodetype = nodetypeEl.data(Jahia.Portal.constants.EXTERNAL_WIDGET_DROP_NODEYPE);
+                    var view = nodetypeEl.data(Jahia.Portal.constants.EXTERNAL_WIDGET_DROP_VIEW);
                     if(nodetype){
                         //get next widget if exist
                         var next = ui.item.next();
@@ -99,6 +125,7 @@ Jahia.Portal.prototype = {
                         if(next.length > 0){
                             beforeWidget = instance.getWidget(next.attr("id"));
                         }
+                        // instanciate this new widget
                         instance.addNewWidget(nodetype, undefined, area, view, beforeWidget, ui.item);
                     }
                 }
@@ -122,6 +149,12 @@ Jahia.Portal.prototype = {
         instance.$areas = $areas;
     },
 
+    /**
+     * Debug message
+     *
+     * @this {Portal}
+     * @param message
+     */
     _debug: function (message) {
         var instance = this;
         if (instance.debug) {
@@ -129,6 +162,12 @@ Jahia.Portal.prototype = {
         }
     },
 
+    /**
+     * Call the widgets types allowed for the current portal
+     *
+     * @this {Portal}
+     * @param callback callback with widgets types in json format
+     */
     getWidgetTypes: function (callback) {
         var instance = this;
         $.ajax(instance.baseURL + instance.portalPath + Jahia.Portal.constants.WIDGETS_PORTAL_VIEW).done(function (data) {
@@ -137,6 +176,17 @@ Jahia.Portal.prototype = {
         });
     },
 
+    /**
+     * Add a new widget to the current portal
+     *
+     * @this {Portal}
+     * @param nodetype {String}
+     * @param name {String} Widget name, optional, generated if not present.
+     * @param toArea {Area} target area, optional, first if not present.
+     * @param view {String} widget view displayed after load, optional, default view used if not present.
+     * @param beforeWidget {Widget} insert before widget, optional, insert at the end of the area if not present
+     * @param $htmlToReplace {Object} jquery object represent the item dropped in the area, mandatory if toArea is specified
+     */
     addNewWidget: function (nodetype, name, toArea, view, beforeWidget, $htmlToReplace) {
         var instance = this;
         instance._debug("Add widget:[" + name + "] nodetype:[" + nodetype + "] area:[" + toArea + "] beforeWidget:[" + beforeWidget + "]");
@@ -172,41 +222,97 @@ Jahia.Portal.prototype = {
         });
     },
 
+    /**
+     * Register a new Area for the current portal, this function is call by the portal area component automatically
+     *
+     * @this {Portal}
+     * @param htmlID {String} area id, mandatory
+     * @param widgetPath {String} widget path to load in this area, optional, used for load a specific widget in this area
+     * @param widgetState {String} widget state to load in this area, optional, used for full state
+     * @param widgetView {String} widget view to load in this area, optional, used for full view
+     */
     registerArea: function (htmlID, widgetPath, widgetState, widgetView) {
         var instance = this;
         instance.areas[htmlID] = new Jahia.Portal.Area(htmlID, Jahia.Utils.getObjectSize(instance.areas), instance, widgetPath, widgetState, widgetView);
         instance.initDragDrop();
     },
 
+    /**
+     * return the Area corresponding to a given id
+     *
+     * @this {Portal}
+     * @param htmlID {String} area id
+     * @returns {Area}
+     */
     getArea: function (htmlID) {
         var instance = this;
         return instance.areas[htmlID];
     },
 
+    /**
+     * return the Area corresponding to a given index
+     *
+     * @this {Portal}
+     * @param index {Number} area index
+     * @returns {Area}
+     */
     getAreaByColIndex: function (index) {
         var instance = this;
         return instance.getAreaByColName("col-" + index)
     },
 
+    /**
+     * return the Area corresponding to a given column name
+     *
+     * @this {Portal}
+     * @param colName {Number} area colname (col-0, col-1, ...)
+     * @returns {Area}
+     */
     getAreaByColName: function (colName) {
         var instance = this;
         return instance.getArea($("." + colName).attr("id"));
     },
 
+    /**
+     * return the Widget corresponding to a given widget html id
+     *
+     * @this {Portal}
+     * @param htmlId {String} widget html id
+     * @returns {Widget}
+     */
     getWidget: function (htmlId) {
         var instance = this;
         return instance.widgets[htmlId];
     },
 
+    /**
+     * return the Widget parent of the given html id
+     *
+     * @this {Portal}
+     * @param htmlId {String} html id
+     * @returns {Widget}
+     */
     getCurrentWidget: function (htmlId) {
         var instance = this;
         return instance.getWidget($("#" + htmlId).parents("." + Jahia.Portal.constants.PORTAL_WIDGET_CLASS).attr("id"));
     },
 
+    /**
+     * delete a specific widget
+     *
+     * @this {Portal}
+     * @param widget {Widget} widget to delete
+     */
     deleteWidget: function(widget) {
         widget.performDelete();
     },
 
+    /**
+     * return the portal tab information in JSON format
+     *
+     * @this {Portal}
+     * @param callback {function}
+     */
     getTabFormInfo: function (callback) {
         var instance = this;
         instance._debug("Load form infos for portal tab: " + instance.portalTabPath);
@@ -222,6 +328,14 @@ Jahia.Portal.prototype = {
             });
     },
 
+    /**
+     * save the portal tab form
+     *
+     * @this {Portal}
+     * @param callback {function}
+     * @param form {Object} portal tab information to save
+     * @param isNew {Boolean}
+     */
     saveTabForm: function (form, callback, isNew) {
         var instance = this;
         var action = isNew ? "Add new" : "Edit";
@@ -246,6 +360,12 @@ Jahia.Portal.prototype = {
             });
     },
 
+    /**
+     * Delete current portal tab
+     *
+     * @this {Portal}
+     * @param callback {function}
+     */
     deleteCurrentTab: function(callback) {
         var instance = this;
         instance._debug("Delete tab: " + instance.portalTabPath);
@@ -266,6 +386,12 @@ Jahia.Portal.prototype = {
             });
     },
 
+    /**
+     * Instantiate a new portal based on the current one
+     *
+     * @this {Portal}
+     * @param callback {function}
+     */
     initPortalFromModel: function(callback){
         var instance = this;
         if(instance.isModel){
@@ -288,6 +414,12 @@ Jahia.Portal.prototype = {
         }
     },
 
+    /**
+     * Return portal tabs for the current portal in json format
+     *
+     * @this {Portal}
+     * @param callback {function}
+     */
     getTabs: function(callback) {
         var instance = this;
         instance._debug("Load tabs for portal tab: " + instance.portalPath);
@@ -303,6 +435,16 @@ Jahia.Portal.prototype = {
             });
     },
 
+    /**
+     * Load a specific widget, construct the url to display a specific widget in specific state, view, and tab template.
+     * Reload the page
+     *
+     * @this {Portal}
+     * @param tabTemplate {String} portal tab template, optional, default used if not specify
+     * @param widgetIdentifier {String} widget node identifier to load, mandatory
+     * @param widgetState {String} widget state (full, box, ...), optional
+     * @param widgetView {String} widget view (full, view, edit ...), optional
+     */
     loadSingleWidget: function(tabTemplate, widgetIdentifier, widgetState, widgetView){
         var instance = this;
         var url = "";
@@ -326,6 +468,11 @@ Jahia.Portal.prototype = {
         window.location.href = url;
     },
 
+    /**
+     * Reload the current portal tab
+     *
+     * @this {Portal}
+     */
     reloadTab: function(){
         var instance = this;
         window.location.href = instance.baseURL + instance.portalTabPath + ".html";
@@ -344,13 +491,14 @@ Jahia.Portal.prototype = {
 
 /**
  * Portal area object
- * @param id
- * @param portal
+ *
  * @constructor
- * @param index
- * @param widgetPath
- * @param widgetState
- * @param widgetView
+ * @param id {String}
+ * @param index {number}
+ * @param portal {Portal}
+ * @param widgetPath {String} optional, used for load a single specific widget in the area
+ * @param widgetState {String} optional, used for load a single specific widget in the area
+ * @param widgetView {String} optional, used for load a single specific widget in the area
  */
 Jahia.Portal.Area = function (id, index, portal, widgetPath, widgetState, widgetView) {
     this._id = id;
@@ -358,6 +506,9 @@ Jahia.Portal.Area = function (id, index, portal, widgetPath, widgetState, widget
     this._colIndex = index;
     this._colName = "col-" + index;
     this._colPath = this._portal.portalTabPath + "/" + this._colName;
+
+    // Add "col-" jcr name to the html class
+    $("#" + id).addClass(this._colName);
 
     if(widgetPath){
         // load a specific single widget
@@ -369,22 +520,28 @@ Jahia.Portal.Area = function (id, index, portal, widgetPath, widgetState, widget
 };
 
 Jahia.Portal.Area.prototype = {
+    /**
+     * Load a single specific widget
+     *
+     * @this Area
+     * @param path {String}
+     * @param state {String}
+     * @param view {String}
+     */
     load: function (path, state, view) {
         var instance = this;
-
-        // Add "col-" jcr name to the html class
-        $("#" + instance._id).addClass(instance._colName);
-
         instance._portal._debug("Load widget: " + path);
 
         instance.registerWidget(path, undefined, state, view);
     },
 
+    /**
+     * Load all widgets for the current area
+     *
+     * @this Area
+     */
     loadAll: function () {
         var instance = this;
-
-        // Add "col-" jcr name to the html class
-        $("#" + instance._id).addClass(instance._colName);
 
         instance._portal._debug("Load widgets for col: " + instance._colName);
 
@@ -399,6 +556,16 @@ Jahia.Portal.Area.prototype = {
             });
     },
 
+    /**
+     * Register a widget for the current area
+     *
+     * @this Area
+     * @param path {String} widget path
+     * @param state {String} widget state, optional
+     * @param view {String} view used to load the widget, optional
+     * @param $htmlToReplace {Object} jquery object to replace by the widget content, optional
+     * @param forcedOriginalView {String} specify a original view different from the view used to load the widget, optional
+     */
     registerWidget: function (path, $htmlToReplace, state, view, forcedOriginalView) {
         var instance = this;
         var widgetHtmlId = "w_" + Math.random().toString(36).substring(7);
@@ -408,10 +575,15 @@ Jahia.Portal.Area.prototype = {
 
 /**
  * Portal widget object
- * @param id
- * @param path
- * @param area
+ *
  * @constructor
+ * @param id {String} widget id, mandatory
+ * @param path {String} widget path, mandatory
+ * @param area {Area} parent area, mandatory
+ * @param $htmlToReplace {Object} jquery object to replace by the widget content, optional
+ * @param state {String} widget state, optional
+ * @param view {String} widget view, optional, used to load the widget
+ * @param forcedOriginalView {String} widget original view, optional, used to force original view
  */
 Jahia.Portal.Widget = function (id, path, $htmlToReplace, state, view, forcedOriginalView, area) {
     this._id = id;
@@ -427,6 +599,11 @@ Jahia.Portal.Widget = function (id, path, $htmlToReplace, state, view, forcedOri
 };
 
 Jahia.Portal.Widget.prototype = {
+    /**
+     * Init the widget
+     *
+     * @param $htmlToReplace
+     */
     init: function ($htmlToReplace) {
         var instance = this;
         instance._portal._debug("Load widget: " + instance._path);
@@ -441,6 +618,9 @@ Jahia.Portal.Widget.prototype = {
         instance.load(instance._initView);
     },
 
+    /**
+     * Attach event related to drag&drop actions on the widget
+     */
     attachEvents: function() {
         var instance = this;
         //detach
@@ -463,11 +643,22 @@ Jahia.Portal.Widget.prototype = {
         });
     },
 
+    /**
+     * Return the jQuery object corresponding to the widget
+     *
+     * @returns {*|jQuery|HTMLElement}
+     */
     getjQueryWidget: function() {
         var instance = this;
         return $("#" + instance._id);
     },
 
+    /**
+     * Load or reload the widget
+     *
+     * @param view {String} specify a view, optional
+     * @param callback {function}
+     */
     load: function (view, callback) {
         var instance = this;
         instance.attachEvents();
@@ -489,6 +680,11 @@ Jahia.Portal.Widget.prototype = {
         });
     },
 
+    /**
+     * Perform a move to a specific Area
+     *
+     * @param toArea {Area}
+     */
     performMove: function (toArea) {
         var instance = this;
 
@@ -517,6 +713,9 @@ Jahia.Portal.Widget.prototype = {
             });
     },
 
+    /**
+     * Perform delete action on the current widget
+     */
     performDelete: function() {
         var instance = this;
         $.ajax({
@@ -536,6 +735,12 @@ Jahia.Portal.Widget.prototype = {
             });
     },
 
+    /**
+     * Perform update action on the current widget
+     *
+     * @param data {Object} JSON object representing the current widget node
+     * @param callback
+     */
     performUpdate: function(data, callback) {
         var instance = this;
         $.ajax({
@@ -555,5 +760,3 @@ Jahia.Portal.Widget.prototype = {
             });
     }
 };
-
-
