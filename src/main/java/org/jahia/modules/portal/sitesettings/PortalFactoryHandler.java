@@ -81,6 +81,8 @@ public class PortalFactoryHandler implements Serializable {
         if(StringUtils.isNotEmpty(identifier)){
             try {
                 JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(identifier);
+                ctx.getRequestScope().put("portalNode", portalNode);
+
                 form.setName(portalNode.getDisplayableName());
                 
                 List<String> allowedWidgetTypes = new ArrayList<String>();

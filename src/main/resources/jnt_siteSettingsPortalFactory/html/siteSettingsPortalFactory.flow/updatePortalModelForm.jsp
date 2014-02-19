@@ -68,8 +68,7 @@
                                      nodeTypes="jnt:template"
                                      displayIncludeChildren="false"
                                      selectableNodeTypes="jnt:template"
-                                     includeChildren=""
-                                     valueType="title"/>
+                                     valueType="path"/>
             </div>
         </div>
         <div class="row-fluid">
