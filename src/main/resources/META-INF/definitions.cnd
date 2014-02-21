@@ -12,6 +12,7 @@
 [jmix:portal] mixin
  - j:templateRootPath (string) mandatory
  - j:fullTemplate (string)
+ - j:lastViewed (date)
  + * (jnt:portalTab)
 
 [jmix:hasModel] mixin
@@ -28,6 +29,7 @@
  - j:allowedWidgetTypes (string) multiple
 
 [jnt:portalUser] > jnt:content, mix:title, jmix:list, jmix:portal, jmix:hasModel
+- j:siteKey (string)
 
 [jnt:portalTab] > jnt:content, mix:title, jmix:list, jmix:hasTemplateNode, jmix:portalWidgetSkin
  + * (nt:base) = nt:base version
@@ -37,8 +39,6 @@ orderable
  + * (jmix:portalWidget)
 
 [jnt:portalArea] > jnt:content, jmix:layoutComponentContent, jmix:studioOnly
-
-
 
 //---------------------------------------------------------
 // Portal admin

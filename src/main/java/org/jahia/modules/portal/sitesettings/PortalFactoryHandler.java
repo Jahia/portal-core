@@ -17,6 +17,8 @@ import org.springframework.webflow.execution.RequestContext;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
+import javax.jcr.query.Query;
+import javax.jcr.query.QueryManager;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,6 +100,19 @@ public class PortalFactoryHandler implements Serializable {
         }
 
         return form;
+    }
+
+    public void initUserPortalsManager(RequestContext ctx) {
+        try {
+            JCRSessionWrapper sessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession("live");
+            QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
+            Query query = queryManager.createQuery(("select * from [" + PortalConstants.JNT_PORTAL_USER + "] " +
+                    "as p where p.['" + PortalConstants.J_SITEKEY + "'] = '" + getRenderContext(ctx).getSite().getSiteKey()) + "'", Query.JCR_SQL2);
+
+            ctx.getRequestScope().put("userPortals", query.execute().getNodes());
+        } catch (RepositoryException e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 
     public boolean enablePortalModel(RequestContext ctx, String selectedPortalModelIdentifier){

@@ -14,6 +14,7 @@
             <evaluate expression="flowHandler.getSitePortalModels(flowRequestContext)" result="requestScope.portals"/>
         </on-render>
         <transition on="createPortal" to="newPortalModelForm" bind="false" validate="false"/>
+        <transition on="manageUserPortals" to="manageUserPortals" bind="false" validate="false"/>
         <transition on="editPortal" to="updatePortalModelForm" bind="false" validate="false">
             <set name="flowScope.portalIdentifier" value="requestParameters.selectedPortal" type="java.lang.String" />
         </transition>
@@ -23,6 +24,12 @@
         <transition on="disablePortal" to="portalFactory" bind="false" validate="false">
             <evaluate expression="flowHandler.disablePortalModel(flowRequestContext, requestParameters.selectedPortal)"/>
         </transition>
+    </view-state>
+
+    <view-state id="manageUserPortals">
+        <on-render>
+            <evaluate expression="flowHandler.initUserPortalsManager(flowRequestContext)"/>
+        </on-render>
     </view-state>
 
     <view-state id="newPortalModelForm" model="portalModelForm">

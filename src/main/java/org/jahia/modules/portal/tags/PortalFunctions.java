@@ -8,6 +8,10 @@ import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderService;
 import org.jahia.services.render.View;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,5 +110,10 @@ public class PortalFunctions {
 
     public static Collection<JCRNodeWrapper> getUserPortalsByModel(JCRNodeWrapper portalModelNode) {
         return portalService.getUserPortalsInstanceByModel(portalModelNode);
+    }
+
+    public static long daysBetweenSinceDate(String date) {
+        DateTime sinceDate = ISODateTimeFormat.dateOptionalTimeParser().parseDateTime(date);
+        return Days.daysBetween(new LocalDate(sinceDate), new LocalDate()).getDays();
     }
 }

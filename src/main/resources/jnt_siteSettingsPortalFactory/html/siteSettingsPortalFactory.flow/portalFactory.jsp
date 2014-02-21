@@ -51,6 +51,10 @@
             <i class="icon-plus"></i>
                 <fmt:message key="newPortalModelForm.title"/>
         </button>
+        <button class="btn" onclick="submitPortalForm('manageUserPortals')">
+            <i class="icon-plus"></i>
+            User portals
+        </button>
     </div>
 
     <p>

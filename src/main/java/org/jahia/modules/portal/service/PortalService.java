@@ -184,7 +184,7 @@ public class PortalService {
             JCRNodeWrapper templateRootNode = session.getNode(templateRootPath);
             StringBuilder q = new StringBuilder();
             q.append("select * from [" + PortalConstants.JNT_CONTENT_TEMPLATE + "] as t where isdescendantnode(t, ['").append(templateRootNode.getPath())
-                    .append("'])  and contains(t.['" + PortalConstants.J_APPLY_ON + "'], '" + PortalConstants.JNT_PORTAL_TAB + "')");
+                    .append("']) and contains(t.['" + PortalConstants.J_APPLY_ON + "'], '" + PortalConstants.JNT_PORTAL_TAB + "')");
             Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
 
             NodeIterator nodes = query.execute().getNodes();
@@ -381,7 +381,6 @@ public class PortalService {
     public Collection<JCRNodeWrapper> getUserPortalsInstanceByModel(JCRNodeWrapper portalModelNode) {
         SortedSet<JCRNodeWrapper> portals = new TreeSet<JCRNodeWrapper>(PORTALS_COMPARATOR);
 
-
         try {
             if (portalIsModel(portalModelNode)) {
                 JCRSessionWrapper sessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession("live");
@@ -418,6 +417,7 @@ public class PortalService {
             portal.setProperty(PortalConstants.JCR_TITLE, modelNode.getDisplayableName());
             portal.setProperty(PortalConstants.J_FULL_TEMPLATE, modelNode.getPropertyAsString(PortalConstants.J_FULL_TEMPLATE));
             portal.setProperty(PortalConstants.J_MODEL, modelNode);
+            portal.setProperty(PortalConstants.J_SITEKEY, modelNode.getResolveSite().getSiteKey());
 
             //copy tabs
             List<JCRNodeWrapper> tabNodes = getPortalTabs(modelNode, sessionWrapper);

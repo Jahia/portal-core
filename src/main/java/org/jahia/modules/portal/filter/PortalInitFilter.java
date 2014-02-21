@@ -12,6 +12,8 @@ import org.jahia.services.render.filter.RenderChain;
 import org.jahia.services.render.filter.cache.AggregateCacheFilter;
 import org.jahia.utils.ScriptEngineUtils;
 import org.jahia.utils.WebUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
@@ -25,6 +27,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,6 +51,21 @@ public class PortalInitFilter extends AbstractFilter{
     private String template;
     private String resolvedTemplate;
     private Boolean debugEnabled;
+
+    @Override
+    public String prepare(RenderContext renderContext, Resource resource, RenderChain chain) throws Exception {
+        JCRNodeWrapper portalNode = JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JMIX_PORTAL);
+        DateTime currentDateTime = new DateTime();
+        String lastViewed = portalNode.getPropertyAsString(PortalConstants.J_LASTVIEWED);
+
+        boolean firstView = StringUtils.isEmpty(lastViewed);
+        if(firstView || currentDateTime.getDayOfYear() != ISODateTimeFormat.dateOptionalTimeParser().parseDateTime(lastViewed).getDayOfYear()){
+            portalNode.setProperty(PortalConstants.J_LASTVIEWED, currentDateTime.toCalendar(Locale.ENGLISH));
+            portalNode.saveSession();
+        }
+
+        return null;
+    }
 
     @Override
     public String execute(String previousOut, RenderContext renderContext, Resource resource, RenderChain chain) throws Exception {

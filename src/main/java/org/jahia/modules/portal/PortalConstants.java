@@ -23,6 +23,8 @@ public class PortalConstants {
     public static final String J_ENABLED = "j:enabled";
     public static final String J_WIDGET_SKIN = "j:widgetSkin";
     public static final String J_MODEL = "j:model";
+    public static final String J_SITEKEY = "j:siteKey";
+    public static final String J_LASTVIEWED = "j:lastViewed";
 
     public static final String JNT_CONTENT_TEMPLATE = "jnt:contentTemplate";
     public static final String J_TEMPLATE_NAME = "j:templateName";
