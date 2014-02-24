@@ -10,18 +10,28 @@ import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.RenderService;
+import org.jahia.utils.i18n.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.binding.message.MessageBuilder;
+import org.springframework.binding.message.MessageContext;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.webflow.execution.RequestContext;
 
+import javax.jcr.AccessDeniedException;
+import javax.jcr.ItemNotFoundException;
 import javax.jcr.RepositoryException;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
+import javax.jcr.version.VersionException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,6 +44,7 @@ public class PortalFactoryHandler implements Serializable {
     private static final long serialVersionUID = 978219001163542883L;
 
     private static final Logger logger = LoggerFactory.getLogger(PortalFactoryHandler.class);
+    private static final String BUNDLE = "resources.portal-core";
 
     @Autowired
     private transient PortalService portalService;
@@ -128,6 +139,40 @@ public class PortalFactoryHandler implements Serializable {
     public String getTemplatesPath(RequestContext ctx){
         JCRSiteNode currentSite = getRenderContext(ctx).getSite();
         return currentSite.getTemplatePackage().getRootFolderPath() + "/" + currentSite.getTemplatePackage().getVersion() + "/templates";
+    }
+
+    public void deleteUserPortal(RequestContext ctx, MessageContext messageContext, String selectedPortal){
+        JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+        try {
+            JCRNodeWrapper portalNode = sessionWrapper.getNodeByIdentifier(selectedPortal);
+            String name = portalNode.getDisplayableName();
+            portalNode.remove();
+            sessionWrapper.save();
+            setActionMessage(messageContext, true, "manageUserPortals", ".deleted", name);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            setActionMessage(messageContext, false, "manageUserPortals", ".deleted", null);
+        }
+    }
+
+    private void setActionMessage(MessageContext msgCtx, boolean success, String panel, String action, Object name){
+        Locale locale = LocaleContextHolder.getLocale();
+
+        String successFlag = success ? ".successfully" : ".failed";
+
+        String message = Messages.get(BUNDLE, panel + successFlag + action, locale);
+        if(name != null){
+            message = Messages.format(message, name);
+        }
+
+        MessageBuilder messageBuilder = new MessageBuilder();
+        if(success){
+            messageBuilder.info();
+        } else {
+            messageBuilder.error();
+        }
+        messageBuilder.defaultText(message);
+        msgCtx.addMessage(messageBuilder.build());
     }
 
     private JCRSessionWrapper getCurrentUserSession(RequestContext ctx) {

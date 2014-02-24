@@ -22,6 +22,21 @@
 <%--@elvariable id="searchCriteria" type="org.jahia.services.usermanager.SearchCriteria"--%>
 <%--@elvariable id="userPortal" type="org.jahia.services.content.JCRNodeWrapper"--%>
 
+<template:addResources type="javascript" resources="jquery.min.js,jquery-ui.min.js,jquery.blockUI.js,workInProgress.js,admin-bootstrap.js"/>
+<template:addResources type="css" resources="admin-bootstrap.css"/>
+<template:addResources type="css" resources="jquery-ui.smoothness.css,jquery-ui.smoothness-jahia.css,tablecloth.css"/>
+<template:addResources>
+    <script type="text/javascript">
+        function submitPortalForm(act, portal) {
+            $('#portalFormAction').val(act);
+            if(portal){
+                $('#portalFormSelected').val(portal);
+            }
+            $('#portalForm').submit();
+        }
+    </script>
+</template:addResources>
+
 <h2>manage user portals</h2>
 
 <form action="${flowExecutionUrl}" method="post" style="display: inline;" id="portalForm">
@@ -69,6 +84,7 @@
                 </c:when>
                 <c:otherwise>
                     <c:forEach items="${userPortals}" var="userPortal" varStatus="loopStatus">
+                        <fmt:message var="i18nRemoveConfirm" key="manageUserPortals.remove"/><c:set var="i18nRemoveConfirm" value="${functions:escapeJavaScript(i18nRemoveConfirm)}"/>
                         <tr>
                             <td align="center" class="center">${loopStatus.count}</td>
                             <td>
@@ -89,10 +105,24 @@
                                 </c:choose>
                             </td>
                             <td>
-                                ${portal:getDaysSinceDate(userPortal.properties['j:lastViewed'].string)}
+                                <c:set var="lastViewed" value="${portal:getDaysSinceDate(userPortal.properties['j:lastViewed'].string)}" />
+                                <c:choose>
+                                    <c:when test="${lastViewed == 0}">
+                                        <fmt:message key="manageUserPortals.today" />
+                                    </c:when>
+                                    <c:when test="${lastViewed == 1}">
+                                        <fmt:message key="manageUserPortals.lastViewed.day" />
+                                    </c:when>
+                                    <c:otherwise>
+                                        <fmt:message key="manageUserPortals.lastViewed.days">
+                                            <fmt:param value="${lastViewed}" />
+                                        </fmt:message>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
                             <td>
-                                <a style="margin-bottom:0;" class="btn btn-danger btn-small" title="${i18nRemove}" href="#delete">
+                                <a style="margin-bottom:0;" class="btn btn-danger btn-small" title="${i18nRemove}" href="#delete"
+                                        onclick="if (confirm('${i18nRemoveConfirm}')) { submitPortalForm('removePortal', '${userPortal.identifier}');} return false; ">
                                     <i class="icon-remove icon-white"></i>
                                 </a>
                             </td>

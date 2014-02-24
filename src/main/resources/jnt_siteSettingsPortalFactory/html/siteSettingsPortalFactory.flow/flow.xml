@@ -30,6 +30,9 @@
         <on-render>
             <evaluate expression="flowHandler.initUserPortalsManager(flowRequestContext)"/>
         </on-render>
+        <transition on="removePortal" to="manageUserPortals">
+            <evaluate expression="flowHandler.deleteUserPortal(flowRequestContext, messageContext, requestParameters.selectedPortal)" />
+        </transition>
     </view-state>
 
     <view-state id="newPortalModelForm" model="portalModelForm">
