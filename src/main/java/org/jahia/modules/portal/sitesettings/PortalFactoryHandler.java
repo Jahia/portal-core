@@ -5,9 +5,13 @@ import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
+import org.jahia.modules.portal.sitesettings.table.UserPortalsPager;
+import org.jahia.modules.portal.sitesettings.table.UserPortalsTable;
+import org.jahia.modules.portal.sitesettings.table.UserPortalsTableRow;
 import org.jahia.services.content.*;
 import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
+import org.jahia.services.query.QueryResultWrapperImpl;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.RenderService;
 import org.jahia.utils.i18n.Messages;
@@ -19,19 +23,13 @@ import org.springframework.binding.message.MessageContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.webflow.execution.RequestContext;
 
-import javax.jcr.AccessDeniedException;
-import javax.jcr.ItemNotFoundException;
+import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
-import javax.jcr.lock.LockException;
-import javax.jcr.nodetype.ConstraintViolationException;
 import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
-import javax.jcr.version.VersionException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -113,14 +111,49 @@ public class PortalFactoryHandler implements Serializable {
         return form;
     }
 
-    public void initUserPortalsManager(RequestContext ctx) {
+    public UserPortalsTable initUserPortalsManager(RequestContext ctx) {
+        UserPortalsTable userPortalsTable = new UserPortalsTable();
+        UserPortalsPager pager = new UserPortalsPager();
+        try {
+            pager.setMaxResults(getUserPortalsQuery(ctx).execute().getNodes().getSize());
+        } catch (RepositoryException e) {
+            logger.error(e.getMessage(), e);
+            pager.setMaxResults(0);
+        }
+        userPortalsTable.setPager(pager);
+        userPortalsTable.setRows(new LinkedHashMap<String, UserPortalsTableRow>());
+        return userPortalsTable;
+    }
+
+    private Query getUserPortalsQuery(RequestContext ctx){
+        Query query = null;
         try {
             JCRSessionWrapper sessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession("live");
             QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
-            Query query = queryManager.createQuery(("select * from [" + PortalConstants.JNT_PORTAL_USER + "] " +
+            query = queryManager.createQuery(("select * from [" + PortalConstants.JNT_PORTAL_USER + "] " +
                     "as p where p.['" + PortalConstants.J_SITEKEY + "'] = '" + getRenderContext(ctx).getSite().getSiteKey()) + "'", Query.JCR_SQL2);
+        } catch (RepositoryException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return query;
+    }
 
-            ctx.getRequestScope().put("userPortals", query.execute().getNodes());
+    public void doUserPortalsQuery(RequestContext ctx, UserPortalsTable userPortalsTable){
+        try {
+            Query query = getUserPortalsQuery(ctx);
+            query.setLimit(userPortalsTable.getPager().getItemsPerPage());
+            query.setOffset(userPortalsTable.getPager().getItemsPerPage() * (userPortalsTable.getPager().getPage() - 1));
+
+            NodeIterator nodeIterator = query.execute().getNodes();
+
+            while (nodeIterator.hasNext()){
+                JCRNodeWrapper portalNode = (JCRNodeWrapper) nodeIterator.next();
+                UserPortalsTableRow row = new UserPortalsTableRow();
+                row.setUserNodeIdentifier(JCRContentUtils.getParentOfType(portalNode, "jnt:user").getIdentifier());
+                row.setModelName(((JCRNodeWrapper) portalNode.getProperty("j:model").getNode()).getDisplayableName());
+                row.setLastUsed(portalNode.getPropertyAsString("j:lastViewed"));
+                userPortalsTable.getRows().put(portalNode.getPath(), row);
+            }
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
         }

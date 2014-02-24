@@ -21,6 +21,7 @@
 <%--@elvariable id="flowExecutionUrl" type="java.lang.String"--%>
 <%--@elvariable id="searchCriteria" type="org.jahia.services.usermanager.SearchCriteria"--%>
 <%--@elvariable id="userPortal" type="org.jahia.services.content.JCRNodeWrapper"--%>
+<%--@elvariable id="userPortalsTable" type="org.jahia.modules.portal.sitesettings.table.UserPortalsTable"--%>
 
 <template:addResources type="javascript" resources="jquery.min.js,jquery-ui.min.js,jquery.blockUI.js,workInProgress.js,admin-bootstrap.js"/>
 <template:addResources type="css" resources="admin-bootstrap.css"/>
@@ -63,8 +64,11 @@
     </p>
 
     <div>
-        <c:set var="portalsFound" value="${userPortals.size > 0}"/>
+        <c:set var="portalsFound" value="${fn:length(userPortalsTable.rows) > 0}"/>
 
+        <p>
+            ${userPortalsTable.pager.maxResults}
+        </p>
         <table class="table table-bordered table-striped table-hover">
             <thead>
             <tr>
@@ -76,6 +80,7 @@
             </tr>
             </thead>
             <tbody>
+
             <c:choose>
                 <c:when test="${!portalsFound}">
                     <tr>
@@ -83,29 +88,19 @@
                     </tr>
                 </c:when>
                 <c:otherwise>
-                    <c:forEach items="${userPortals}" var="userPortal" varStatus="loopStatus">
+                    <c:forEach items="${userPortalsTable.rows}" var="userPortalRow" varStatus="loopStatus">
                         <fmt:message var="i18nRemoveConfirm" key="manageUserPortals.remove"/><c:set var="i18nRemoveConfirm" value="${functions:escapeJavaScript(i18nRemoveConfirm)}"/>
+                        <jcr:node var="userNode" uuid="${userPortalRow.value.userNodeIdentifier}"/>
                         <tr>
                             <td align="center" class="center">${loopStatus.count}</td>
                             <td>
-                                ${userPortal.properties['j:model'].node.displayableName}
+                                ${userPortalRow.value.modelName}
                             </td>
                             <td>
-                                <c:set var="user" value="${jcr:getParentOfType(userPortal, 'jnt:user')}"/>
-                                <jcr:nodeProperty node="${user}" name="j:firstName" var="firstname"/>
-                                <jcr:nodeProperty node="${user}" name="j:lastName" var="lastname"/>
-
-                                <c:choose>
-                                    <c:when test="${empty firstname.string && empty lastname.string}">
-                                        ${fn:escapeXml(currentNode.name)}
-                                    </c:when>
-                                    <c:otherwise>
-                                        ${fn:escapeXml(firstname.string)}&nbsp;${fn:escapeXml(lastname.string)}
-                                    </c:otherwise>
-                                </c:choose>
+                                ${fn:escapeXml(userNode.displayableName)}
                             </td>
                             <td>
-                                <c:set var="lastViewed" value="${portal:getDaysSinceDate(userPortal.properties['j:lastViewed'].string)}" />
+                                <c:set var="lastViewed" value="${portal:getDaysSinceDate(userPortalRow.value.lastUsed)}" />
                                 <c:choose>
                                     <c:when test="${lastViewed == 0}">
                                         <fmt:message key="manageUserPortals.today" />
