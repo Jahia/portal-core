@@ -145,7 +145,7 @@ public class PortalFactoryHandler implements Serializable {
             query.setOffset(userPortalsTable.getPager().getItemsPerPage() * (userPortalsTable.getPager().getPage() - 1));
 
             NodeIterator nodeIterator = query.execute().getNodes();
-
+            userPortalsTable.setRows(new LinkedHashMap<String, UserPortalsTableRow>());
             while (nodeIterator.hasNext()){
                 JCRNodeWrapper portalNode = (JCRNodeWrapper) nodeIterator.next();
                 UserPortalsTableRow row = new UserPortalsTableRow();

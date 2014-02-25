@@ -8,6 +8,7 @@
 <%@ taglib prefix="user" uri="http://www.jahia.org/tags/user" %>
 <%@ taglib prefix="portal" uri="http://www.jahia.org/tags/portalLib" %>
 <%@ taglib prefix="query" uri="http://www.jahia.org/tags/queryLib" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%--@elvariable id="currentNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="out" type="java.io.PrintWriter"--%>
 <%--@elvariable id="script" type="org.jahia.services.render.scripting.Script"--%>
@@ -23,9 +24,11 @@
 <%--@elvariable id="userPortal" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="userPortalsTable" type="org.jahia.modules.portal.sitesettings.table.UserPortalsTable"--%>
 
+<fmt:message key="label.workInProgressTitle" var="i18nWaiting"/><c:set var="i18nWaiting" value="${functions:escapeJavaScript(i18nWaiting)}"/>
 <template:addResources type="javascript" resources="jquery.min.js,jquery-ui.min.js,jquery.blockUI.js,workInProgress.js,admin-bootstrap.js"/>
 <template:addResources type="css" resources="admin-bootstrap.css"/>
 <template:addResources type="css" resources="jquery-ui.smoothness.css,jquery-ui.smoothness-jahia.css,tablecloth.css"/>
+<template:addResources type="css" resources="portal-factory.css"/>
 <template:addResources>
     <script type="text/javascript">
         function submitPortalForm(act, portal) {
@@ -34,6 +37,20 @@
                 $('#portalFormSelected').val(portal);
             }
             $('#portalForm').submit();
+        }
+
+        function paginate(page, itemsPerPage, disabled) {
+            var form = $("#pagerForm");
+            if(page){
+                form.find("#page").val(page);
+            }
+            if(itemsPerPage){
+                form.find("#itemsPerPage").val(itemsPerPage)
+            }
+            if(!disabled){
+                workInProgress('${i18nWaiting}')
+                form.submit();
+            }
         }
     </script>
 </template:addResources>
@@ -64,11 +81,60 @@
     </p>
 
     <div>
-        <c:set var="portalsFound" value="${fn:length(userPortalsTable.rows) > 0}"/>
+        <c:set var="portalsCount" value="${fn:length(userPortalsTable.rows)}" />
+        <c:set var="portalsFound" value="${portalsCount > 0}"/>
 
-        <p>
-            ${userPortalsTable.pager.maxResults}
-        </p>
+        <div class="manageUserPortalsPagination">
+            <form:form commandName="userPortalsTable" action="${flowExecutionUrl}" method="post" id="pagerForm">
+                <form:hidden path="pager.itemsPerPage" id="itemsPerPage"/>
+                <form:hidden path="pager.page" id="page"/>
+                <input type="hidden" name="_eventId" value="paginateTable"/>
+            </form:form>
+
+            <div class="results span3">
+                <span>
+                    <fmt:message key="pagination.pageOf.withTotal">
+                        <fmt:param value="${userPortalsTable.pager.page}"/>
+                        <fmt:param value="${userPortalsTable.pager.pages}"/>
+                        <fmt:param value="${userPortalsTable.pager.maxResults}"/>
+                    </fmt:message>
+                </span>
+            </div>
+            <div class="pagination span6">
+                <c:set var="isStart" value="${userPortalsTable.pager.start}"/>
+                <c:set var="isEnd" value="${userPortalsTable.pager.end}"/>
+                <ul>
+                    <li class="${isStart ? 'disabled' : ''}"><a href="#" onclick="paginate(1, null, ${isStart})"><fmt:message key="pagination.begin"/></a></li>
+                    <li class="${isStart ? 'disabled' : ''}"><a href="#" onclick="paginate(${userPortalsTable.pager.page - 1}, null, ${isStart})"><fmt:message key="pagination.previous"/></a></li>
+
+                    <c:forEach var="i" begin="${userPortalsTable.pager.firstEntry}" end="${userPortalsTable.pager.lastEntry}">
+                        <li class="${i == userPortalsTable.pager.page ? 'active' : ''}">
+                            <a href="#" onclick="paginate(${i}, null, ${i == userPortalsTable.pager.page})">${i}</a>
+                        </li>
+                    </c:forEach>
+
+                    <li class="${isEnd ? 'disabled' : ''}"><a href="#" onclick="paginate(${userPortalsTable.pager.page + 1}, null, ${isEnd})"><fmt:message key="pagination.next"/></a></li>
+                    <li class="${isEnd ? 'disabled' : ''}"><a href="#" onclick="paginate(${userPortalsTable.pager.pages}, null, ${isEnd})"><fmt:message key="pagination.end"/></a></li>
+                </ul>
+            </div>
+
+            <div class="items span3">
+                <div class="btn-group">
+                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                        <fmt:message key="pagination.itemsPerPage"/>: ${userPortalsTable.pager.itemsPerPage}
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <c:forEach items="${userPortalsTable.pager.itemsPerPageEntries}" var="entry">
+                            <li class="${entry == userPortalsTable.pager.itemsPerPage ? 'active' : ''}">
+                                <a href="#" onclick="paginate(null, ${entry}, ${entry == userPortalsTable.pager.itemsPerPage})">${entry}</a>
+                            </li>
+                        </c:forEach>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <table class="table table-bordered table-striped table-hover">
             <thead>
             <tr>

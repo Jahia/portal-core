@@ -36,6 +36,9 @@
         <transition on="removePortal" to="manageUserPortals">
             <evaluate expression="flowHandler.deleteUserPortal(flowRequestContext, messageContext, requestParameters.selectedPortal)" />
         </transition>
+        <transition on="paginateTable" to="manageUserPortals">
+            <evaluate expression="flowHandler.doUserPortalsQuery(flowRequestContext, userPortalsTable)" />
+        </transition>
     </view-state>
 
     <view-state id="newPortalModelForm" model="portalModelForm">
