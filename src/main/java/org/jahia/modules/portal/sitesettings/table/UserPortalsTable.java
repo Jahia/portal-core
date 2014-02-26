@@ -11,10 +11,19 @@ public class UserPortalsTable implements Serializable{
 
     //results
     private UserPortalsPager pager;
+    private UserPortalsSearchCriteria searchCriteria;
     private HashMap<String, UserPortalsTableRow> rows;
 
     public UserPortalsPager getPager() {
         return pager;
+    }
+
+    public UserPortalsSearchCriteria getSearchCriteria() {
+        return searchCriteria;
+    }
+
+    public void setSearchCriteria(UserPortalsSearchCriteria searchCriteria) {
+        this.searchCriteria = searchCriteria;
     }
 
     public void setPager(UserPortalsPager pager) {

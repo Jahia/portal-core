@@ -39,12 +39,13 @@
         }
 
         function paginate(page, itemsPerPage, disabled) {
-            var form = $("#pagerForm");
+            var form = $("#manageUserPortalsForm");
+            form.find("#event").val("paginateTable");
             if(page){
-                form.find("#page").val(page);
+                form.find("#pager_page").val(page);
             }
             if(itemsPerPage){
-                form.find("#itemsPerPage").val(itemsPerPage);
+                form.find("#pager_itemsPerPage").val(itemsPerPage);
             }
             if(!disabled){
                 workInProgress('${i18nWaiting}');
@@ -53,21 +54,30 @@
         }
 
         function order(sortBy, asc, disabled) {
-            var form = $("#pagerForm");
+            var form = $("#manageUserPortalsForm");
+            form.find("#event").val("paginateTable");
             if(sortBy){
-                form.find("#sortBy").val(sortBy);
+                form.find("#pager_sortBy").val(sortBy);
             }
-            form.find("#sortAsc").val(asc);
+            form.find("#pager_sortAsc").val(asc);
 
             if(!disabled){
                 workInProgress('${i18nWaiting}');
                 form.submit();
             }
         }
+
+        function search(searchString) {
+            var form = $("#manageUserPortalsForm");
+            form.find("#searchCriteria_searchString").val(searchString);
+            form.find("#event").val("search");
+            workInProgress('${i18nWaiting}');
+            form.submit();
+        }
     </script>
 </template:addResources>
 
-<h2>manage user portals</h2>
+<h2><fmt:message key="manageUserPortals.title"/></h2>
 
 <form action="${flowExecutionUrl}" method="post" style="display: inline;" id="portalForm">
     <input type="hidden" name="selectedPortal" id="portalFormSelected"/>
@@ -96,15 +106,28 @@
         <c:set var="portalsCount" value="${fn:length(userPortalsTable.rows)}" />
         <c:set var="portalsFound" value="${portalsCount > 0}"/>
 
-        <div class="manageUserPortalsPagination">
-            <form:form commandName="userPortalsTable" action="${flowExecutionUrl}" method="post" id="pagerForm">
-                <form:hidden path="pager.itemsPerPage" id="itemsPerPage"/>
-                <form:hidden path="pager.page" id="page"/>
-                <form:hidden path="pager.sortBy" id="sortBy"/>
-                <form:hidden path="pager.sortAsc" id="sortAsc"/>
-                <input type="hidden" name="_eventId" value="paginateTable"/>
-            </form:form>
+        <form:form commandName="userPortalsTable" action="${flowExecutionUrl}" method="post" id="manageUserPortalsForm">
+            <form:hidden path="pager.itemsPerPage" id="pager_itemsPerPage"/>
+            <form:hidden path="pager.page" id="pager_page"/>
+            <form:hidden path="pager.sortBy" id="pager_sortBy"/>
+            <form:hidden path="pager.sortAsc" id="pager_sortAsc"/>
+            <form:hidden path="searchCriteria.searchString" id="searchCriteria_searchString"/>
+            <input type="hidden" name="_eventId" id="event"/>
+        </form:form>
 
+        <div class="manageUserPortalsSearch">
+            <div class="input-append">
+                <label for="searchString"><fmt:message key="manageUserPortals.search"/></label>
+                <form:input path="userPortalsTable.searchCriteria.searchString" id="searchString" class="span6"
+                            onkeydown="if (event.keyCode == 13) search($('#searchString').val());"/>
+                <button class="btn btn-primary" type="submit" name="_eventId_search" onclick="search($('#searchString').val())">
+                    <i class="icon-search icon-white"></i>
+                    &nbsp;<fmt:message key='label.search'/>
+                </button>
+            </div>
+        </div>
+
+        <div class="manageUserPortalsPagination">
             <div class="results span3">
                 <span>
                     <fmt:message key="pagination.pageOf.withTotal">
@@ -114,6 +137,7 @@
                     </fmt:message>
                 </span>
             </div>
+
             <div class="pagination span6">
                 <c:set var="isStart" value="${userPortalsTable.pager.start}"/>
                 <c:set var="isEnd" value="${userPortalsTable.pager.end}"/>
@@ -153,14 +177,22 @@
             <tr>
                 <th width="3%">#</th>
                 <th class="${userPortalsTable.pager.sortBy == 'j:model' ? (userPortalsTable.pager.sortAsc ? 'headerSortUp' : 'headerSortDown') : ''}">
-                    <a href="#" onclick="order('j:model', ${!userPortalsTable.pager.sortAsc})">model</a>
+                    <a href="#" onclick="order('j:model', ${!userPortalsTable.pager.sortAsc})">
+                        <fmt:message key="manageUserPortals.table.header.model"/>
+                    </a>
                 </th>
-                <th>user</th>
+                <th>
+                    <fmt:message key="manageUserPortals.table.header.user"/>
+                </th>
                 <th class="${userPortalsTable.pager.sortBy == 'j:lastViewed' ? (userPortalsTable.pager.sortAsc ? 'headerSortUp' : 'headerSortDown') : ''}">
-                    <a href="#" onclick="order('j:lastViewed', ${!userPortalsTable.pager.sortAsc})">last used</a>
+                    <a href="#" onclick="order('j:lastViewed', ${!userPortalsTable.pager.sortAsc})">
+                        <fmt:message key="manageUserPortals.table.header.lastUsed"/>
+                    </a>
                 </th>
                 <th class="${userPortalsTable.pager.sortBy == 'jcr:created' ? (userPortalsTable.pager.sortAsc ? 'headerSortUp' : 'headerSortDown') : ''}">
-                    <a href="#" onclick="order('jcr:created', ${!userPortalsTable.pager.sortAsc})">created</a>
+                    <a href="#" onclick="order('jcr:created', ${!userPortalsTable.pager.sortAsc})">
+                        <fmt:message key="manageUserPortals.table.header.created"/>
+                    </a>
                 </th>
                 <th width="15%"><fmt:message key="label.actions"/></th>
             </tr>

@@ -1,11 +1,13 @@
 package org.jahia.modules.portal.sitesettings;
 
 import org.apache.commons.lang.StringUtils;
+import org.jahia.data.viewhelper.principal.PrincipalViewHelper;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
 import org.jahia.modules.portal.sitesettings.table.UserPortalsPager;
+import org.jahia.modules.portal.sitesettings.table.UserPortalsSearchCriteria;
 import org.jahia.modules.portal.sitesettings.table.UserPortalsTable;
 import org.jahia.modules.portal.sitesettings.table.UserPortalsTableRow;
 import org.jahia.services.content.*;
@@ -14,6 +16,7 @@ import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.query.QueryResultWrapperImpl;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.RenderService;
+import org.jahia.services.usermanager.JahiaUser;
 import org.jahia.utils.i18n.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +32,7 @@ import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import java.io.Serializable;
+import java.security.Principal;
 import java.util.*;
 
 /**
@@ -112,37 +116,87 @@ public class PortalFactoryHandler implements Serializable {
     }
 
     public UserPortalsTable initUserPortalsManager(RequestContext ctx) {
-        UserPortalsTable userPortalsTable = new UserPortalsTable();
+        return initUserPortalsManager(ctx, null);
+    }
+
+    public UserPortalsTable initUserPortalsManager(RequestContext ctx, UserPortalsTable userPortalsTable) {
+        if(userPortalsTable == null){
+            userPortalsTable = new UserPortalsTable();
+        }
         UserPortalsPager pager = new UserPortalsPager();
+        UserPortalsSearchCriteria searchCriteria = new UserPortalsSearchCriteria();
+        userPortalsTable.setPager(pager);
+        userPortalsTable.setSearchCriteria(searchCriteria);
+        userPortalsTable.setRows(new LinkedHashMap<String, UserPortalsTableRow>());
+
         try {
-            pager.setMaxResults(getUserPortalsQuery(ctx, null, null).execute().getNodes().getSize());
+            pager.setMaxResults(getUserPortalsQuery(ctx, userPortalsTable).execute().getNodes().getSize());
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
             pager.setMaxResults(0);
         }
-        userPortalsTable.setPager(pager);
-        userPortalsTable.setRows(new LinkedHashMap<String, UserPortalsTableRow>());
         return userPortalsTable;
     }
 
-    private Query getUserPortalsQuery(RequestContext ctx, String sortby, String sortOrder){
+    private Query getUserPortalsQuery(RequestContext ctx, UserPortalsTable userPortalsTable){
         Query query = null;
         try {
             JCRSessionWrapper sessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession("live");
             QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
-            query = queryManager.createQuery(("select * from [" + PortalConstants.JNT_PORTAL_USER + "] " +
-                    "as p where p.['" + PortalConstants.J_SITEKEY + "'] = '" +
-                    getRenderContext(ctx).getSite().getSiteKey()) + "'" +
-                    (StringUtils.isNotEmpty(sortby) ? " order by '" + sortby + "' " + sortOrder : ""), Query.JCR_SQL2);
+            StringBuilder builder = new StringBuilder("select * from [" + PortalConstants.JNT_PORTAL_USER + "] as p where");
+            boolean first = true;
+            if(userPortalsTable.getSearchCriteria() != null && StringUtils.isNotEmpty(userPortalsTable.getSearchCriteria().getSearchString())){
+                Set<Principal> searchResult = PrincipalViewHelper.getSearchResult("allProps",
+                        userPortalsTable.getSearchCriteria().getSearchString(), null, "providers",
+                        new String[]{"jcr"});
+
+                Iterator<Principal> principals = searchResult.iterator();
+                while (principals.hasNext()){
+                    if(first){
+                        builder.append("(");
+                        first = false;
+                    }
+                    JahiaUser user = (JahiaUser) principals.next();
+                    builder.append(" isdescendantnode(p, ['").append(user.getLocalPath()).append("'])");
+                    if(principals.hasNext()){
+                        builder.append(" or");
+                    }else {
+                        builder.append(")");
+                    }
+                }
+            }
+            if(!first){
+                builder.append(" and");
+            }
+            builder.append(" p.['").append(PortalConstants.J_SITEKEY).append("'] = '").append(getRenderContext(ctx).getSite().getSiteKey()).append("'");
+            if(userPortalsTable.getPager() != null && StringUtils.isNotEmpty(userPortalsTable.getPager().getSortBy())){
+                builder.append(" order by '").append(userPortalsTable.getPager().getSortBy()).append("' ").append(userPortalsTable.getPager().isSortAsc() ? "ASC" : "DESC");
+            }
+            query = queryManager.createQuery(builder.toString(), Query.JCR_SQL2);
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
         }
         return query;
     }
 
+    public void searchUserPortals(RequestContext ctx, UserPortalsTable userPortalsTable) {
+        try {
+            if (userPortalsTable.getSearchCriteria() != null && StringUtils.isNotEmpty(userPortalsTable.getSearchCriteria().getSearchString())) {
+                UserPortalsSearchCriteria searchCriteria = userPortalsTable.getSearchCriteria();
+                initUserPortalsManager(ctx, userPortalsTable);
+                userPortalsTable.setSearchCriteria(searchCriteria);
+                userPortalsTable.getPager().setMaxResults(getUserPortalsQuery(ctx, userPortalsTable).execute().getNodes().getSize());
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            doUserPortalsQuery(ctx, userPortalsTable);
+        }
+    }
+
     public void doUserPortalsQuery(RequestContext ctx, UserPortalsTable userPortalsTable){
         try {
-            Query query = getUserPortalsQuery(ctx, userPortalsTable.getPager().getSortBy(), userPortalsTable.getPager().isSortAsc() ? "ASC" : "DESC");
+            Query query = getUserPortalsQuery(ctx, userPortalsTable);
             query.setLimit(userPortalsTable.getPager().getItemsPerPage());
             query.setOffset(userPortalsTable.getPager().getItemsPerPage() * (userPortalsTable.getPager().getPage() - 1));
 
