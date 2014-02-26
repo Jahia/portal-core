@@ -177,14 +177,16 @@ public class PortalFactoryHandler implements Serializable {
         return currentSite.getTemplatePackage().getRootFolderPath() + "/" + currentSite.getTemplatePackage().getVersion() + "/templates";
     }
 
-    public void deleteUserPortal(RequestContext ctx, MessageContext messageContext, String selectedPortal){
+    public void deleteUserPortal(RequestContext ctx, MessageContext messageContext, String selectedPortal, UserPortalsTable userPortalsTable){
         JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
         try {
-            JCRNodeWrapper portalNode = sessionWrapper.getNodeByIdentifier(selectedPortal);
+            JCRNodeWrapper portalNode = sessionWrapper.getNode(selectedPortal);
             String name = portalNode.getDisplayableName();
             portalNode.remove();
             sessionWrapper.save();
             setActionMessage(messageContext, true, "manageUserPortals", ".deleted", name);
+
+            userPortalsTable.getPager().setMaxResults(userPortalsTable.getPager().getMaxResults() - 1);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             setActionMessage(messageContext, false, "manageUserPortals", ".deleted", null);

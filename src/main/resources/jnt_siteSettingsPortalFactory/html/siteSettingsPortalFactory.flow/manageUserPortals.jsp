@@ -21,7 +21,6 @@
 <%--@elvariable id="flowRequestContext" type="org.springframework.webflow.execution.RequestContext"--%>
 <%--@elvariable id="flowExecutionUrl" type="java.lang.String"--%>
 <%--@elvariable id="searchCriteria" type="org.jahia.services.usermanager.SearchCriteria"--%>
-<%--@elvariable id="userPortal" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="userPortalsTable" type="org.jahia.modules.portal.sitesettings.table.UserPortalsTable"--%>
 
 <fmt:message key="label.workInProgressTitle" var="i18nWaiting"/><c:set var="i18nWaiting" value="${functions:escapeJavaScript(i18nWaiting)}"/>
@@ -207,7 +206,7 @@
                             </td>
                             <td>
                                 <a style="margin-bottom:0;" class="btn btn-danger btn-small" title="${i18nRemove}" href="#delete"
-                                        onclick="if (confirm('${i18nRemoveConfirm}')) { submitPortalForm('removePortal', '${userPortal.identifier}');} return false; ">
+                                        onclick="if (confirm('${i18nRemoveConfirm}')) { submitPortalForm('removePortal', '${userPortalRow.key}');} return false; ">
                                     <i class="icon-remove icon-white"></i>
                                 </a>
                             </td>

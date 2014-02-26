@@ -34,7 +34,7 @@
         </on-render>
 
         <transition on="removePortal" to="manageUserPortals">
-            <evaluate expression="flowHandler.deleteUserPortal(flowRequestContext, messageContext, requestParameters.selectedPortal)" />
+            <evaluate expression="flowHandler.deleteUserPortal(flowRequestContext, messageContext, requestParameters.selectedPortal, userPortalsTable)" />
         </transition>
 
         <transition on="paginateTable" to="manageUserPortals"/>
