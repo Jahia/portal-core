@@ -10,7 +10,7 @@ public class UserPortalsPager implements Serializable {
 
     private long maxResults = 0;
     private long page = 1;
-    private long itemsPerPage = 1;
+    private long itemsPerPage = 2;
     private long pageEntries = 5;
     private Long[] itemsPerPageEntries = new Long[]{50l, 100l, 200l, 400l, 800l};
     private boolean sortAsc = true;

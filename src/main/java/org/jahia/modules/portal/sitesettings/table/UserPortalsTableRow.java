@@ -1,6 +1,7 @@
 package org.jahia.modules.portal.sitesettings.table;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by kevan on 24/02/14.
@@ -11,6 +12,7 @@ public class UserPortalsTableRow implements Serializable{
     private String userNodeIdentifier;
     private String modelName;
     private String lastUsed;
+    private Date created;
 
     public String getUserNodeIdentifier() {
         return userNodeIdentifier;
@@ -34,5 +36,13 @@ public class UserPortalsTableRow implements Serializable{
 
     public void setLastUsed(String lastUsed) {
         this.lastUsed = lastUsed;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 }

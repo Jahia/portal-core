@@ -115,7 +115,7 @@ public class PortalFactoryHandler implements Serializable {
         UserPortalsTable userPortalsTable = new UserPortalsTable();
         UserPortalsPager pager = new UserPortalsPager();
         try {
-            pager.setMaxResults(getUserPortalsQuery(ctx).execute().getNodes().getSize());
+            pager.setMaxResults(getUserPortalsQuery(ctx, null, null).execute().getNodes().getSize());
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
             pager.setMaxResults(0);
@@ -125,13 +125,15 @@ public class PortalFactoryHandler implements Serializable {
         return userPortalsTable;
     }
 
-    private Query getUserPortalsQuery(RequestContext ctx){
+    private Query getUserPortalsQuery(RequestContext ctx, String sortby, String sortOrder){
         Query query = null;
         try {
             JCRSessionWrapper sessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession("live");
             QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
             query = queryManager.createQuery(("select * from [" + PortalConstants.JNT_PORTAL_USER + "] " +
-                    "as p where p.['" + PortalConstants.J_SITEKEY + "'] = '" + getRenderContext(ctx).getSite().getSiteKey()) + "'", Query.JCR_SQL2);
+                    "as p where p.['" + PortalConstants.J_SITEKEY + "'] = '" +
+                    getRenderContext(ctx).getSite().getSiteKey()) + "'" +
+                    (StringUtils.isNotEmpty(sortby) ? " order by '" + sortby + "' " + sortOrder : ""), Query.JCR_SQL2);
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
         }
@@ -140,7 +142,7 @@ public class PortalFactoryHandler implements Serializable {
 
     public void doUserPortalsQuery(RequestContext ctx, UserPortalsTable userPortalsTable){
         try {
-            Query query = getUserPortalsQuery(ctx);
+            Query query = getUserPortalsQuery(ctx, userPortalsTable.getPager().getSortBy(), userPortalsTable.getPager().isSortAsc() ? "ASC" : "DESC");
             query.setLimit(userPortalsTable.getPager().getItemsPerPage());
             query.setOffset(userPortalsTable.getPager().getItemsPerPage() * (userPortalsTable.getPager().getPage() - 1));
 
@@ -152,6 +154,7 @@ public class PortalFactoryHandler implements Serializable {
                 row.setUserNodeIdentifier(JCRContentUtils.getParentOfType(portalNode, "jnt:user").getIdentifier());
                 row.setModelName(((JCRNodeWrapper) portalNode.getProperty("j:model").getNode()).getDisplayableName());
                 row.setLastUsed(portalNode.getPropertyAsString("j:lastViewed"));
+                row.setCreated(portalNode.getProperty("jcr:created").getDate().getTime());
                 userPortalsTable.getRows().put(portalNode.getPath(), row);
             }
         } catch (RepositoryException e) {

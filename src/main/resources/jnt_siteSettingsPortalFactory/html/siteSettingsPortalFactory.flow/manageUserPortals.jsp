@@ -45,10 +45,23 @@
                 form.find("#page").val(page);
             }
             if(itemsPerPage){
-                form.find("#itemsPerPage").val(itemsPerPage)
+                form.find("#itemsPerPage").val(itemsPerPage);
             }
             if(!disabled){
-                workInProgress('${i18nWaiting}')
+                workInProgress('${i18nWaiting}');
+                form.submit();
+            }
+        }
+
+        function order(sortBy, asc, disabled) {
+            var form = $("#pagerForm");
+            if(sortBy){
+                form.find("#sortBy").val(sortBy);
+            }
+            form.find("#sortAsc").val(asc);
+
+            if(!disabled){
+                workInProgress('${i18nWaiting}');
                 form.submit();
             }
         }
@@ -88,6 +101,8 @@
             <form:form commandName="userPortalsTable" action="${flowExecutionUrl}" method="post" id="pagerForm">
                 <form:hidden path="pager.itemsPerPage" id="itemsPerPage"/>
                 <form:hidden path="pager.page" id="page"/>
+                <form:hidden path="pager.sortBy" id="sortBy"/>
+                <form:hidden path="pager.sortAsc" id="sortAsc"/>
                 <input type="hidden" name="_eventId" value="paginateTable"/>
             </form:form>
 
@@ -134,14 +149,20 @@
                 </div>
             </div>
         </div>
-
         <table class="table table-bordered table-striped table-hover">
             <thead>
             <tr>
                 <th width="3%">#</th>
-                <th>model</th>
+                <th class="${userPortalsTable.pager.sortBy == 'j:model' ? (userPortalsTable.pager.sortAsc ? 'headerSortUp' : 'headerSortDown') : ''}">
+                    <a href="#" onclick="order('j:model', ${!userPortalsTable.pager.sortAsc})">model</a>
+                </th>
                 <th>user</th>
-                <th>last used</th>
+                <th class="${userPortalsTable.pager.sortBy == 'j:lastViewed' ? (userPortalsTable.pager.sortAsc ? 'headerSortUp' : 'headerSortDown') : ''}">
+                    <a href="#" onclick="order('j:lastViewed', ${!userPortalsTable.pager.sortAsc})">last used</a>
+                </th>
+                <th class="${userPortalsTable.pager.sortBy == 'jcr:created' ? (userPortalsTable.pager.sortAsc ? 'headerSortUp' : 'headerSortDown') : ''}">
+                    <a href="#" onclick="order('jcr:created', ${!userPortalsTable.pager.sortAsc})">created</a>
+                </th>
                 <th width="15%"><fmt:message key="label.actions"/></th>
             </tr>
             </thead>
@@ -180,6 +201,9 @@
                                         </fmt:message>
                                     </c:otherwise>
                                 </c:choose>
+                            </td>
+                            <td>
+                                <fmt:formatDate value="${userPortalRow.value.created}" dateStyle="short" type="both"/>
                             </td>
                             <td>
                                 <a style="margin-bottom:0;" class="btn btn-danger btn-small" title="${i18nRemove}" href="#delete"
