@@ -121,9 +121,11 @@
                     <span class="text-error"><strong>*</strong></span></form:label>
                 <form:select path="tabWidgetSkin">
                     <c:forEach items="${allowedWidgetsSkin}" var="skin">
-                        <form:option value="${skin.key}">
-                            <fmt:message key="${skin.displayName}"/>
-                        </form:option>
+                        <c:if test="${fn:startsWith(skin.key, 'box')}">
+                            <form:option value="${skin.key}">
+                                <fmt:message key="${skin.displayName}"/>
+                            </form:option>
+                        </c:if>
                     </c:forEach>
                 </form:select>
             </div>

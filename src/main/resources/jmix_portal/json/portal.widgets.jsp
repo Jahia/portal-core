@@ -25,7 +25,6 @@
 
 <json:array>
     <c:forEach items="${portal:getPortalWidgetNodeTypes(currentNode)}" var="widgetNodeType">
-        <c:set var="views" value=""/>
         <json:object>
             <json:property name="name" value="${widgetNodeType.name}"/>
             <json:property name="displayableName"

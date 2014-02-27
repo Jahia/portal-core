@@ -50,10 +50,12 @@
     </json:array>
 
     <json:array items="${portal:getViewsSet(portalWidgetMixin, portalNode)}" var="skin" name="allowedWidgetsSkins">
-        <fmt:message var="i18Name" key="${skin.displayName}"/>
-        <json:object>
-            <json:property name="name" value="${functions:escapeJavaScript(i18Name)}"/>
-            <json:property name="key" value="${skin.key}"/>
-        </json:object>
+        <c:if test="${fn:startsWith(skin.key, 'box')}">
+            <fmt:message var="i18Name" key="${skin.displayName}"/>
+            <json:object>
+                <json:property name="name" value="${functions:escapeJavaScript(i18Name)}"/>
+                <json:property name="key" value="${skin.key}"/>
+            </json:object>
+        </c:if>
     </json:array>
 </json:object>
