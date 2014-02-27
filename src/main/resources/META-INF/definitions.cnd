@@ -13,6 +13,7 @@
  - j:templateRootPath (string) mandatory
  - j:fullTemplate (string)
  - j:lastViewed (date)
+ - j:locked (boolean)
  + * (jnt:portalTab)
 
 [jmix:hasModel] mixin

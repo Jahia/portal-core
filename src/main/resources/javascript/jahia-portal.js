@@ -28,6 +28,7 @@ Jahia.Portal = function (options) {
     this.debug = options.debug ? options.debug : false;
     this.isModel = options.isModel ? options.isModel :false;
     this.isEditable = options.isEditable ? options.isEditable : false;
+    this.isLocked = options.isLocked ? options.isLocked : false;
     this.fullTemplate = options.fullTemplate ? options.fullTemplate : false;
 
     this.baseURL = options.baseURL;
@@ -478,6 +479,41 @@ Jahia.Portal.prototype = {
     reloadTab: function(){
         var instance = this;
         window.location.href = instance.baseURL + instance.portalTabPath + ".html";
+    },
+
+    lockPortal: function(){
+        var instance = this;
+        instance._debug("Lock portal");
+        instance._makeAjaxPostRequest({
+            "jcrNodeType": "jmix:portal",
+            "j:locked" : true
+        }, instance.baseURL + instance.portalPath, function(){
+            instance.reloadTab();
+        });
+    },
+
+    unlockPortal: function(){
+        var instance = this;
+        instance._debug("Unlock portal");
+        instance._makeAjaxPostRequest({
+            "jcrNodeType": "jmix:portal",
+            "j:locked" : false
+        }, instance.baseURL + instance.portalPath, function(){
+            instance.reloadTab();
+        });
+    },
+
+    _makeAjaxPostRequest: function (data, url, successCb, errorCb){
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: url,
+            data: data
+        }).done(function (data) {
+            if(successCb){
+                successCb(data)
+            }
+        });
     },
 
     _convertTabFormToJCRProps: function (form) {

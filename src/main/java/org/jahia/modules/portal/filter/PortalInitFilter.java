@@ -42,6 +42,7 @@ public class PortalInitFilter extends AbstractFilter{
     public static final String PORTAL_INIT_BASE_URL = "baseURL";
     public static final String PORTAL_INIT_DEBUG = "debug";
     public static final String PORTAL_INIT_IS_EDITABLE = "isEditable";
+    public static final String PORTAL_INIT_IS_LOCKED = "isLocked";
     public static final String PORTAL_INIT_IS_MODEL = "isModel";
     public static final String PORTAL_INIT_FULL_TEMPLATE = "fullTemplate";
     public static final String PORTAL_INIT_PORTAL_PATH = "portalPath";
@@ -111,6 +112,7 @@ public class PortalInitFilter extends AbstractFilter{
         bindingMap.put(PORTAL_INIT_PORTAL_PATH, stringifyJsParam(portalNode.getPath()));
         bindingMap.put(PORTAL_INIT_PORTAL_TAB_PATH, stringifyJsParam(resource.getNode().getPath()));
         bindingMap.put(PORTAL_INIT_IS_EDITABLE, resource.getNode().hasPermission("jcr:write_live"));
+        bindingMap.put(PORTAL_INIT_IS_LOCKED, portalNode.hasProperty("j:locked") && portalNode.getProperty("j:locked").getBoolean());
         bindingMap.put(PORTAL_INIT_IS_MODEL, portalNode.isNodeType(PortalConstants.JNT_PORTAL_MODEL));
         bindingMap.put(PORTAL_INIT_FULL_TEMPLATE, stringifyJsParam(portalNode.getProperty(PortalConstants.J_FULL_TEMPLATE).getString()));
         bindingMap.put(PORTAL_INIT_DEBUG, debugEnabled);

@@ -22,8 +22,14 @@ public class PortalSkinFilter extends AbstractFilter {
 
     public String prepare(RenderContext renderContext, Resource resource, RenderChain chain) throws Exception {
         // Add cache dependancy to portal tab
+        JCRNodeWrapper portalNode = JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JMIX_PORTAL);
         resource.getDependencies().add(JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JNT_PORTAL_TAB).getCanonicalPath());
-        pushWidgetSkinWrapperForNode(resource.getNode(), resource);
+        resource.getDependencies().add(portalNode.getCanonicalPath());
+        if (portalNode.hasProperty("j:locked") && portalNode.getProperty("j:locked").getBoolean()){
+            resource.pushWrapper("locked");
+        }else {
+            pushWidgetSkinWrapperForNode(resource.getNode(), resource);
+        }
         return null;
     }
 
