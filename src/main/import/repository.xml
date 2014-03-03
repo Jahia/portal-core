@@ -3,7 +3,7 @@
     <modules jcr:primaryType="jnt:modules">
         <portal-factory j:dependencies="default siteSettings"
                     j:moduleType="module"
-                    j:title="Jahia portal"
+                    j:title="portal factory"
                     jcr:primaryType="jnt:module">
                 
                 <templates j:rootTemplatePath="/base" jcr:primaryType="jnt:templatesFolder">
