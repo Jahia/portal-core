@@ -5,26 +5,28 @@
                     j:moduleType="module"
                     j:title="portal factory"
                     jcr:primaryType="jnt:module">
-                
+                <portlets jcr:primaryType="jnt:portletFolder"/>
+                <files jcr:primaryType="jnt:folder"/>
+                <contents jcr:primaryType="jnt:contentFolder"/>
                 <templates j:rootTemplatePath="/base" jcr:primaryType="jnt:templatesFolder">
                     <files jcr:primaryType="jnt:folder">
-                        <window_application_enterprise_add.png j:height="16"
+                        <Portal-Factory-icon.png j:height="16"
                                                       j:width="16"
                                                       jcr:mixinTypes="jmix:image"
                                                       jcr:primaryType="jnt:file">
                             <jcr:content jcr:mimeType="image/png" jcr:primaryType="jnt:resource"/>
                             <thumbnail jcr:mimeType="image/png" jcr:primaryType="jnt:resource"/>
                             <thumbnail2 jcr:mimeType="image/png" jcr:primaryType="jnt:resource"/>
-                        </window_application_enterprise_add.png>
+                        </Portal-Factory-icon.png>
                     </files>
                     <contents jcr:primaryType="jnt:contentFolder"/>
-                    <site-settings-base j:icon="/modules/portal-core/templates/files/window_application_enterprise_add.png"
-                                j:view="portalSettings"
+                    <site-settings-base j:view="portalSettings"
                                 jcr:mixinTypes="jmix:useUILocale"
                                 jcr:primaryType="jnt:template">
                         <portal-factory j:applyOn="jnt:virtualsite"
                                j:defaultTemplate="false"
                                j:hiddenTemplate="true"
+                               j:icon="/modules/portal-factory/templates/files/Portal-Factory-icon.png"
                                j:view="portalSettings"
                                jcr:primaryType="jnt:contentTemplate">
                             <j:translation_en jcr:language="en"
@@ -43,9 +45,7 @@
                     </site-settings-base>
                 </templates>
 
-                <portlets jcr:primaryType="jnt:portletFolder"/>
-                <files jcr:primaryType="jnt:folder"/>
-                <contents jcr:primaryType="jnt:contentFolder"/>
+                
             </portal-factory>
     </modules>
 </content>
