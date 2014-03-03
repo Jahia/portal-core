@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <content xmlns:j="http://www.jahia.org/jahia/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0">
     <modules jcr:primaryType="jnt:modules">
-        <portal-core j:dependencies="default siteSettings"
+        <portal-factory j:dependencies="default siteSettings"
                     j:moduleType="module"
                     j:title="Jahia portal"
                     jcr:primaryType="jnt:module">
@@ -46,6 +46,6 @@
                 <portlets jcr:primaryType="jnt:portletFolder"/>
                 <files jcr:primaryType="jnt:folder"/>
                 <contents jcr:primaryType="jnt:contentFolder"/>
-            </portal-core>
+            </portal-factory>
     </modules>
 </content>

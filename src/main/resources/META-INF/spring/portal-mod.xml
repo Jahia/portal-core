@@ -36,7 +36,7 @@
         <property name="applyOnModes" value="live" />
         <property name="applyOnNodeTypes" value="jnt:portalTab"/>
         <property name="scriptEngineUtils" ref="scriptEngineUtils"/>
-        <property name="template" value="${portalInitTemplate:/modules/portal-core/WEB-INF/scripts/portalInit.groovy}"/>
+        <property name="template" value="${portalInitTemplate:/modules/portal-factory/WEB-INF/scripts/portalInit.groovy}"/>
         <property name="debugEnabled" value="${portalDebugEnabled:true}"/>
     </bean>
     <bean name="PortalSkinFilter" class="org.jahia.modules.portal.filter.PortalSkinFilter">
