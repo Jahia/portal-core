@@ -46,7 +46,7 @@ public class PortalFactoryHandler implements Serializable {
     private static final long serialVersionUID = 978219001163542883L;
 
     private static final Logger logger = LoggerFactory.getLogger(PortalFactoryHandler.class);
-    private static final String BUNDLE = "resources.portal-core";
+    private static final String BUNDLE = "resources.portal-factory";
 
     @Autowired
     private transient PortalService portalService;
