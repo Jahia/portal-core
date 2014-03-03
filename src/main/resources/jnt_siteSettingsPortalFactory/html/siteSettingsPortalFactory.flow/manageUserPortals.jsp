@@ -202,7 +202,7 @@
             <c:choose>
                 <c:when test="${!portalsFound}">
                     <tr>
-                        <td colspan="3"><fmt:message key="label.noItemFound"/></td>
+                        <td colspan="6"><fmt:message key="label.noItemFound"/></td>
                     </tr>
                 </c:when>
                 <c:otherwise>
