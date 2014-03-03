@@ -28,7 +28,7 @@
 <body>
 
 <div class="page-header">
-    <h1><fmt:message key="label.administration"/>: <img src="<c:url value='${url.currentModule}/img/Private-App-Store.png'/>" alt=""/></h1>
+    <h1><fmt:message key="label.administration"/>: <img src="<c:url value='${url.currentModule}/img/Portal-Factory.png'/>" alt=""/></h1>
 </div>
 
 
