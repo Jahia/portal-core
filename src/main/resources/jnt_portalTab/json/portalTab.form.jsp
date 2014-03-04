@@ -49,12 +49,14 @@
         </json:object>
     </json:array>
 
-    <json:array items="${portal:getViewsSet(portalWidgetMixin, portalNode)}" var="skin" name="allowedWidgetsSkins">
-        <c:if test="${fn:startsWith(skin.key, 'box')}">
-            <json:object>
-                <json:property name="name" value="${functions:escapeJavaScript(portal:getMessage(skin.module, skin.displayName, renderContext.mainResourceLocale))}"/>
-                <json:property name="key" value="${skin.key}"/>
-            </json:object>
-        </c:if>
+    <json:array name="allowedWidgetsSkins">
+        <c:forEach items="${portal:getViewsSet(portalWidgetMixin, portalNode)}" var="skin" >
+            <c:if test="${fn:startsWith(skin.key, 'box')}">
+                <json:object>
+                    <json:property name="name" value="${functions:escapeJavaScript(portal:getMessage(skin.module, skin.displayName, renderContext.mainResourceLocale))}"/>
+                    <json:property name="key" value="${skin.key}"/>
+                </json:object>
+            </c:if>
+        </c:forEach>
     </json:array>
 </json:object>
