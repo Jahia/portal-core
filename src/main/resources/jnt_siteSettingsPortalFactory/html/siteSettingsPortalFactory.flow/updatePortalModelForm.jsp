@@ -78,7 +78,7 @@
                 <c:forEach items="${portal:getWidgetNodeTypes()}" var="widgetNodeType">
                     <label for="widgetType_${widgetNodeType.name}">
                         <form:checkbox path="allowedWidgetTypes" value="${widgetNodeType.name}" id="widgetType_${widgetNodeType.name}"/>
-                            ${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}
+                            &nbsp;${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}
                     </label>
                 </c:forEach>
             </div>
