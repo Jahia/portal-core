@@ -1,6 +1,7 @@
 package org.jahia.modules.portal.tags;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.services.content.JCRNodeWrapper;
@@ -8,6 +9,7 @@ import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderService;
 import org.jahia.services.render.View;
+import org.jahia.utils.i18n.Messages;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -48,6 +50,14 @@ public class PortalFunctions {
 
     public static String getI18nNodetypeName(ExtendedNodeType nodeType, Locale locale) {
         return portalService.getI18NodeTypeName(nodeType, locale);
+    }
+
+    public static String geti18Message(JahiaTemplatesPackage module, String key, Locale locale) {
+        try {
+            return Messages.get(module, key, locale);
+        }catch (Exception e){
+            return key;
+        }
     }
 
     public static JCRNodeWrapper getTemplateNodeForName(String name, JCRNodeWrapper portalNode) {

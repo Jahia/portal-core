@@ -30,6 +30,12 @@
     </function>
 
     <function>
+        <name>getMessage</name>
+        <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
+        <function-signature>java.lang.String geti18Message(org.jahia.data.templates.JahiaTemplatesPackage,java.lang.String,java.util.Locale)</function-signature>
+    </function>
+
+    <function>
         <name>getPortalTabTemplates</name>
         <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
         <function-signature>java.util.List getPortalTabTemplates(org.jahia.services.content.JCRNodeWrapper)</function-signature>

@@ -123,7 +123,7 @@
                     <c:forEach items="${allowedWidgetsSkin}" var="skin">
                         <c:if test="${fn:startsWith(skin.key, 'box')}">
                             <form:option value="${skin.key}">
-                                <fmt:message key="${skin.displayName}"/>
+                                ${portal:getMessage(skin.module, skin.displayName, renderContext.mainResourceLocale)}
                             </form:option>
                         </c:if>
                     </c:forEach>
