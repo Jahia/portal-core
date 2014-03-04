@@ -57,7 +57,7 @@
                 <form:input class="span4" path="name"/>
             </div>
         </div>
-        <div class="row-fluid">
+        <%-- div class="row-fluid">
             <div class="span12">
                 <form:label path="templateFull"><fmt:message key="newPortalModelForm.portal.form.fullTemplate"/></form:label>
                 <form:hidden path="templateFull"/>
@@ -70,7 +70,7 @@
                                      selectableNodeTypes="jnt:template"
                                      valueType="path"/>
             </div>
-        </div>
+        </div --%>
         <div class="row-fluid">
             <div class="span12">
                 <p><fmt:message key="newPortalModelForm.portal.form.allowedWidgetTypes"/> <span class="text-error"><strong>*</strong></span></p>

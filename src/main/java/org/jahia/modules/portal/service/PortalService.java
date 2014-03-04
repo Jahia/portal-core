@@ -141,7 +141,8 @@ public class PortalService {
     public void updatePortalModel(PortalForm form, JCRSessionWrapper sessionWrapper) throws RepositoryException {
         JCRNodeWrapper portalModelNode = sessionWrapper.getNodeByIdentifier(form.getPortalModelIdentifier());
         portalModelNode.setProperty(PortalConstants.JCR_TITLE, form.getName());
-        portalModelNode.setProperty(PortalConstants.J_FULL_TEMPLATE, form.getTemplateFull());
+        // TODO: make it works (update full template)
+        //portalModelNode.setProperty(PortalConstants.J_FULL_TEMPLATE, form.getTemplateFull());
         portalModelNode.setProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES, form.getAllowedWidgetTypes());
         sessionWrapper.save();
     }
