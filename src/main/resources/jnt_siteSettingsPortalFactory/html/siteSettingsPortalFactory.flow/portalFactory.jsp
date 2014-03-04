@@ -111,7 +111,7 @@
                             </td>
                             <td>
                                 <a style="margin-bottom:0;" class="btn btn-small" title="${i18nLiveMode}" href="${portalURL}">
-                                    <i class="icon-pencil"></i>
+                                    <i class="icon-globe"></i>
                                 </a>
 
                                 <a style="margin-bottom:0;" class="btn btn-small" title="${i18nEdit}" href="#edit" onclick="submitPortalForm('editPortal', '${portal.identifier}')">
