@@ -5,6 +5,7 @@ import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.services.content.JCRNodeWrapper;
+import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderService;
@@ -40,12 +41,12 @@ public class PortalFunctions {
         PortalFunctions.portalService = portalService;
     }
 
-    public static Collection<ExtendedNodeType> getWidgetNodeTypes() {
-        return portalService.getWidgetNodeTypes();
+    public static Collection<ExtendedNodeType> getWidgetNodeTypes(JCRSiteNode site) {
+        return portalService.getWidgetNodeTypes(site);
     }
 
-    public static Collection<ExtendedNodeType> getPortalWidgetNodeTypes(JCRNodeWrapper portalNode) {
-        return portalService.getPortalWidgetNodeTypes(portalNode);
+    public static Collection<ExtendedNodeType> getPortalWidgetNodeTypes(JCRSiteNode site, JCRNodeWrapper portalNode) {
+        return portalService.getPortalWidgetNodeTypes(site, portalNode);
     }
 
     public static String getI18nNodetypeName(ExtendedNodeType nodeType, Locale locale) {

@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.ajax.gwt.helper.ContentManagerHelper;
+import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
@@ -475,14 +476,15 @@ public class PortalService {
         return null;
     }
 
-    public Collection<ExtendedNodeType> getWidgetNodeTypes() {
+    public Collection<ExtendedNodeType> getWidgetNodeTypes(JCRSiteNode site) {
         SortedSet<ExtendedNodeType> widgetTypes = new TreeSet<ExtendedNodeType>(NODE_TYPES_COMPARATOR);
+        Set<String> installedModules = site.getInstalledModulesWithAllDependencies();
 
         NodeTypeIterator nodeTypes = NodeTypeRegistry.getInstance().getAllNodeTypes();
         while (nodeTypes.hasNext()) {
             ExtendedNodeType nodeType = (ExtendedNodeType) nodeTypes.next();
             for (ExtendedNodeType superType : nodeType.getSupertypes()) {
-                if (superType.getName().equals(PortalConstants.JMIX_PORTAL_WIDGET)) {
+                if (superType.getName().equals(PortalConstants.JMIX_PORTAL_WIDGET) && installedModules.contains(nodeType.getSystemId())) {
                     widgetTypes.add(nodeType);
                     break;
                 }
@@ -491,7 +493,7 @@ public class PortalService {
         return widgetTypes;
     }
 
-    public Collection<ExtendedNodeType> getPortalWidgetNodeTypes(JCRNodeWrapper portalNode) {
+    public Collection<ExtendedNodeType> getPortalWidgetNodeTypes(JCRSiteNode site, JCRNodeWrapper portalNode) {
         try {
             if (!portalIsModel(portalNode) && portalHasModel(portalNode)) {
                 portalNode = getPortalModel(portalNode);
@@ -516,7 +518,7 @@ public class PortalService {
                         }
                     };
 
-                    return Collections2.filter(getWidgetNodeTypes(), isAllowedWidgetPredicate);
+                    return Collections2.filter(getWidgetNodeTypes(site), isAllowedWidgetPredicate);
                 }
             }
         } catch (RepositoryException e) {

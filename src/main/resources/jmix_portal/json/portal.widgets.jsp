@@ -24,7 +24,7 @@
 <c:set target="${renderContext}" property="contentType" value="application/json;charset=UTF-8"/>
 
 <json:array>
-    <c:forEach items="${portal:getPortalWidgetNodeTypes(currentNode)}" var="widgetNodeType">
+    <c:forEach items="${portal:getPortalWidgetNodeTypes(renderContext.site, currentNode)}" var="widgetNodeType">
         <json:object>
             <json:property name="name" value="${widgetNodeType.name}"/>
             <json:property name="displayableName"

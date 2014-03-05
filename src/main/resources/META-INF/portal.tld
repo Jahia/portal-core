@@ -13,13 +13,13 @@
     <function>
         <name>getWidgetNodeTypes</name>
         <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
-        <function-signature>java.util.Collection getWidgetNodeTypes()</function-signature>
+        <function-signature>java.util.Collection getWidgetNodeTypes(org.jahia.services.content.decorator.JCRSiteNode)</function-signature>
     </function>
 
     <function>
         <name>getPortalWidgetNodeTypes</name>
         <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
-        <function-signature>java.util.Collection getPortalWidgetNodeTypes(org.jahia.services.content.JCRNodeWrapper)</function-signature>
+        <function-signature>java.util.Collection getPortalWidgetNodeTypes(org.jahia.services.content.decorator.JCRSiteNode,org.jahia.services.content.JCRNodeWrapper)</function-signature>
     </function>
 
 

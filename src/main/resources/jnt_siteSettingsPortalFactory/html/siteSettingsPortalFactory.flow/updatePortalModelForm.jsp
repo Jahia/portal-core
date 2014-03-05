@@ -75,7 +75,7 @@
             <div class="span12">
                 <p><fmt:message key="newPortalModelForm.portal.form.allowedWidgetTypes"/> <span class="text-error"><strong>*</strong></span></p>
 
-                <c:forEach items="${portal:getWidgetNodeTypes()}" var="widgetNodeType">
+                <c:forEach items="${portal:getWidgetNodeTypes(renderContext.site)}" var="widgetNodeType">
                     <label for="widgetType_${widgetNodeType.name}">
                         <form:checkbox path="allowedWidgetTypes" value="${widgetNodeType.name}" id="widgetType_${widgetNodeType.name}"/>
                             &nbsp;${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}
