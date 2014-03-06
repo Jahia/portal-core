@@ -38,9 +38,10 @@ public class MoveWidgetAction extends Action {
 
     public ActionResult doExecute(HttpServletRequest req, RenderContext renderContext, Resource resource,
                                   JCRSessionWrapper session, Map<String, List<String>> parameters, URLResolver urlResolver) throws Exception {
-        String colPath = req.getParameter("toArea");
+        String area = req.getParameter("toArea");
         String widgetPath = req.getParameter("widget");
         String onTopOfWidgetPath = req.getParameter("onTopOfWidget");
+        String colPath = resource.getNode().getPath() + "/" + area;
 
         JCRSessionWrapper jcrSessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession(resource.getWorkspace(), resource.getLocale());
 
@@ -52,7 +53,6 @@ public class MoveWidgetAction extends Action {
 
         JSONObject result = new JSONObject();
         result.put("path", colPath + "/" + StringUtils.substringAfterLast(widgetPath, "/"));
-        result.put("col", StringUtils.substringAfterLast(colPath, "/"));
 
         return new ActionResult(HttpServletResponse.SC_OK, null, result);
     }

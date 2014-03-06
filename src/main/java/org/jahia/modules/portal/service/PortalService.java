@@ -217,8 +217,8 @@ public class PortalService {
 		return templatePortalNode;
 	}
 
-    public JCRNodeWrapper addWidgetToPortal(JCRNodeWrapper portalTabNode, String nodetypeName, String nodeName, Long colIndex, String beforeNodePath, JCRSessionWrapper session) {
-        JCRNodeWrapper columnNode = getColumn(portalTabNode, colIndex);
+    public JCRNodeWrapper addWidgetToPortal(JCRNodeWrapper portalTabNode, String nodetypeName, String nodeName, String colname, String beforeNodePath, JCRSessionWrapper session) {
+        JCRNodeWrapper columnNode = getColumn(portalTabNode, colname);
 
         try {
             if(StringUtils.isEmpty(nodeName)){
@@ -248,15 +248,14 @@ public class PortalService {
         }
     }
 
-    public JCRNodeWrapper getColumn(JCRNodeWrapper portalTabNode, Long index) {
-        String columnName = "col-" + index;
+    public JCRNodeWrapper getColumn(JCRNodeWrapper portalTabNode, String name) {
         JCRNodeWrapper columnNode;
         try {
-            columnNode = portalTabNode.getNode(columnName);
+            columnNode = portalTabNode.getNode(name);
             return columnNode;
         } catch (RepositoryException e) {
             try {
-                columnNode = portalTabNode.addNode(JCRContentUtils.generateNodeName(columnName, 32), PortalConstants.JNT_PORTAL_COLUMN);
+                columnNode = portalTabNode.addNode(name, PortalConstants.JNT_PORTAL_COLUMN);
                 return columnNode;
             } catch (RepositoryException e1) {
                 logger.error(e.getMessage(), e);

@@ -93,7 +93,7 @@ Jahia.Portal.prototype = {
         instance.conf.sortable_options.update = function (event, ui) {
             // Test if we are on the destination col after sort update
             if ($(event.target).attr("id") == ui.item.parent().attr("id")) {
-                var toArea = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).attr("id"));
+                var toArea = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).data("area-name"));
                 var widget = instance.getWidget(ui.item.attr("id"));
 
                 if(widget){
@@ -121,7 +121,7 @@ Jahia.Portal.prototype = {
                     if(nodetype){
                         //get next widget if exist
                         var next = ui.item.next();
-                        var area = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).attr("id"));
+                        var area = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).data("area-name"));
                         var beforeWidget = undefined;
                         if(next.length > 0){
                             beforeWidget = instance.getWidget(next.attr("id"));
@@ -192,12 +192,10 @@ Jahia.Portal.prototype = {
      */
     addNewWidget: function (nodetype, name, toArea, view, beforeWidget, $htmlToReplace) {
         var instance = this;
-        instance._debug("Add widget:[" + name + "] nodetype:[" + nodetype + "] area:[" + toArea + "] beforeWidget:[" + beforeWidget + "]");
 
-        var col = 0;
-        if(toArea){
-            col = toArea._colIndex;
-        }
+        toArea = toArea ? toArea : instance.getAreaByIndex(0);
+        var areaName = toArea._$area.data('area-name');
+        instance._debug("Add widget:[" + name + "] nodetype:[" + nodetype + "] area:[" + areaName + "] beforeWidget:[" + beforeWidget + "]");
 
         var beforeWidgetPath = undefined;
         if(beforeWidget){
@@ -207,7 +205,7 @@ Jahia.Portal.prototype = {
         var data = {
             nodetype: nodetype,
             name: name,
-            col: col,
+            col: areaName,
             beforeWidget: beforeWidgetPath
         };
         $.ajax({
@@ -217,11 +215,7 @@ Jahia.Portal.prototype = {
             url: instance.baseURL + instance.portalTabPath + Jahia.Portal.constants.ADD_WIDGET_ACTION,
             data: data
         }).done(function (widget) {
-            if(toArea){
-                toArea.registerWidget(widget.path, $htmlToReplace, undefined, view, "view");
-            }else {
-                instance.getAreaByColIndex(0).registerWidget(widget.path);
-            }
+            toArea.registerWidget(widget.path, $htmlToReplace, undefined, view, "view");
         });
     },
 
@@ -234,22 +228,16 @@ Jahia.Portal.prototype = {
      * @param widgetState {String} widget state to load in this area, optional, used for full state
      * @param widgetView {String} widget view to load in this area, optional, used for full view
      */
-    registerArea: function (htmlID, widgetPath, widgetState, widgetView) {
+    registerArea: function (htmlID) {
         var instance = this;
-        instance.areas[htmlID] = new Jahia.Portal.Area(htmlID, Jahia.Utils.getObjectSize(instance.areas), instance, widgetPath, widgetState, widgetView);
+        var $area = $("#" + htmlID);
+        instance.areas[$area.data("area-name")] = new Jahia.Portal.Area($area, instance);
         instance.initDragDrop();
     },
 
-    /**
-     * return the Area corresponding to a given id
-     *
-     * @this {Portal}
-     * @param htmlID {String} area id
-     * @returns {Area}
-     */
-    getArea: function (htmlID) {
+    getArea: function (name) {
         var instance = this;
-        return instance.areas[htmlID];
+        return instance.areas[name];
     },
 
     /**
@@ -259,21 +247,15 @@ Jahia.Portal.prototype = {
      * @param index {Number} area index
      * @returns {Area}
      */
-    getAreaByColIndex: function (index) {
+    getAreaByIndex: function (index) {
         var instance = this;
-        return instance.getAreaByColName("col-" + index)
-    },
-
-    /**
-     * return the Area corresponding to a given column name
-     *
-     * @this {Portal}
-     * @param colName {Number} area colname (col-0, col-1, ...)
-     * @returns {Area}
-     */
-    getAreaByColName: function (colName) {
-        var instance = this;
-        return instance.getArea($("." + colName).attr("id"));
+        var $area = $($(instance.conf.sortable_options.connectWith).get(index));
+        if($area.length == 0){
+            instance._debug("No area at index: " + index);
+            return undefined;
+        }else {
+            return instance.getArea($area.data("area-name"));
+        }
     },
 
     /**
@@ -527,30 +509,15 @@ Jahia.Portal.prototype = {
     }
 };
 
-/**
- * Portal area object
- *
- * @constructor
- * @param id {String}
- * @param index {number}
- * @param portal {Portal}
- * @param widgetPath {String} optional, used for load a single specific widget in the area
- * @param widgetState {String} optional, used for load a single specific widget in the area
- * @param widgetView {String} optional, used for load a single specific widget in the area
- */
-Jahia.Portal.Area = function (id, index, portal, widgetPath, widgetState, widgetView) {
-    this._id = id;
+
+Jahia.Portal.Area = function ($area, portal) {
     this._portal = portal;
-    this._colIndex = index;
-    this._colName = "col-" + index;
-    this._colPath = this._portal.portalTabPath + "/" + this._colName;
+    this._$area = $area;
+    this._colPath = this._portal.portalTabPath + "/" + $area.data("area-name");
 
-    // Add "col-" jcr name to the html class
-    $("#" + id).addClass(this._colName);
-
-    if(widgetPath){
+    if($area.data("widget-path")){
         // load a specific single widget
-        this.load(widgetPath, widgetState, widgetView)
+        this.load($area.data("widget-path"), $area.data("widget-state"), $area.data("widget-view"))
     }else {
         // load all coll widget
         this.loadAll();
@@ -580,8 +547,9 @@ Jahia.Portal.Area.prototype = {
      */
     loadAll: function () {
         var instance = this;
+        var areaName = instance._$area.data("area-name");
 
-        instance._portal._debug("Load widgets for col: " + instance._colName);
+        instance._portal._debug("Load widgets for area: " + areaName);
 
         $.ajax(this._portal.baseURL + this._colPath + ".widgets.json").done(function (data) {
             instance._portal._debug(data.length + " widgets found");
@@ -590,7 +558,7 @@ Jahia.Portal.Area.prototype = {
                 instance.registerWidget(widget.path);
             });
         }).fail(function () {
-                instance._portal._debug("No col: " + instance._colName);
+                instance._portal._debug("No col: " + areaName);
             });
     },
 
@@ -650,7 +618,7 @@ Jahia.Portal.Widget.prototype = {
         if($htmlToReplace){
             $htmlToReplace.replaceWith(wrapper);
         }else {
-            $("#" + instance._area._id).append(wrapper);
+            instance._area._$area.append(wrapper);
         }
 
         instance.load(instance._initView);
@@ -725,13 +693,14 @@ Jahia.Portal.Widget.prototype = {
      */
     performMove: function (toArea) {
         var instance = this;
+        var areaName = toArea._$area.data("area-name");
 
-        instance._portal._debug("Moved widget " + instance._path + " to " + toArea._colName);
+        instance._portal._debug("Moved widget " + instance._path + " to " + areaName);
 
         var onTopOfWidget = instance._portal.getWidget($("#" + instance._id).next("." + Jahia.Portal.constants.PORTAL_WIDGET_CLASS).attr("id"));
 
         var data = {
-            toArea: toArea._colPath,
+            toArea: areaName,
             widget: instance._path,
             onTopOfWidget: onTopOfWidget ? onTopOfWidget._path : ""
         };
@@ -743,7 +712,7 @@ Jahia.Portal.Widget.prototype = {
             data: data
         }).done(function (newPositionInfo) {
                 instance._path = newPositionInfo.path;
-                instance._area = instance._portal.getAreaByColName(newPositionInfo.col);
+                instance._area = instance._portal.getArea(toArea);
 
                 instance.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_SUCCEEDED);
             }).fail(function () {

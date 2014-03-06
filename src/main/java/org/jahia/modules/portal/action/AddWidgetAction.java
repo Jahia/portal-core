@@ -43,11 +43,10 @@ public class AddWidgetAction extends Action{
         List<String> col =  parameters.get(COL_PARAM);
         List<String> beforeWidget =  parameters.get(BEFORE_WIDGET_PARAM);
 
-        if(CollectionUtils.isNotEmpty(nodetype)){
+        if(CollectionUtils.isNotEmpty(nodetype) && CollectionUtils.isNotEmpty(col)){
             String name = CollectionUtils.isNotEmpty(names) ? names.get(0) : null;
-            Long colIndex = CollectionUtils.isNotEmpty(col) ? Long.valueOf(col.get(0)) : 0;
             String beforeWidgetPath = CollectionUtils.isNotEmpty(beforeWidget) ? beforeWidget.get(0) : null;
-            JCRNodeWrapper widgetNode = portalService.addWidgetToPortal(resource.getNode(), nodetype.get(0), name, colIndex, beforeWidgetPath, session);
+            JCRNodeWrapper widgetNode = portalService.addWidgetToPortal(resource.getNode(), nodetype.get(0), name, col.get(0), beforeWidgetPath, session);
             if(widgetNode != null){
                 JSONObject result = new JSONObject();
                 result.put("path", widgetNode.getPath());
