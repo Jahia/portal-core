@@ -217,7 +217,7 @@ Jahia.Portal.prototype = {
         }).done(function (data) {
 
             if(data.isGadget){
-                instance.reloadTab(data.id, view);
+                instance.loadInCurrentTab(data.id, view);
             }else{
                 var $widget = $("<div></div>").attr("id", "w_" + data.id).attr("class", "portal_widget");
                 $widget.data("widget-gadget", false);
@@ -433,46 +433,19 @@ Jahia.Portal.prototype = {
     },
 
     /**
-     * Load a specific widget, construct the url to display a specific widget in specific state, view, and tab template.
-     * Reload the page
-     *
-     * @this {Portal}
-     * @param tabTemplate {String} portal tab template, optional, default used if not specify
-     * @param widgetIdentifier {String} widget node identifier to load, mandatory
-     * @param widgetState {String} widget state (full, box, ...), optional
-     * @param widgetView {String} widget view (full, view, edit ...), optional
-     */
-    loadSingleWidget: function(tabTemplate, widgetIdentifier, widgetState, widgetView){
-        var instance = this;
-        var url = "";
-
-        if(tabTemplate){
-            url = instance.baseURL + instance.portalTabPath + "." + tabTemplate;
-        }else {
-            url = instance.baseURL + instance.portalTabPath;
-        }
-
-        url += (".html?w=" + widgetIdentifier);
-
-        if(widgetState){
-            url += ("&w_state=" + widgetState);
-        }
-
-        if(widgetView){
-            url += ("&w_view=" + widgetView);
-        }
-
-        window.location.href = url;
-    },
-
-    /**
      * Reload the current portal tab
      *
      * @this {Portal}
      */
-    reloadTab: function(widgetId, widgetView, widgetState, widgetSolo){
+    loadInCurrentTab: function(widgetId, widgetView, widgetState, widgetSolo, tabTemplate){
         var instance = this;
-        var url = instance.baseURL + instance.portalTabPath + ".html";
+        var tabPath = tabTemplate ? instance.portalTabPath + "." + tabTemplate : instance.portalTabPath;
+        instance.loadTab(tabPath, widgetId, widgetView, widgetState, widgetSolo);
+    },
+
+    loadTab: function(tabPath, widgetId, widgetView, widgetState, widgetSolo){
+        var instance = this;
+        var url = instance.baseURL + tabPath + ".html";
 
         var paramArray = [];
         if (widgetId){
@@ -511,7 +484,7 @@ Jahia.Portal.prototype = {
             "jcrNodeType": "jmix:portal",
             "j:locked" : true
         }, instance.baseURL + instance.portalPath, function(){
-            instance.reloadTab();
+            instance.loadInCurrentTab();
         });
     },
 
@@ -522,7 +495,7 @@ Jahia.Portal.prototype = {
             "jcrNodeType": "jmix:portal",
             "j:locked" : false
         }, instance.baseURL + instance.portalPath, function(){
-            instance.reloadTab();
+            instance.loadInCurrentTab();
         });
     },
 
@@ -668,9 +641,9 @@ Jahia.Portal.Widget.prototype = {
 
         if(instance._isGadget){
             if(view){
-                instance._portal.reloadTab(instance._jcrIdentifier, view);
+                instance._portal.loadInCurrentTab(instance._jcrIdentifier, view);
             }else {
-                instance._portal.reloadTab();
+                instance._portal.loadInCurrentTab();
             }
         }else {
             if(!view){

@@ -43,7 +43,7 @@
              data-widget-view="${widgetView}"
                 >
             <c:if test="${isGadget}">
-                <template:module path="${widgetNode.path}" view="view"/>
+                <template:module path="${widgetNode.path}" view="${widgetView}"/>
             </c:if>
         </div>
     </c:when>
