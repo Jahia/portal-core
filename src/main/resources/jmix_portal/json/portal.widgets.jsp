@@ -30,7 +30,7 @@
             <json:property name="displayableName"
                            value="${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}"/>
             <json:array name="views">
-                <c:forEach items="${portal:getViewsSet(widgetNodeType.name, currentNode)}" var="view">
+                <c:forEach items="${portal:getWidgetPortalViewsSet(widgetNodeType.name, currentNode)}" var="view">
                     <json:object>
                         <json:property name="path" value="${view.path}"/>
                         <json:property name="key" value="${view.key}"/>

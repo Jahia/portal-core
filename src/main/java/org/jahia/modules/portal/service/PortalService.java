@@ -74,6 +74,15 @@ public class PortalService {
 
     }
 
+    public JCRNodeWrapper getPortalColNodeForArea(JCRNodeWrapper portalTabNode, String areaName) {
+        try {
+            return portalTabNode.getNode(areaName);
+        } catch (RepositoryException e) {
+            logger.info("Cannot retrieve portal col node for area: '" + areaName + "'");
+            return null;
+        }
+    }
+
     public List<JCRNodeWrapper> getSitePortalModels(JCRSiteNode site, String orderBy, boolean orderAscending, JCRSessionWrapper session) {
         long timer = System.currentTimeMillis();
 

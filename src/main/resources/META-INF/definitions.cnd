@@ -6,6 +6,8 @@
 // Portal
 //---------------------------------------------------------
 
+[jmix:portalGadget] mixin
+
 [jmix:portalWidgetSkin] mixin
  - j:widgetSkin (string)
 

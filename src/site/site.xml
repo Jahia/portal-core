@@ -1,10 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/DECORATION/1.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd">
-    <body>
-        <menu ref="parent"/>
-        <menu ref="modules"/>
-        <menu ref="reports"/>
-    </body>
-</project>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<p>
+    default
+</p>
+<script src="//www.gmodules.com/ig/ifr?url=http://my-igadgets.googlecode.com/files/supermarioworld2.xml&amp;synd=open&amp;w=400&amp;h=400&amp;title=__MSG_title__&amp;lang=fr&amp;country=ALL&amp;border=http%3A%2F%2Fwww.gmodules.com%2Fig%2Fimages%2F&amp;output=js"></script>

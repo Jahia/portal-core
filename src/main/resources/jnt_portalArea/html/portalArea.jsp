@@ -1,4 +1,3 @@
-<%@ page import="org.jahia.modules.portal.PortalConstants" %>
 <%@ page language="java" contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="template" uri="http://www.jahia.org/tags/templateLib" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -23,28 +22,19 @@
 <%--@elvariable id="nodetype" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
 
 <c:choose>
-    <c:when test="${renderContext.editModeConfigName eq 'studiomode'}">
+    <c:when test="${!renderContext.liveMode}">
         portal Area
     </c:when>
-    <c:when test="${renderContext.liveMode}">
-        <c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
-        <c:set var="portalNode" value="${jcr:getParentOfType(renderContext.mainResource.node, portalMixin)}"/>
-        <c:set var="widgetIdentifier" value="${not empty renderContext.request.parameterMap['w'] ? renderContext.request.parameterMap['w'][0] : null}"/>
-        <c:set var="widgetState" value="${not empty renderContext.request.parameterMap['w_state'] ? renderContext.request.parameterMap['w_state'][0] : ''}"/>
-        <c:set var="widgetView" value="${not empty renderContext.request.parameterMap['w_view'] ? renderContext.request.parameterMap['w_view'][0] : ''}"/>
+    <c:otherwise>
+        <c:set var="portalColNode" value="${portal:getPortalColForArea(renderContext.mainResource.node, currentNode.name)}"/>
+        <template:addCacheDependency node="${portalColNode}"/>
 
-        <div id="portal_area_${currentNode.identifier}" class="portal_area" data-area-name="${currentNode.name}"
-                <c:if test="${widgetIdentifier != null}">
-                    <c:set var="widgetNode" value="${portal:getWidget(widgetIdentifier, portalNode)}"/>
-                    data-widget-path="${widgetNode.path}"
-                    data-widget-state="${widgetState}"
-                    data-widget-view="${widgetView}"
-                </c:if>
-                >
+        <div id="portal_area_${currentNode.identifier}" class="portal_area" data-area-name="${currentNode.name}">
+            <template:area path="${portalColNode.path}"/>
         </div>
 
         <script type="text/javascript">
             portal.registerArea("portal_area_${currentNode.identifier}");
         </script>
-    </c:when>
+    </c:otherwise>
 </c:choose>

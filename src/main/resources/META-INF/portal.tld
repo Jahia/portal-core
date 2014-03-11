@@ -22,6 +22,11 @@
         <function-signature>java.util.Collection getPortalWidgetNodeTypes(org.jahia.services.content.decorator.JCRSiteNode,org.jahia.services.content.JCRNodeWrapper)</function-signature>
     </function>
 
+    <function>
+        <name>getPortalColForArea</name>
+        <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
+        <function-signature>org.jahia.services.content.JCRNodeWrapper getPortalColNameForArea(org.jahia.services.content.JCRNodeWrapper,java.lang.String)</function-signature>
+    </function>
 
     <function>
         <name>getNodeTypeDisplayableName</name>
@@ -51,6 +56,12 @@
         <name>getViewsSet</name>
         <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
         <function-signature>java.util.SortedSet getViewSet(java.lang.String,org.jahia.services.content.JCRNodeWrapper)</function-signature>
+    </function>
+
+    <function>
+        <name>getWidgetPortalViewsSet</name>
+        <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
+        <function-signature>java.util.SortedSet getWidgetPortalViewSet(java.lang.String,org.jahia.services.content.JCRNodeWrapper)</function-signature>
     </function>
 
     <function>

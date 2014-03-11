@@ -3,6 +3,7 @@ package org.jahia.modules.portal.action;
 import org.apache.commons.collections.CollectionUtils;
 import org.jahia.bin.Action;
 import org.jahia.bin.ActionResult;
+import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionWrapper;
@@ -49,7 +50,10 @@ public class AddWidgetAction extends Action{
             JCRNodeWrapper widgetNode = portalService.addWidgetToPortal(resource.getNode(), nodetype.get(0), name, col.get(0), beforeWidgetPath, session);
             if(widgetNode != null){
                 JSONObject result = new JSONObject();
+                result.put("id", widgetNode.getIdentifier());
                 result.put("path", widgetNode.getPath());
+                result.put("isGadget", widgetNode.isNodeType(PortalConstants.JMIX_PORTAL_GADGET));
+
                 return new ActionResult(HttpServletResponse.SC_OK, null, result);
             }
         }

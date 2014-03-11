@@ -17,6 +17,7 @@ public class PortalConstants {
     public static final String JNT_PORTAL_TAB = "jnt:portalTab";
     public static final String JNT_PORTAL_COLUMN = "jnt:portalColumn";
     public static final String JMIX_PORTAL_WIDGET = "jmix:portalWidget";
+    public static final String JMIX_PORTAL_GADGET = "jmix:portalGadget";
     public static final String J_TEMPLATE_ROOT_PATH = "j:templateRootPath";
     public static final String J_FULL_TEMPLATE = "j:fullTemplate";
     public static final String J_ALLOWED_WIDGET_TYPES = "j:allowedWidgetTypes";

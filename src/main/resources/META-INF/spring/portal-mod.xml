@@ -41,9 +41,9 @@
     </bean>
     <bean name="PortalSkinFilter" class="org.jahia.modules.portal.filter.PortalSkinFilter">
         <property name="description" value="Filter that add skins to the current resource."/>
-        <property name="priority" value="45"/>
+        <property name="priority" value="-4"/>
         <property name="applyOnNodeTypes" value="jmix:portalWidget"/>
-        <property name="skipOnConfigurations" value="include,wrapper"/>
+        <property name="skipOnConfigurations" value="wrapper"/>
         <property name="skipOnModes" value="studio"/>
     </bean>
     <bean class="org.jahia.modules.portal.filter.PortalSiteFilter">

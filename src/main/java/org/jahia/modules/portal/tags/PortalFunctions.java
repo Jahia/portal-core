@@ -1,5 +1,8 @@
 package org.jahia.modules.portal.tags;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.modules.portal.PortalConstants;
@@ -20,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import javax.jcr.RepositoryException;
 import java.util.*;
 
@@ -61,6 +65,10 @@ public class PortalFunctions {
         }
     }
 
+    public static JCRNodeWrapper getPortalColNameForArea(JCRNodeWrapper portalTabNode, String areaName) {
+        return portalService.getPortalColNodeForArea(portalTabNode, areaName);
+    }
+
     public static JCRNodeWrapper getTemplateNodeForName(String name, JCRNodeWrapper portalNode) {
         try {
             return portalService.getPortalTabTemplateNode(name, portalNode.getPropertyAsString(PortalConstants.J_TEMPLATE_ROOT_PATH), portalNode.getSession());
@@ -94,6 +102,20 @@ public class PortalFunctions {
     public static SortedSet<View> getViewSet(String nt, JCRNodeWrapper portalNode){
         try {
             return RenderService.getInstance().getViewsSet(NodeTypeRegistry.getInstance().getNodeType(nt), portalService.getPortalSite(portalNode), "html");
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public static SortedSet<View> getWidgetPortalViewSet(String nt, JCRNodeWrapper portalNode){
+        try {
+            return Sets.filter(getViewSet(nt, portalNode), new Predicate<View>() {
+                @Override
+                public boolean apply(@Nullable View input) {
+                    return input != null && input.getKey().startsWith("portal.");
+                }
+            });
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

@@ -214,8 +214,20 @@ Jahia.Portal.prototype = {
             traditional: true,
             url: instance.baseURL + instance.portalTabPath + Jahia.Portal.constants.ADD_WIDGET_ACTION,
             data: data
-        }).done(function (widget) {
-            toArea.registerWidget(widget.path, $htmlToReplace, undefined, view, "view");
+        }).done(function (data) {
+
+            if(data.isGadget){
+                instance.reloadTab(data.id, view);
+            }else{
+                var $widget = $("<div></div>").attr("id", "w_" + data.id).attr("class", "portal_widget");
+                $widget.data("widget-gadget", false);
+                $widget.data("widget-path", data.path);
+                if(view){
+                    $widget.data("widget-view", view);
+                }
+
+                toArea.registerWidget($widget, $htmlToReplace, false);
+            }
         });
     },
 
@@ -458,9 +470,38 @@ Jahia.Portal.prototype = {
      *
      * @this {Portal}
      */
-    reloadTab: function(){
+    reloadTab: function(widgetId, widgetView, widgetState, widgetSolo){
         var instance = this;
-        window.location.href = instance.baseURL + instance.portalTabPath + ".html";
+        var url = instance.baseURL + instance.portalTabPath + ".html";
+
+        var paramArray = [];
+        if (widgetId){
+            paramArray.push("w=" + widgetId);
+        }
+
+        if (widgetView){
+            paramArray.push("w_view=" + widgetView);
+        }
+
+        if (widgetState) {
+            paramArray.push("w_state=" + widgetState);
+        }
+
+        if (widgetSolo) {
+            paramArray.push("w_solo=" + widgetSolo);
+        }
+
+        for (var index = 0; index < paramArray.length; ++index) {
+            if(index == 0){
+                url += "?"
+            }
+            url += paramArray[index];
+            if(index < (paramArray.length - 1)){
+                url += "&";
+            }
+        }
+
+        window.location.href = url;
     },
 
     lockPortal: function(){
@@ -515,93 +556,48 @@ Jahia.Portal.Area = function ($area, portal) {
     this._$area = $area;
     this._colPath = this._portal.portalTabPath + "/" + $area.data("area-name");
 
-    if($area.data("widget-path")){
-        // load a specific single widget
-        this.load($area.data("widget-path"), $area.data("widget-state"), $area.data("widget-view"))
-    }else {
-        // load all coll widget
-        this.loadAll();
-    }
+    this.init();
 };
 
 Jahia.Portal.Area.prototype = {
-    /**
-     * Load a single specific widget
-     *
-     * @this Area
-     * @param path {String}
-     * @param state {String}
-     * @param view {String}
-     */
-    load: function (path, state, view) {
-        var instance = this;
-        instance._portal._debug("Load widget: " + path);
-
-        instance.registerWidget(path, undefined, state, view);
-    },
 
     /**
      * Load all widgets for the current area
      *
      * @this Area
      */
-    loadAll: function () {
+    init: function () {
         var instance = this;
         var areaName = instance._$area.data("area-name");
 
         instance._portal._debug("Load widgets for area: " + areaName);
 
-        $.ajax(this._portal.baseURL + this._colPath + ".widgets.json").done(function (data) {
-            instance._portal._debug(data.length + " widgets found");
-
-            data.forEach(function (widget) {
-                instance.registerWidget(widget.path);
-            });
-        }).fail(function () {
-                instance._portal._debug("No col: " + areaName);
-            });
+        instance._$area.find("." + Jahia.Portal.constants.PORTAL_WIDGET_CLASS).each(function(index, widget){
+            var $widget = $(widget);
+            instance.registerWidget($widget);
+        });
     },
 
-    /**
-     * Register a widget for the current area
-     *
-     * @this Area
-     * @param path {String} widget path
-     * @param state {String} widget state, optional
-     * @param view {String} view used to load the widget, optional
-     * @param $htmlToReplace {Object} jquery object to replace by the widget content, optional
-     * @param forcedOriginalView {String} specify a original view different from the view used to load the widget, optional
-     */
-    registerWidget: function (path, $htmlToReplace, state, view, forcedOriginalView) {
+    registerWidget: function ($widget, $htmlToReplace, forcedOriginalView) {
         var instance = this;
-        var widgetHtmlId = "w_" + Math.random().toString(36).substring(7);
-        instance._portal.widgets[widgetHtmlId] = new Jahia.Portal.Widget(widgetHtmlId, path, $htmlToReplace, state, view, forcedOriginalView, instance);
+        instance._portal.widgets[$widget.attr('id')] = new Jahia.Portal.Widget($widget, $htmlToReplace, forcedOriginalView, instance);
     }
 };
 
-/**
- * Portal widget object
- *
- * @constructor
- * @param id {String} widget id, mandatory
- * @param path {String} widget path, mandatory
- * @param area {Area} parent area, mandatory
- * @param $htmlToReplace {Object} jquery object to replace by the widget content, optional
- * @param state {String} widget state, optional
- * @param view {String} widget view, optional, used to load the widget
- * @param forcedOriginalView {String} widget original view, optional, used to force original view
- */
-Jahia.Portal.Widget = function (id, path, $htmlToReplace, state, view, forcedOriginalView, area) {
-    this._id = id;
-    this._path = path;
+
+Jahia.Portal.Widget = function ($widget, $htmlToReplace, forcedOriginalView, area) {
+    this._id = $widget.attr('id');
+    this._jcrIdentifier = this._id.substring(2);
+    this._isGadget = $widget.data("widget-gadget");
+    this._path = $widget.data('widget-path');
     this._area = area;
     this._portal = area._portal;
-    this._state = state ? state : "box";
-    this._originalView = forcedOriginalView ? forcedOriginalView : (view ? view : "view");
-    this._initView = view ? view : "view";
+    this._state = $widget.data('widget-state') ? $widget.data('widget-state') : "box";
+    this._originalView = forcedOriginalView ? forcedOriginalView : ($widget.data('widget-view') ? $widget.data('widget-view') : "portal.view");
+    this._initView = $widget.data('widget-view') ? $widget.data('widget-view') : "portal.view";
     this._currentView = this._originalView;
 
-    this.init($htmlToReplace);
+    this.init($widget, $htmlToReplace);
 };
 
 Jahia.Portal.Widget.prototype = {
@@ -610,18 +606,19 @@ Jahia.Portal.Widget.prototype = {
      *
      * @param $htmlToReplace
      */
-    init: function ($htmlToReplace) {
+    init: function ($widget, $htmlToReplace) {
         var instance = this;
         instance._portal._debug("Load widget: " + instance._path);
 
-        var wrapper = "<div id='" + instance._id + "' class='" + Jahia.Portal.constants.PORTAL_WIDGET_CLASS + "'></div>";
         if($htmlToReplace){
-            $htmlToReplace.replaceWith(wrapper);
-        }else {
-            instance._area._$area.append(wrapper);
+            $htmlToReplace.replaceWith($widget);
         }
 
-        instance.load(instance._initView);
+        if(!instance._isGadget){
+            instance.load(instance._initView);
+        }else {
+            instance.attachEvents();
+        }
     },
 
     /**
@@ -669,21 +666,29 @@ Jahia.Portal.Widget.prototype = {
         var instance = this;
         instance.attachEvents();
 
-        if(!view){
-            view = instance._originalView;
+        if(instance._isGadget){
+            if(view){
+                instance._portal.reloadTab(instance._jcrIdentifier, view);
+            }else {
+                instance._portal.reloadTab();
+            }
+        }else {
+            if(!view){
+                view = "portal.view";
+            }
+
+            $("#" + instance._id).load(instance._portal.baseURL + instance._path + "." + view + ".html.ajax?includeJavascripts=true", function(){
+                if(instance._portal.isEditable){
+                    instance._portal.initDragDrop();
+                }
+                instance._currentView = view;
+                instance._portal._debug("widget " + instance._path + " loaded successfully");
+
+                if(callback){
+                    callback();
+                }
+            });
         }
-
-        $("#" + instance._id).load(instance._portal.baseURL + instance._path + "." + view + ".html.ajax?includeJavascripts=true", function(){
-            if(instance._portal.isEditable){
-                instance._portal.initDragDrop();
-            }
-            instance._currentView = view;
-            instance._portal._debug("widget " + instance._path + " loaded successfully");
-
-            if(callback){
-                callback();
-            }
-        });
     },
 
     /**

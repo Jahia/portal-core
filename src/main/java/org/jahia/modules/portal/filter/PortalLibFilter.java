@@ -28,7 +28,7 @@ public class PortalLibFilter extends AbstractFilter {
         // add portal API lib
         String path = URLEncoder.encode("/modules/" + renderContext.getMainResource().getNode().getPrimaryNodeType().getTemplatePackage().getBundle().getSymbolicName()
                 + "/javascript/" + JS_API_FILE, "UTF-8");
-        out += ("<jahia:resource type='javascript' path='" + path + "' insert='false' resource='" + JS_API_FILE + "'/>");
+        out += ("<jahia:resource type='javascript' path='" + path + "' insert='true' resource='" + JS_API_FILE + "'/>");
 
         return out;
     }
