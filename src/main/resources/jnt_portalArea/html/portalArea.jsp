@@ -27,7 +27,7 @@
     </c:when>
     <c:otherwise>
         <c:set var="portalColNode" value="${portal:getPortalColForArea(renderContext.mainResource.node, currentNode.name)}"/>
-        <template:addCacheDependency node="${portalColNode}"/>
+        <template:addCacheDependency flushOnPathMatchingRegexp="\\\\Q${renderContext.mainResource.node.path}\\\\E/[^/]*"/>
 
         <div id="portal_area_${currentNode.identifier}" class="portal_area" data-area-name="${currentNode.name}">
             <template:area path="${portalColNode.path}"/>

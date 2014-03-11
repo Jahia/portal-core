@@ -59,7 +59,8 @@
                 </c:if>
                 >
                 <c:if test="${isGadget}">
-                    <template:module path="${widgetNode.path}" view="${widgetIdentifier != null && widgetNode.identifier == widgetIdentifier ? widgetView : 'portal.view'}"/>
+                    <template:module path="${widgetNode.path}"
+                                     view="${widgetIdentifier != null && widgetNode.identifier == widgetIdentifier && not empty widgetView ? widgetView : 'portal.view'}"/>
                 </c:if>
             </div>
         </c:forEach>
