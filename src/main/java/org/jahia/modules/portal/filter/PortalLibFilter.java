@@ -1,6 +1,7 @@
 package org.jahia.modules.portal.filter;
 
 
+import org.apache.commons.lang.StringUtils;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.Resource;
 import org.jahia.services.render.filter.AbstractFilter;
@@ -26,9 +27,11 @@ public class PortalLibFilter extends AbstractFilter {
         String out = previousOut;
 
         // add portal API lib
-        String path = URLEncoder.encode("/modules/" + renderContext.getMainResource().getNode().getPrimaryNodeType().getTemplatePackage().getBundle().getSymbolicName()
-                + "/javascript/" + JS_API_FILE, "UTF-8");
-        out += ("<jahia:resource type='javascript' path='" + path + "' insert='true' resource='" + JS_API_FILE + "'/>");
+        String path = "/modules/" + renderContext.getMainResource().getNode().getPrimaryNodeType().getTemplatePackage().getBundle().getSymbolicName()
+                + "/javascript/" + JS_API_FILE;
+        path = StringUtils.isNotEmpty(renderContext.getRequest().getContextPath()) ? renderContext.getRequest().getContextPath() + path : path;
+        String encodedPath = URLEncoder.encode(path, "UTF-8");
+        out += ("<jahia:resource type='javascript' path='" + encodedPath + "' insert='true' resource='" + JS_API_FILE + "'/>");
 
         return out;
     }

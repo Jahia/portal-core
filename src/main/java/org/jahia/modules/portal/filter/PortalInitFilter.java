@@ -108,7 +108,10 @@ public class PortalInitFilter extends AbstractFilter{
     private HashMap<String, Object> getBindingMap(RenderContext renderContext, Resource resource) throws RepositoryException {
         JCRNodeWrapper portalNode = JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JMIX_PORTAL);
         HashMap<String, Object> bindingMap = new HashMap<String, Object>();
-        bindingMap.put(PORTAL_INIT_BASE_URL, stringifyJsParam(renderContext.getURLGenerator().getBase()));
+        bindingMap.put(PORTAL_INIT_BASE_URL,
+                stringifyJsParam(StringUtils.isNotEmpty(renderContext.getURLGenerator().getContext())
+                        ? renderContext.getURLGenerator().getContext() + renderContext.getURLGenerator().getBaseLive() 
+                        : renderContext.getURLGenerator().getBaseLive()));
         bindingMap.put(PORTAL_INIT_PORTAL_PATH, stringifyJsParam(portalNode.getPath()));
         bindingMap.put(PORTAL_INIT_PORTAL_TAB_PATH, stringifyJsParam(resource.getNode().getPath()));
         bindingMap.put(PORTAL_INIT_IS_EDITABLE, resource.getNode().hasPermission("jcr:write_live"));
