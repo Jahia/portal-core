@@ -7,11 +7,11 @@
         <groupId>org.jahia.modules</groupId>
         <version>7.0.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>portal-factory</artifactId>
+    <artifactId>portal-factory_core</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <name>portal factory</name>
-    <description>This is the custom module (portal) for running on a Jahia xCM server.</description>
+    <name>Portal factory - core</name>
+    <description>This is the custom module (portal factory - core) for running on a Jahia xCM server.</description>
     <scm>
         <connection>scm:dummy:uri</connection>
         <developerConnection>scm:dummy:uri</developerConnection>

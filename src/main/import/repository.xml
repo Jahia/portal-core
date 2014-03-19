@@ -1,32 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <content xmlns:j="http://www.jahia.org/jahia/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0">
     <modules jcr:primaryType="jnt:modules">
-        <portal-factory j:dependencies="default siteSettings"
+        <portal-factory_core j:dependencies="default siteSettings"
+                      j:modulePriority="0"
                     j:moduleType="module"
-                    j:title="portal factory"
+                    j:title="Portal factory - core"
+                      jcr:mixinTypes="jmix:hasExternalProviderExtension"
                     jcr:primaryType="jnt:module">
                 <portlets jcr:primaryType="jnt:portletFolder"/>
                 <files jcr:primaryType="jnt:folder"/>
                 <contents jcr:primaryType="jnt:contentFolder"/>
                 <templates j:rootTemplatePath="/base" jcr:primaryType="jnt:templatesFolder">
                     <files jcr:primaryType="jnt:folder">
-                        <Portal-Factory-icon.png j:height="16"
+                        <portal-factory_core-icon.png j:height="16"
                                                       j:width="16"
                                                       jcr:mixinTypes="jmix:image"
                                                       jcr:primaryType="jnt:file">
                             <jcr:content jcr:mimeType="image/png" jcr:primaryType="jnt:resource"/>
                             <thumbnail jcr:mimeType="image/png" jcr:primaryType="jnt:resource"/>
                             <thumbnail2 jcr:mimeType="image/png" jcr:primaryType="jnt:resource"/>
-                        </Portal-Factory-icon.png>
+                        </portal-factory_core-icon.png>
                     </files>
                     <contents jcr:primaryType="jnt:contentFolder"/>
                     <site-settings-base j:view="portalSettings"
                                 jcr:mixinTypes="jmix:useUILocale"
                                 jcr:primaryType="jnt:template">
-                        <portal-factory j:applyOn="jnt:virtualsite"
+                        <portal-factory_core j:applyOn="jnt:virtualsite"
                                j:defaultTemplate="false"
                                j:hiddenTemplate="true"
-                               j:icon="/modules/portal-factory/templates/files/Portal-Factory-icon.png"
+                               j:icon="/modules/portal-factory_core/templates/files/Portal-Factory-icon.png"
                                j:view="portalSettings"
                                jcr:primaryType="jnt:contentTemplate">
                             <j:translation_en jcr:language="en"
@@ -41,11 +43,11 @@
                                           jcr:title="Portal factory"/>
                         </portal-factory>
                             </pagecontent>
-                        </portal-factory>
+                        </portal-factory_core>
                     </site-settings-base>
                 </templates>
 
                 
-            </portal-factory>
+            </portal-factory_core>
     </modules>
 </content>
