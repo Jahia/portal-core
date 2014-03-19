@@ -7,19 +7,20 @@
                     j:title="Portal factory - core"
                       jcr:mixinTypes="jmix:hasExternalProviderExtension"
                     jcr:primaryType="jnt:module">
+                
                 <portlets jcr:primaryType="jnt:portletFolder"/>
                 <files jcr:primaryType="jnt:folder"/>
                 <contents jcr:primaryType="jnt:contentFolder"/>
                 <templates j:rootTemplatePath="/base" jcr:primaryType="jnt:templatesFolder">
                     <files jcr:primaryType="jnt:folder">
-                        <portal-factory_core-icon.png j:height="16"
+                        <Portal-Factory-icon.png j:height="16"
                                                       j:width="16"
                                                       jcr:mixinTypes="jmix:image"
                                                       jcr:primaryType="jnt:file">
                             <jcr:content jcr:mimeType="image/png" jcr:primaryType="jnt:resource"/>
                             <thumbnail jcr:mimeType="image/png" jcr:primaryType="jnt:resource"/>
                             <thumbnail2 jcr:mimeType="image/png" jcr:primaryType="jnt:resource"/>
-                        </portal-factory_core-icon.png>
+                        </Portal-Factory-icon.png>
                     </files>
                     <contents jcr:primaryType="jnt:contentFolder"/>
                     <site-settings-base j:view="portalSettings"
@@ -47,7 +48,6 @@
                     </site-settings-base>
                 </templates>
 
-                
             </portal-factory_core>
     </modules>
 </content>
