@@ -31,6 +31,7 @@
 <c:set var="widgetSolo" value="${not empty renderContext.request.parameterMap['w_solo'] ? renderContext.request.parameterMap['w_solo'][0] : null}"/>
 <c:set var="widgetState" value="${not empty renderContext.request.parameterMap['w_state'] ? renderContext.request.parameterMap['w_state'][0] : ''}"/>
 <c:set var="widgetView" value="${not empty renderContext.request.parameterMap['w_view'] ? renderContext.request.parameterMap['w_view'][0] : ''}"/>
+<template:addCacheDependency flushOnPathMatchingRegexp="\\\\Q${renderContext.mainResource.node.path}\\\\E/[^/]*"/>
 
 <c:choose>
     <c:when test="${widgetSolo != null && widgetIdentifier != null}">
