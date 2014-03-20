@@ -129,7 +129,8 @@ public class PortalService {
         portalNode.setProperty(PortalConstants.JCR_TITLE, form.getPortal().getName());
         portalNode.setProperty(PortalConstants.J_TEMPLATE_ROOT_PATH, form.getTemplateRootPath());
 		if(StringUtils.isNotEmpty(form.getPortal().getTemplateFull())){
-			portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, getPortalTabTemplate(form.getPortal().getTemplateFull(), session).getName());
+			portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, getPortalTabTemplate(form.getPortal().getTemplateFull(),
+                    JCRSessionFactory.getInstance().getCurrentUserSession()).getName());
 		}else {
 			portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, "");
 		}
