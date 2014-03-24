@@ -390,7 +390,7 @@ public class PortalService {
     }
 
     public Collection<JCRNodeWrapper> getUserPortalsInstanceByModel(JCRNodeWrapper portalModelNode) {
-        SortedSet<JCRNodeWrapper> portals = new TreeSet<JCRNodeWrapper>(PORTALS_COMPARATOR);
+        Set<JCRNodeWrapper> portals = new HashSet<JCRNodeWrapper>();
 
         try {
             if (portalIsModel(portalModelNode)) {
