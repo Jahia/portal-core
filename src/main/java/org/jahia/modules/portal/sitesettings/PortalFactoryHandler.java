@@ -46,7 +46,7 @@ public class PortalFactoryHandler implements Serializable {
     private static final long serialVersionUID = 978219001163542883L;
 
     private static final Logger logger = LoggerFactory.getLogger(PortalFactoryHandler.class);
-    private static final String BUNDLE = "resources.portal-factory";
+    private static final String BUNDLE = "resources.portal-factory_core";
 
     @Autowired
     private transient PortalService portalService;
@@ -235,12 +235,16 @@ public class PortalFactoryHandler implements Serializable {
         JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
         try {
             JCRNodeWrapper portalNode = sessionWrapper.getNode(selectedPortal);
+
+            //update user portals table
+            userPortalsTable.getRows().remove(portalNode.getPath());
+            userPortalsTable.getPager().setMaxResults(userPortalsTable.getPager().getMaxResults() - 1);
+
+            //perform delete
             String name = portalNode.getDisplayableName();
             portalNode.remove();
             sessionWrapper.save();
             setActionMessage(messageContext, true, "manageUserPortals", ".deleted", name);
-
-            userPortalsTable.getPager().setMaxResults(userPortalsTable.getPager().getMaxResults() - 1);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             setActionMessage(messageContext, false, "manageUserPortals", ".deleted", null);

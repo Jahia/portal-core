@@ -26,7 +26,7 @@
                     <site-settings-base j:view="portalSettings"
                                 jcr:mixinTypes="jmix:useUILocale"
                                 jcr:primaryType="jnt:template">
-                        <portal-factory_core j:applyOn="jnt:virtualsite"
+                        <portal-factory j:applyOn="jnt:virtualsite"
                                j:defaultTemplate="false"
                                j:hiddenTemplate="true"
                                j:icon="/modules/portal-factory_core/templates/files/Portal-Factory-icon.png"
@@ -44,7 +44,7 @@
                                           jcr:title="Portal factory"/>
                         </portal-factory>
                             </pagecontent>
-                        </portal-factory_core>
+                        </portal-factory>
                     </site-settings-base>
                 </templates>
 
