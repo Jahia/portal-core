@@ -83,10 +83,11 @@
   <packaging>bundle</packaging>
   <name>Portal factory - core</name>
   <description>This is the custom module (portal factory - core) for running on a Jahia xCM server.</description>
-  <scm>
-    <connection>scm:dummy:uri</connection>
-    <developerConnection>scm:dummy:uri</developerConnection>
-  </scm>
+    <scm>
+        <connection>scm:git:git@github.com:Jahia/portal-factory_core.git</connection>
+        <developerConnection>scm:git:git@github.com:Jahia/portal-factory_core.git</developerConnection>
+        <url>scm:git:git@github.com:Jahia/portal-factory_core.git</url>
+    </scm>
   <distributionManagement>
     <repository>
       <id>jahia-enterprise-releases</id>
