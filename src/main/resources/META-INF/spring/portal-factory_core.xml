@@ -50,7 +50,7 @@
         <property name="portalService" ref="PortalService"/>
         <property name="priority" value="21"/>
         <property name="description" value="set the good site for the user portal"/>
-        <property name="applyOnNodeTypes" value="jnt:portalTab,jmix:portalWidget"/>
+        <property name="applyOnNodeTypes" value="jnt:portalTab,jmix:portalWidget,jmix:portal"/>
     </bean>
 
     <!-- Error handlers -->
