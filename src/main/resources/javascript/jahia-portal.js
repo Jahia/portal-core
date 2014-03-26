@@ -14,6 +14,35 @@ Jahia.Utils = {
             if (obj.hasOwnProperty(key)) size++;
         }
         return size;
+    },
+
+    ajaxJcrRestCall: function() {
+        // TODO implement jcr rest API
+    },
+
+    ajaxJahiaActionCall: function(path, action, method, data, successCB, failCB) {
+        var options = {
+            url: path + action,
+            type: method ? method : "GET",
+            dataType: "json"
+        };
+
+        if(data){
+            options.data = data;
+            options.traditional= true;
+        }
+
+        $.ajax(options)
+            .done(function (result) {
+                if (successCB && successCB instanceof Function) {
+                    successCB(result);
+                }
+            })
+            .fail(function (result) {
+                if (failCB && failCB instanceof Function) {
+                    failCB(result);
+                }
+            });
     }
 };
 
@@ -173,10 +202,10 @@ Jahia.Portal.prototype = {
      */
     getWidgetTypes: function (callback) {
         var instance = this;
-        $.ajax(instance.baseURL + instance.portalPath + Jahia.Portal.constants.WIDGETS_PORTAL_VIEW).done(function (data) {
-            instance._debug(data.length + " widgets loaded");
-            callback(data);
-        });
+        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalPath, Jahia.Portal.constants.WIDGETS_PORTAL_VIEW, "GET", undefined, function(result){
+            instance._debug(result.length + " widgets type allowed for this portal");
+            callback(result);
+        }, undefined);
     },
 
     /**
@@ -202,33 +231,25 @@ Jahia.Portal.prototype = {
             beforeWidgetPath = beforeWidget._path;
         }
 
-        var data = {
+        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalTabPath, Jahia.Portal.constants.ADD_WIDGET_ACTION, "POST", {
             nodetype: nodetype,
             name: name,
             col: areaName,
             beforeWidget: beforeWidgetPath
-        };
-        $.ajax({
-            type: "POST",
-            dataType: "json",
-            traditional: true,
-            url: instance.baseURL + instance.portalTabPath + Jahia.Portal.constants.ADD_WIDGET_ACTION,
-            data: data
-        }).done(function (data) {
-
-            if(data.isGadget){
-                instance.loadInCurrentTab(data.id, view);
+        }, function(result){
+            if(result.isGadget){
+                instance.loadInCurrentTab(result.id, view);
             }else{
-                var $widget = $("<div></div>").attr("id", "w_" + data.id).attr("class", "portal_widget");
+                var $widget = $("<div></div>").attr("id", "w_" + result.id).attr("class", "portal_widget");
                 $widget.data("widget-gadget", false);
-                $widget.data("widget-path", data.path);
+                $widget.data("widget-path", result.path);
                 if(view){
                     $widget.data("widget-view", view);
                 }
 
                 toArea.registerWidget($widget, $htmlToReplace, false);
             }
-        });
+        }, undefined);
     },
 
     /**
@@ -313,16 +334,12 @@ Jahia.Portal.prototype = {
     getTabFormInfo: function (callback) {
         var instance = this;
         instance._debug("Load form infos for portal tab: " + instance.portalTabPath);
-        $.ajax({
-            type: "GET",
-            dataType: "json",
-            url: instance.baseURL + instance.portalTabPath + Jahia.Portal.constants.FORM_TAB_VIEW
-        }).done(function (data) {
-                instance._debug("Portal tab form info successfully loaded");
-                if (callback) {
-                    callback(data);
-                }
-            });
+        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalTabPath, Jahia.Portal.constants.FORM_TAB_VIEW, "GET", undefined, function(result){
+            instance._debug("Portal tab form info successfully loaded");
+            if (callback) {
+                callback(result);
+            }
+        });
     },
 
     /**
@@ -338,6 +355,7 @@ Jahia.Portal.prototype = {
         var action = isNew ? "Add new" : "Edit";
         instance._debug( action + " portal tab: " + form.name);
 
+        //TODO use jcr rest API
         $.ajax({
             type: "POST",
             dataType: "json",
@@ -367,6 +385,7 @@ Jahia.Portal.prototype = {
         var instance = this;
         instance._debug("Delete tab: " + instance.portalTabPath);
 
+        //TODO call jcr rest API
         $.ajax({
             type: "POST",
             dataType: "json",
@@ -394,18 +413,12 @@ Jahia.Portal.prototype = {
         if(instance.isModel){
             instance._debug("Init user portal");
 
-            $.ajax({
-                type: "POST",
-                dataType: "json",
-                traditional: true,
-                url: instance.baseURL + instance.portalPath + Jahia.Portal.constants.COPY_PORTALMODEL_ACTION,
-                data: {}
-            }).done(function(data){
-                    if(callback){
-                        callback(data)
-                    }
-                    window.location.href = instance.baseURL + data.path;
-                });
+            Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalPath, Jahia.Portal.constants.COPY_PORTALMODEL_ACTION, "POST", {}, function(result){
+                if(callback){
+                    callback(result)
+                }
+                window.location.href = instance.baseURL + result.path;
+            });
         }else {
             instance._debug("Impossible to copy this portal, because is not a model");
         }
@@ -420,16 +433,12 @@ Jahia.Portal.prototype = {
     getTabs: function(callback) {
         var instance = this;
         instance._debug("Load tabs for portal tab: " + instance.portalPath);
-        $.ajax({
-            type: "GET",
-            dataType: "json",
-            url: instance.baseURL + instance.portalPath + Jahia.Portal.constants.TABS_PORTAL_VIEW
-        }).done(function (data) {
-                instance._debug(data.length + "portal tabs successfully loaded");
-                if (callback) {
-                    callback(data);
-                }
-            });
+        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalPath, Jahia.Portal.constants.TABS_PORTAL_VIEW, "GET", undefined, function(result){
+            instance._debug(result.length + "portal tabs successfully loaded");
+            if (callback) {
+                callback(result);
+            }
+        }, undefined);
     },
 
     /**
@@ -480,6 +489,7 @@ Jahia.Portal.prototype = {
     lockPortal: function(){
         var instance = this;
         instance._debug("Lock portal");
+        //TODO jcr rest API
         instance._makeAjaxPostRequest({
             "jcrNodeType": "jmix:portal",
             "j:locked" : true
@@ -491,6 +501,7 @@ Jahia.Portal.prototype = {
     unlockPortal: function(){
         var instance = this;
         instance._debug("Unlock portal");
+        //TODO jcr rest API
         instance._makeAjaxPostRequest({
             "jcrNodeType": "jmix:portal",
             "j:locked" : false
@@ -500,6 +511,7 @@ Jahia.Portal.prototype = {
     },
 
     _makeAjaxPostRequest: function (data, url, successCb, errorCb){
+        //TODO jcr rest API
         $.ajax({
             type: "POST",
             dataType: "json",
@@ -677,25 +689,18 @@ Jahia.Portal.Widget.prototype = {
 
         var onTopOfWidget = instance._portal.getWidget($("#" + instance._id).next("." + Jahia.Portal.constants.PORTAL_WIDGET_CLASS).attr("id"));
 
-        var data = {
+        Jahia.Utils.ajaxJahiaActionCall(instance._portal.baseURL + instance._portal.portalTabPath, Jahia.Portal.constants.MOVE_WIDGET_ACTION, "POST", {
             toArea: areaName,
             widget: instance._path,
             onTopOfWidget: onTopOfWidget ? onTopOfWidget._path : ""
-        };
-        $.ajax({
-            type: "POST",
-            dataType: "json",
-            traditional: true,
-            url: instance._portal.baseURL + instance._portal.portalTabPath + Jahia.Portal.constants.MOVE_WIDGET_ACTION,
-            data: data
-        }).done(function (newPositionInfo) {
-                instance._path = newPositionInfo.path;
-                instance._area = instance._portal.getArea(toArea);
+        }, function(newPositionInfo){
+            instance._path = newPositionInfo.path;
+            instance._area = instance._portal.getArea(toArea);
 
-                instance.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_SUCCEEDED);
-            }).fail(function () {
-                instance.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_FAILED);
-            });
+            instance.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_SUCCEEDED);
+        }, function(){
+            instance.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_FAILED);
+        });
     },
 
     /**
@@ -703,6 +708,7 @@ Jahia.Portal.Widget.prototype = {
      */
     performDelete: function() {
         var instance = this;
+        //TODO use jcr rest API
         $.ajax({
             type: "POST",
             data: {
@@ -728,6 +734,7 @@ Jahia.Portal.Widget.prototype = {
      */
     performUpdate: function(data, callback) {
         var instance = this;
+        //TODO use jcr rest API
         $.ajax({
             type: "POST",
             data: data,
