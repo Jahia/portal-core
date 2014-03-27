@@ -38,6 +38,7 @@
         <property name="scriptEngineUtils" ref="scriptEngineUtils"/>
         <property name="template" value="${portalInitTemplate:/modules/portal-factory_core/WEB-INF/scripts/portalInit.groovy}"/>
         <property name="debugEnabled" value="${portalDebugEnabled:true}"/>
+        <property name="jcrRestAPI" value="${portalJcrRestAPI:/modules/api/jcr/v1}"/>
     </bean>
     <bean name="PortalSkinFilter" class="org.jahia.modules.portal.filter.PortalSkinFilter">
         <property name="description" value="Filter that add skins to the current resource."/>

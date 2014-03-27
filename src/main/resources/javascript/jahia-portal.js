@@ -16,8 +16,8 @@ Jahia.Utils = {
         return size;
     },
 
-    ajaxJcrRestCall: function() {
-        // TODO implement jcr rest API
+    ajaxJcrRestCall: function(jcrRestAPIBaseURI, locale, endOfURI, type, data) {
+        // TODO
     },
 
     ajaxJahiaActionCall: function(path, action, method, data, successCB, failCB) {
@@ -62,7 +62,11 @@ Jahia.Portal = function (options) {
 
     this.baseURL = options.baseURL;
     this.portalPath = options.portalPath;
+    this.portalIdentifier = options.portalIdentifier;
     this.portalTabPath = options.portalTabPath;
+    this.portalTabIdentifier = options.portalTabIdentifier;
+    this.jcrRestAPIUri = options.jcrRestAPIUri;
+    this.locale = options.locale;
 
     this.$areas = [];
     this.areas = [];
