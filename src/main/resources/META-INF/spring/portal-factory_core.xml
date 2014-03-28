@@ -21,7 +21,7 @@
 
     <!-- Filters -->
     <bean name="PortalLibFilter" class="org.jahia.modules.portal.filter.PortalLibFilter">
-        <property name="priority" value="19"/>
+        <property name="priority" value="18"/>
         <property name="description" value="Add portal JavaScript API in the page before the static asset filter"/>
         <property name="applyOnConfigurations" value="page" />
         <property name="applyOnTemplateTypes" value="html"/>
@@ -32,6 +32,23 @@
         <property name="debugEnabled" value="${portalDebugEnabled:true}"/>
         <property name="jcrRestAPI" value="${portalJcrRestAPI:/modules/api/jcr/v1}"/>
     </bean>
+
+    <bean class="org.jahia.modules.jcrrestapi.filter.JCRRestJavaScriptLibFilter">
+        <property name="priority" value="19"/>
+        <property name="description" value="Add JCR Rest utils lib into the page"/>
+        <property name="applyOnConfigurations" value="page" />
+        <property name="applyOnTemplateTypes" value="html"/>
+        <property name="applyOnNodeTypes" value="jnt:portalTab"/>
+
+        <property name="scriptEngineUtils" ref="scriptEngineUtils"/>
+        <property name="javaScriptFileName" value="JCRRestUtils.js"/>
+        <property name="moduleName" value="jcr-rest-javascript-utils"/>
+        <property name="templateName" value="jcrRestUtilsInit.groovy"/>
+
+        <property name="debugEnabled" value="${jcrRestUtilsDebugEnabled:true}"/>
+        <property name="jcrRestAPIVersion" value="${jcrRestUtilsAPIVersion:v1}"/>
+    </bean>
+
     <bean name="PortalSkinFilter" class="org.jahia.modules.portal.filter.PortalSkinFilter">
         <property name="description" value="Filter that add skins to the current resource."/>
         <property name="priority" value="45"/>
