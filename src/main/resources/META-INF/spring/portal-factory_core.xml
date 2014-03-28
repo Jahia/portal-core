@@ -21,20 +21,12 @@
 
     <!-- Filters -->
     <bean name="PortalLibFilter" class="org.jahia.modules.portal.filter.PortalLibFilter">
-        <property name="priority" value="1"/>
+        <property name="priority" value="19"/>
         <property name="description" value="Add portal JavaScript API in the page before the static asset filter"/>
         <property name="applyOnConfigurations" value="page" />
         <property name="applyOnTemplateTypes" value="html"/>
-        <property name="applyOnModes" value="live" />
         <property name="applyOnNodeTypes" value="jnt:portalTab"/>
-    </bean>
-    <bean name="PortalInitFilter" class="org.jahia.modules.portal.filter.PortalInitFilter">
-        <property name="priority" value="-1"/>
-        <property name="description" value="Add portal init JavaScript in the header"/>
-        <property name="applyOnConfigurations" value="page" />
-        <property name="applyOnTemplateTypes" value="html"/>
-        <property name="applyOnModes" value="live" />
-        <property name="applyOnNodeTypes" value="jnt:portalTab"/>
+
         <property name="scriptEngineUtils" ref="scriptEngineUtils"/>
         <property name="template" value="${portalInitTemplate:/modules/portal-factory_core/WEB-INF/scripts/portalInit.groovy}"/>
         <property name="debugEnabled" value="${portalDebugEnabled:true}"/>
@@ -42,16 +34,24 @@
     </bean>
     <bean name="PortalSkinFilter" class="org.jahia.modules.portal.filter.PortalSkinFilter">
         <property name="description" value="Filter that add skins to the current resource."/>
-        <property name="priority" value="-4"/>
+        <property name="priority" value="45"/>
         <property name="applyOnNodeTypes" value="jmix:portalWidget"/>
         <property name="skipOnConfigurations" value="wrapper"/>
         <property name="skipOnModes" value="studio"/>
     </bean>
     <bean class="org.jahia.modules.portal.filter.PortalSiteFilter">
         <property name="portalService" ref="PortalService"/>
-        <property name="priority" value="-5"/>
+        <property name="priority" value="10"/>
         <property name="description" value="set the good site for the user portal"/>
         <property name="applyOnNodeTypes" value="jnt:portalTab,jmix:portalWidget,jmix:portal"/>
+    </bean>
+    <bean name="PortalLastWatchFilter" class="org.jahia.modules.portal.filter.PortalLastWatchFilter">
+        <property name="priority" value="11"/>
+        <property name="description" value="update last watch property for a portal"/>
+        <property name="applyOnConfigurations" value="page" />
+        <property name="applyOnTemplateTypes" value="html"/>
+        <property name="applyOnNodeTypes" value="jnt:portalTab"/>
+        <property name="applyOnFirstWatchInTheDay" value="true"/>
     </bean>
 
     <!-- Error handlers -->

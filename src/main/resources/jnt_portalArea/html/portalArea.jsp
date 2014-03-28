@@ -29,7 +29,9 @@
         <c:set var="portalColNode" value="${portal:getPortalColForArea(renderContext.mainResource.node, currentNode.name)}"/>
 
         <div id="portal_area_${currentNode.identifier}" class="portal_area" data-area-name="${currentNode.name}">
-            <template:area path="${portalColNode.path}"/>
+            <c:if test="${not empty portalColNode}">
+                <template:area path="${portalColNode.path}"/>
+            </c:if>
         </div>
 
         <script type="text/javascript">
