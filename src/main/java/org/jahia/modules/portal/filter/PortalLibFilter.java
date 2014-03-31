@@ -50,13 +50,10 @@ public class PortalLibFilter extends AbstractFilter {
     public static final String PORTAL_INIT_PORTAL_IDENTIFIER = "portalIdentifier";
     public static final String PORTAL_INIT_PORTAL_TAB_PATH = "portalTabPath";
     public static final String PORTAL_INIT_PORTAL_TAB_IDENTIFIER = "portalTabIdentifier";
-    public static final String PORTAL_INIT_JCR_REST_API_URI = "jcrRestAPIUri";
-    public static final String PORTAL_INIT_LOCALE = "locale";
 
     private ScriptEngineUtils scriptEngineUtils;
     private String template;
     private String resolvedTemplate;
-    private String jcrRestAPI;
     private Boolean debugEnabled;
 
     @Override
@@ -109,8 +106,6 @@ public class PortalLibFilter extends AbstractFilter {
         bindingMap.put(PORTAL_INIT_IS_LOCKED, portalNode.hasProperty("j:locked") && portalNode.getProperty("j:locked").getBoolean());
         bindingMap.put(PORTAL_INIT_IS_MODEL, portalNode.isNodeType(PortalConstants.JNT_PORTAL_MODEL));
         bindingMap.put(PORTAL_INIT_FULL_TEMPLATE, stringifyJsParam(portalNode.getProperty(PortalConstants.J_FULL_TEMPLATE).getString()));
-        bindingMap.put(PORTAL_INIT_JCR_REST_API_URI, stringifyJsParam(jcrRestAPI));
-        bindingMap.put(PORTAL_INIT_LOCALE, stringifyJsParam(resource.getLocale().toString()));
         bindingMap.put(PORTAL_INIT_DEBUG, debugEnabled);
         return bindingMap;
     }
@@ -135,10 +130,6 @@ public class PortalLibFilter extends AbstractFilter {
 
     public void setTemplate(String template) {
         this.template = template;
-    }
-
-    public void setJcrRestAPI(String jcrRestAPI) {
-        this.jcrRestAPI = jcrRestAPI;
     }
 
     public void setDebugEnabled(Boolean debugEnabled) {

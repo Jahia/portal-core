@@ -30,7 +30,6 @@
         <property name="scriptEngineUtils" ref="scriptEngineUtils"/>
         <property name="template" value="${portalInitTemplate:/modules/portal-factory_core/WEB-INF/scripts/portalInit.groovy}"/>
         <property name="debugEnabled" value="${portalDebugEnabled:true}"/>
-        <property name="jcrRestAPI" value="${portalJcrRestAPI:/modules/api/jcr/v1}"/>
     </bean>
 
     <bean class="org.jahia.modules.jcrrestapi.filter.JCRRestJavaScriptLibFilter">

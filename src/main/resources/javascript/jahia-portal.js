@@ -16,20 +16,16 @@ Jahia.Utils = {
         return size;
     },
 
-    ajaxJcrRestCall: function(jcrRestAPIBaseURI, locale, endOfURI, type, data) {
-        // TODO
-    },
-
-    ajaxJahiaActionCall: function(path, action, method, data, successCB, failCB) {
+    ajaxJahiaActionCall: function (path, action, method, data, successCB, failCB) {
         var options = {
             url: path + action,
             type: method ? method : "GET",
             dataType: "json"
         };
 
-        if(data){
+        if (data) {
             options.data = data;
-            options.traditional= true;
+            options.traditional = true;
         }
 
         $.ajax(options)
@@ -55,7 +51,7 @@ Jahia.Utils = {
 Jahia.Portal = function (options) {
     this.conf = Jahia.Portal.default;
     this.debug = options.debug ? options.debug : false;
-    this.isModel = options.isModel ? options.isModel :false;
+    this.isModel = options.isModel ? options.isModel : false;
     this.isEditable = options.isEditable ? options.isEditable : false;
     this.isLocked = options.isLocked ? options.isLocked : false;
     this.fullTemplate = options.fullTemplate ? options.fullTemplate : false;
@@ -64,9 +60,8 @@ Jahia.Portal = function (options) {
     this.portalPath = options.portalPath;
     this.portalIdentifier = options.portalIdentifier;
     this.portalTabPath = options.portalTabPath;
+    this.portalTabNodeName = this.portalTabPath.substring(this.portalTabPath.lastIndexOf("/") + 1);
     this.portalTabIdentifier = options.portalTabIdentifier;
-    this.jcrRestAPIUri = options.jcrRestAPIUri;
-    this.locale = options.locale;
 
     this.$areas = [];
     this.areas = [];
@@ -93,7 +88,7 @@ Jahia.Portal.constants = {
     EXTERNAL_WIDGET_DROP_NODEYPE: "widget_nodetype",
     EXTERNAL_WIDGET_DROP_VIEW: "widget_view",
 
-    PORTAL_WIDGET_CLASS:    "portal_widget"
+    PORTAL_WIDGET_CLASS: "portal_widget"
 };
 /**
  * portal conf
@@ -129,41 +124,41 @@ Jahia.Portal.prototype = {
                 var toArea = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).data("area-name"));
                 var widget = instance.getWidget(ui.item.attr("id"));
 
-                if(widget){
+                if (widget) {
                     widget.performMove(toArea);
-                }else {
+                } else {
                     newWidget = true;
                 }
             }
         };
 
         // sortable start callback, used for store initial state of the item, allow to do some check in others callbacks
-        instance.conf.sortable_options.start = function(event, ui) {
+        instance.conf.sortable_options.start = function (event, ui) {
             ui.item.data('start_index', ui.item.index());
             ui.item.data('start_colId', $(ui.item).parent(instance.conf.sortable_options.connectWith).attr("id"));
         };
 
         // sortable stop callback
-        instance.conf.sortable_options.stop = function(event, ui) {
-            if(newWidget){
+        instance.conf.sortable_options.stop = function (event, ui) {
+            if (newWidget) {
                 //search for widget related datas in the item html
                 var nodetypeEl = ui.item.hasClass(Jahia.Portal.constants.EXTERNAL_WIDGET_DROP_CLASS) ? ui.item : ui.item.find("." + Jahia.Portal.constants.EXTERNAL_WIDGET_DROP_CLASS);
-                if(nodetypeEl.length > 0){
+                if (nodetypeEl.length > 0) {
                     var nodetype = nodetypeEl.data(Jahia.Portal.constants.EXTERNAL_WIDGET_DROP_NODEYPE);
                     var view = nodetypeEl.data(Jahia.Portal.constants.EXTERNAL_WIDGET_DROP_VIEW);
-                    if(nodetype){
+                    if (nodetype) {
                         //get next widget if exist
                         var next = ui.item.next();
                         var area = instance.getArea(ui.item.parent(instance.conf.sortable_options.connectWith).data("area-name"));
                         var beforeWidget = undefined;
-                        if(next.length > 0){
+                        if (next.length > 0) {
                             beforeWidget = instance.getWidget(next.attr("id"));
                         }
                         // instanciate this new widget
                         instance.addNewWidget(nodetype, undefined, area, view, beforeWidget, ui.item);
                     }
                 }
-            }else {
+            } else {
                 var start_pos = ui.item.data('start_index');
                 var start_colId = ui.item.data('start_colId');
                 if (start_pos == ui.item.index() && start_colId == $(ui.item).parent(instance.conf.sortable_options.connectWith).attr("id")) {
@@ -174,11 +169,11 @@ Jahia.Portal.prototype = {
             }
         };
 
-        if($areas.sortable){
-            if(instance.isEditable){
+        if ($areas.sortable) {
+            if (instance.isEditable) {
                 $areas.sortable(instance.conf.sortable_options);
             }
-        }else {
+        } else {
             console.error("Missing portal dependency 'jquery-ui sortable, draggable'")
         }
 
@@ -206,7 +201,7 @@ Jahia.Portal.prototype = {
      */
     getWidgetTypes: function (callback) {
         var instance = this;
-        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalPath, Jahia.Portal.constants.WIDGETS_PORTAL_VIEW, "GET", undefined, function(result){
+        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalPath, Jahia.Portal.constants.WIDGETS_PORTAL_VIEW, "GET", undefined, function (result) {
             instance._debug(result.length + " widgets type allowed for this portal");
             callback(result);
         }, undefined);
@@ -231,7 +226,7 @@ Jahia.Portal.prototype = {
         instance._debug("Add widget:[" + name + "] nodetype:[" + nodetype + "] area:[" + areaName + "] beforeWidget:[" + beforeWidget + "]");
 
         var beforeWidgetPath = undefined;
-        if(beforeWidget){
+        if (beforeWidget) {
             beforeWidgetPath = beforeWidget._path;
         }
 
@@ -240,14 +235,15 @@ Jahia.Portal.prototype = {
             name: name,
             col: areaName,
             beforeWidget: beforeWidgetPath
-        }, function(result){
-            if(result.isGadget){
+        }, function (result) {
+            if (result.isGadget) {
                 instance.loadInCurrentTab(result.id, view);
-            }else{
+            } else {
                 var $widget = $("<div></div>").attr("id", "w_" + result.id).attr("class", "portal_widget");
                 $widget.data("widget-gadget", false);
                 $widget.data("widget-path", result.path);
-                if(view){
+                $widget.data("col-id", result.col_id);
+                if (view) {
                     $widget.data("widget-view", view);
                 }
 
@@ -287,10 +283,10 @@ Jahia.Portal.prototype = {
     getAreaByIndex: function (index) {
         var instance = this;
         var $area = $($(instance.conf.sortable_options.connectWith).get(index));
-        if($area.length == 0){
+        if ($area.length == 0) {
             instance._debug("No area at index: " + index);
             return undefined;
-        }else {
+        } else {
             return instance.getArea($area.data("area-name"));
         }
     },
@@ -325,7 +321,7 @@ Jahia.Portal.prototype = {
      * @this {Portal}
      * @param widget {Widget} widget to delete
      */
-    deleteWidget: function(widget) {
+    deleteWidget: function (widget) {
         widget.performDelete();
     },
 
@@ -338,7 +334,7 @@ Jahia.Portal.prototype = {
     getTabFormInfo: function (callback) {
         var instance = this;
         instance._debug("Load form infos for portal tab: " + instance.portalTabPath);
-        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalTabPath, Jahia.Portal.constants.FORM_TAB_VIEW, "GET", undefined, function(result){
+        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalTabPath, Jahia.Portal.constants.FORM_TAB_VIEW, "GET", undefined, function (result) {
             instance._debug("Portal tab form info successfully loaded");
             if (callback) {
                 callback(result);
@@ -357,26 +353,35 @@ Jahia.Portal.prototype = {
     saveTabForm: function (form, callback, isNew) {
         var instance = this;
         var action = isNew ? "Add new" : "Edit";
-        instance._debug( action + " portal tab: " + form.name);
+        instance._debug(action + " portal tab: " + form.name);
 
-        //TODO use jcr rest API
-        $.ajax({
-            type: "POST",
-            dataType: "json",
-            traditional: true,
-            url: isNew ? instance.baseURL + instance.portalPath + "/*" : instance.baseURL + instance.portalTabPath,
-            data: instance._convertTabFormToJCRProps(form)
-        }).done(function (data) {
-                instance._debug("Portal tab form successfully saved");
-                if(callback){
-                    callback(data);
-                }
-                if(isNew){
-                    window.location.href = instance.baseURL + instance.portalPath + "/" + data["j_nodename"] + ".html";
-                }else {
+        var formSerialized = instance._convertTabFormToJCRProps(form);
+        if (isNew) {
+            var url = JCRRestUtils.buildURL("", "", "", instance.portalIdentifier);
+            var normalizedName = JCRRestUtils.normalizeNodeName(form.name);
+            var data = JCRRestUtils.createUpdateChildData(normalizedName, "jnt:portalTab", JCRRestUtils.arrayToDataProperties(formSerialized, true));
+
+            JCRRestUtils.standardCall(url, "PUT",
+                JSON.stringify(data),
+                function (data) {
+                    instance._debug("Portal tab form successfully created");
+                    if (callback) {
+                        callback(data);
+                    }
+                    window.location.href = instance.baseURL + instance.portalPath + "/" + normalizedName + ".html";
+                });
+        } else {
+            var url = JCRRestUtils.buildURL();
+            JCRRestUtils.standardCall(url, "PUT",
+                JSON.stringify({properties: JCRRestUtils.arrayToDataProperties(formSerialized, true)}),
+                function (data) {
+                    instance._debug("Portal tab form successfully updated");
+                    if (callback) {
+                        callback(data);
+                    }
                     window.location.reload();
-                }
-            });
+                })
+        }
     },
 
     /**
@@ -385,25 +390,16 @@ Jahia.Portal.prototype = {
      * @this {Portal}
      * @param callback {function}
      */
-    deleteCurrentTab: function(callback) {
+    deleteCurrentTab: function (callback) {
         var instance = this;
         instance._debug("Delete tab: " + instance.portalTabPath);
-
-        //TODO call jcr rest API
-        $.ajax({
-            type: "POST",
-            dataType: "json",
-            traditional: true,
-            url: instance.baseURL + instance.portalTabPath,
-            data: {
-                jcrMethodToCall: "delete"
+        var url = JCRRestUtils.buildURL("", "", "", instance.portalIdentifier + "/children");
+        JCRRestUtils.standardCall(url, "DELETE", JSON.stringify([instance.portalTabNodeName]), function(data){
+            if (callback) {
+                callback(data)
             }
-        }).done(function(data){
-                if(callback){
-                    callback(data)
-                }
             window.location.href = instance.baseURL + instance.portalPath;
-            });
+        });
     },
 
     /**
@@ -412,18 +408,18 @@ Jahia.Portal.prototype = {
      * @this {Portal}
      * @param callback {function}
      */
-    initPortalFromModel: function(callback){
+    initPortalFromModel: function (callback) {
         var instance = this;
-        if(instance.isModel){
+        if (instance.isModel) {
             instance._debug("Init user portal");
 
-            Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalPath, Jahia.Portal.constants.COPY_PORTALMODEL_ACTION, "POST", {}, function(result){
-                if(callback){
+            Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalPath, Jahia.Portal.constants.COPY_PORTALMODEL_ACTION, "POST", {}, function (result) {
+                if (callback) {
                     callback(result)
                 }
                 window.location.href = instance.baseURL + result.path;
             });
-        }else {
+        } else {
             instance._debug("Impossible to copy this portal, because is not a model");
         }
     },
@@ -434,10 +430,10 @@ Jahia.Portal.prototype = {
      * @this {Portal}
      * @param callback {function}
      */
-    getTabs: function(callback) {
+    getTabs: function (callback) {
         var instance = this;
         instance._debug("Load tabs for portal tab: " + instance.portalPath);
-        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalPath, Jahia.Portal.constants.TABS_PORTAL_VIEW, "GET", undefined, function(result){
+        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalPath, Jahia.Portal.constants.TABS_PORTAL_VIEW, "GET", undefined, function (result) {
             instance._debug(result.length + "portal tabs successfully loaded");
             if (callback) {
                 callback(result);
@@ -450,22 +446,22 @@ Jahia.Portal.prototype = {
      *
      * @this {Portal}
      */
-    loadInCurrentTab: function(widgetId, widgetView, widgetState, widgetSolo, tabTemplate){
+    loadInCurrentTab: function (widgetId, widgetView, widgetState, widgetSolo, tabTemplate) {
         var instance = this;
         var tabPath = tabTemplate ? instance.portalTabPath + "." + tabTemplate : instance.portalTabPath;
         instance.loadTab(tabPath, widgetId, widgetView, widgetState, widgetSolo);
     },
 
-    loadTab: function(tabPath, widgetId, widgetView, widgetState, widgetSolo){
+    loadTab: function (tabPath, widgetId, widgetView, widgetState, widgetSolo) {
         var instance = this;
         var url = instance.baseURL + tabPath + ".html";
 
         var paramArray = [];
-        if (widgetId){
+        if (widgetId) {
             paramArray.push("w=" + widgetId);
         }
 
-        if (widgetView){
+        if (widgetView) {
             paramArray.push("w_view=" + widgetView);
         }
 
@@ -478,11 +474,11 @@ Jahia.Portal.prototype = {
         }
 
         for (var index = 0; index < paramArray.length; ++index) {
-            if(index == 0){
+            if (index == 0) {
                 url += "?"
             }
             url += paramArray[index];
-            if(index < (paramArray.length - 1)){
+            if (index < (paramArray.length - 1)) {
                 url += "&";
             }
         }
@@ -490,52 +486,33 @@ Jahia.Portal.prototype = {
         window.location.href = url;
     },
 
-    lockPortal: function(){
+    lockPortal: function () {
         var instance = this;
-        instance._debug("Lock portal");
-        //TODO jcr rest API
-        instance._makeAjaxPostRequest({
-            "jcrNodeType": "jmix:portal",
-            "j:locked" : true
-        }, instance.baseURL + instance.portalPath, function(){
-            instance.loadInCurrentTab();
-        });
+        instance._lockOrUnlockPortal(true);
     },
 
-    unlockPortal: function(){
+    unlockPortal: function () {
         var instance = this;
-        instance._debug("Unlock portal");
-        //TODO jcr rest API
-        instance._makeAjaxPostRequest({
-            "jcrNodeType": "jmix:portal",
-            "j:locked" : false
-        }, instance.baseURL + instance.portalPath, function(){
-            instance.loadInCurrentTab();
-        });
+        instance._lockOrUnlockPortal(false);
     },
 
-    _makeAjaxPostRequest: function (data, url, successCb, errorCb){
-        //TODO jcr rest API
-        $.ajax({
-            type: "POST",
-            dataType: "json",
-            url: url,
-            data: data
-        }).done(function (data) {
-            if(successCb){
-                successCb(data)
-            }
-        });
+    _lockOrUnlockPortal: function(bool) {
+        var instance = this;
+        var action = bool ? "Lock" : "Unlock";
+        instance._debug(action + " portal");
+        var url = JCRRestUtils.buildURL("", "", "", instance.portalIdentifier);
+        JCRRestUtils.standardCall(url, "PUT",
+            JSON.stringify({properties: JCRRestUtils.arrayToDataProperties([{"j:locked": bool}])}), function(data){
+                instance.loadInCurrentTab();
+            });
     },
 
     _convertTabFormToJCRProps: function (form) {
-        return {
-            "jcrNodeType": "jnt:portalTab",
-            "jcr:title": form.name,
-            "j:templateName": form.template.key,
-            "j:widgetSkin": form.widgetSkin.key,
-            "jcrNormalizeNodeName" : true
-        };
+        return [
+            {"name":"jcr:title", "value":form.name},
+            {"name":"j:templateName", "value":form.template.key},
+            {"name":"j:widgetSkin", "value":form.widgetSkin.key}
+        ];
     }
 };
 
@@ -561,7 +538,7 @@ Jahia.Portal.Area.prototype = {
 
         instance._portal._debug("Load widgets for area: " + areaName);
 
-        instance._$area.find("." + Jahia.Portal.constants.PORTAL_WIDGET_CLASS).each(function(index, widget){
+        instance._$area.find("." + Jahia.Portal.constants.PORTAL_WIDGET_CLASS).each(function (index, widget) {
             var $widget = $(widget);
             instance.registerWidget($widget);
         });
@@ -577,6 +554,7 @@ Jahia.Portal.Area.prototype = {
 Jahia.Portal.Widget = function ($widget, $htmlToReplace, forcedOriginalView, area) {
     this._id = $widget.attr('id');
     this._jcrIdentifier = this._id.substring(2);
+    this._columnJcrIdentifier = $widget.data("col-id");
     this._isGadget = $widget.data("widget-gadget");
     this._path = $widget.data('widget-path');
     this._area = area;
@@ -599,13 +577,13 @@ Jahia.Portal.Widget.prototype = {
         var instance = this;
         instance._portal._debug("Load widget: " + instance._path);
 
-        if($htmlToReplace){
+        if ($htmlToReplace) {
             $htmlToReplace.replaceWith($widget);
         }
 
-        if(!instance._isGadget){
+        if (!instance._isGadget) {
             instance.load(instance._initView);
-        }else {
+        } else {
             instance.attachEvents();
         }
     },
@@ -613,24 +591,24 @@ Jahia.Portal.Widget.prototype = {
     /**
      * Attach event related to drag&drop actions on the widget
      */
-    attachEvents: function() {
+    attachEvents: function () {
         var instance = this;
         //detach
         instance.getjQueryWidget().off();
 
         // Append when the server successfully make the move for the widget in the JCR
-        instance.getjQueryWidget().on(Jahia.Portal.constants.WIDGET_EVENT_MOVED_SUCCEEDED, function(){
+        instance.getjQueryWidget().on(Jahia.Portal.constants.WIDGET_EVENT_MOVED_SUCCEEDED, function () {
             instance._portal._debug("Widget successfully moved to " + instance._path);
         });
         // Append when the server failed to perform the move for widget in the JCR
-        instance.getjQueryWidget().on(Jahia.Portal.constants.WIDGET_EVENT_MOVED_FAILED, function(){
+        instance.getjQueryWidget().on(Jahia.Portal.constants.WIDGET_EVENT_MOVED_FAILED, function () {
             instance._portal._debug("Widget " + instance._path + " move failed");
 
             // Server cannot perform the move so rollback it in the page also
             instance._portal.$areas.sortable('cancel');
         });
         // Append when the widget return to his initial position
-        instance.getjQueryWidget().on(Jahia.Portal.constants.WIDGET_EVENT_MOVED_CANCELED, function(){
+        instance.getjQueryWidget().on(Jahia.Portal.constants.WIDGET_EVENT_MOVED_CANCELED, function () {
             instance._portal._debug("Widget stay at " + instance._path);
         });
     },
@@ -640,7 +618,7 @@ Jahia.Portal.Widget.prototype = {
      *
      * @returns {*|jQuery|HTMLElement}
      */
-    getjQueryWidget: function() {
+    getjQueryWidget: function () {
         var instance = this;
         return $("#" + instance._id);
     },
@@ -655,25 +633,25 @@ Jahia.Portal.Widget.prototype = {
         var instance = this;
         instance.attachEvents();
 
-        if(instance._isGadget){
-            if(view){
+        if (instance._isGadget) {
+            if (view) {
                 instance._portal.loadInCurrentTab(instance._jcrIdentifier, view);
-            }else {
+            } else {
                 instance._portal.loadInCurrentTab();
             }
-        }else {
-            if(!view){
+        } else {
+            if (!view) {
                 view = "portal.view";
             }
 
-            $("#" + instance._id).load(instance._portal.baseURL + instance._path + "." + view + ".html.ajax?includeJavascripts=true", function(){
-                if(instance._portal.isEditable){
+            $("#" + instance._id).load(instance._portal.baseURL + instance._path + "." + view + ".html.ajax?includeJavascripts=true", function () {
+                if (instance._portal.isEditable) {
                     instance._portal.initDragDrop();
                 }
                 instance._currentView = view;
                 instance._portal._debug("widget " + instance._path + " loaded successfully");
 
-                if(callback){
+                if (callback) {
                     callback();
                 }
             });
@@ -697,12 +675,12 @@ Jahia.Portal.Widget.prototype = {
             toArea: areaName,
             widget: instance._path,
             onTopOfWidget: onTopOfWidget ? onTopOfWidget._path : ""
-        }, function(newPositionInfo){
+        }, function (newPositionInfo) {
             instance._path = newPositionInfo.path;
             instance._area = instance._portal.getArea(toArea);
 
             instance.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_SUCCEEDED);
-        }, function(){
+        }, function () {
             instance.getjQueryWidget().trigger(Jahia.Portal.constants.WIDGET_EVENT_MOVED_FAILED);
         });
     },
@@ -710,18 +688,12 @@ Jahia.Portal.Widget.prototype = {
     /**
      * Perform delete action on the current widget
      */
-    performDelete: function() {
+    performDelete: function () {
         var instance = this;
-        //TODO use jcr rest API
-        $.ajax({
-            type: "POST",
-            data: {
-                jcrMethodToCall:"delete"
-            },
-            dataType: "json",
-            traditional: true,
-            url: instance._portal.baseURL + instance._path
-        }).done(function(){
+        var url = JCRRestUtils.buildURL("", "", "", instance._columnJcrIdentifier + "/children");
+        JCRRestUtils.standardCall(url, "DELETE",
+            JSON.stringify([this._path.substring(this._path.lastIndexOf("/") + 1)]),
+            function (data) {
                 instance._portal._debug("Widget " + instance._path + " successfully deleted");
                 // delete from html
                 $("#" + instance._id).remove();
@@ -733,26 +705,38 @@ Jahia.Portal.Widget.prototype = {
     /**
      * Perform update action on the current widget
      *
-     * @param data {Object} JSON object representing the current widget node
+     * @param array {Array} array representing the serialized form
      * @param callback
      */
-    performUpdate: function(data, callback) {
+    performUpdate: function (array, callback) {
         var instance = this;
-        //TODO use jcr rest API
-        $.ajax({
-            type: "POST",
-            data: data,
-            dataType: "json",
-            traditional: true,
-            url: instance._portal.baseURL + instance._path
-        }).done(function(response){
-                instance._portal._debug("Widget " + instance._path + " successfully updated");
 
-                if(callback){
-                    callback(response);
-                }
-            }).fail(function(response){
-                instance._portal._debug("Widget " + instance._path + " failed to update");
-            });
+        var url = JCRRestUtils.buildURL("", "", "", instance._jcrIdentifier);
+        var propreties = JSON.stringify({properties: JCRRestUtils.arrayToDataProperties(array, true)});
+        var propertiesToDelete = JSON.stringify(JCRRestUtils.arrayToDeleteProperties(array));
+
+        var successCB = function(data){
+            instance._portal._debug("Widget " + instance._path + " successfully updated");
+
+            if (callback) {
+                callback(data);
+            }
+        };
+
+        var updatePropsFailedCB = function(data){
+            instance._portal._debug("Widget " + instance._path + " failed to update properties");
+        };
+
+        var deletePropsFailedCB = function(data){
+            instance._portal._debug("Widget " + instance._path + " failed to delete properties");
+        };
+
+        JCRRestUtils.standardCall(url, "PUT", propreties, function(data){
+            if(propertiesToDelete.length > 0){
+                JCRRestUtils.standardCall(url + "/properties", "DELETE", propertiesToDelete, successCB, deletePropsFailedCB);
+            }else {
+                successCB(data);
+            }
+        }, updatePropsFailedCB);
     }
 };

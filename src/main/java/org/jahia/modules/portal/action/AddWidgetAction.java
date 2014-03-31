@@ -51,6 +51,7 @@ public class AddWidgetAction extends Action{
             if(widgetNode != null){
                 JSONObject result = new JSONObject();
                 result.put("id", widgetNode.getIdentifier());
+                result.put("col_id", widgetNode.getParent().getIdentifier());
                 result.put("path", widgetNode.getPath());
                 result.put("isGadget", widgetNode.isNodeType(PortalConstants.JMIX_PORTAL_GADGET));
 

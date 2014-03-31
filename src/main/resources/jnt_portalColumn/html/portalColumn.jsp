@@ -42,6 +42,7 @@
              data-widget-path="${widgetNode.path}"
              data-widget-state="${widgetState}"
              data-widget-view="${widgetView}"
+             data-col-id="${currentNode.identifier}"
                 >
             <c:if test="${isGadget}">
                 <template:module path="${widgetNode.path}" view="${widgetView}"/>
@@ -58,6 +59,7 @@
                     data-widget-state="${widgetState}"
                     data-widget-view="${widgetView}"
                 </c:if>
+                data-col-id="${currentNode.identifier}"
                 >
                 <c:if test="${isGadget}">
                     <template:module path="${widgetNode.path}"
