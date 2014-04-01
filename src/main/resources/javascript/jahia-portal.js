@@ -502,7 +502,7 @@ Jahia.Portal.prototype = {
         instance._debug(action + " portal");
         var url = JCRRestUtils.buildURL("", "", "", instance.portalIdentifier);
         JCRRestUtils.standardCall(url, "PUT",
-            JSON.stringify({properties: JCRRestUtils.arrayToDataProperties([{"j:locked": bool}])}), function(data){
+            JSON.stringify({properties: JCRRestUtils.arrayToDataProperties([{name:"j:locked",value:bool}], true)}), function(data){
                 instance.loadInCurrentTab();
             });
     },
