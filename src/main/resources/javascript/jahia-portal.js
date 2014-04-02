@@ -358,7 +358,7 @@ Jahia.Portal.prototype = {
         var formSerialized = instance._convertTabFormToJCRProps(form);
         if (isNew) {
             var url = JCRRestUtils.buildURL("", "", "", instance.portalIdentifier);
-            var normalizedName = JCRRestUtils.normalizeNodeName(form.name);
+            var normalizedName = JCRRestUtils.normalizeNodeName(form.name, true, true, "-", /\W/g);
             var data = JCRRestUtils.createUpdateChildData(normalizedName, "jnt:portalTab", JCRRestUtils.arrayToDataProperties(formSerialized, true));
 
             JCRRestUtils.standardCall(url, "PUT",
@@ -371,8 +371,7 @@ Jahia.Portal.prototype = {
                     window.location.href = instance.baseURL + instance.portalPath + "/" + normalizedName + ".html";
                 });
         } else {
-            var url = JCRRestUtils.buildURL();
-            JCRRestUtils.standardCall(url, "PUT",
+            JCRRestUtils.standardCall(JCRRestUtils.buildURL(), "PUT",
                 JSON.stringify({properties: JCRRestUtils.arrayToDataProperties(formSerialized, true)}),
                 function (data) {
                     instance._debug("Portal tab form successfully updated");
@@ -579,6 +578,8 @@ Jahia.Portal.Widget.prototype = {
 
         if ($htmlToReplace) {
             $htmlToReplace.replaceWith($widget);
+        }else {
+            this._area._$area.append($widget);
         }
 
         if (!instance._isGadget) {
