@@ -23,6 +23,8 @@
 
 [jmix:portalWidget] > mix:referenceable, mix:title, jmix:portalWidgetSkin mixin
 
+[jmix:portalWidgetModel] mixin
+
 [jnt:portalsFolder] > jnt:content
  + * (jnt:portalsFolder)
  + * (jmix:portal)

@@ -240,6 +240,9 @@ public class PortalService {
                 contentManager.moveOnTopOf(widget.getPath(), beforeNodePath, session);
             }
             widget.setProperty(PortalConstants.JCR_TITLE, nodeName);
+            if(portalIsModel(portalTabNode.getParent())){
+                widget.addMixin(PortalConstants.JMIX_PORTAL_WIDGET_MODEL);
+            }
             session.save();
 
             return widget;
