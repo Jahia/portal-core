@@ -1,1 +1,0 @@
-Model specific view for widgets

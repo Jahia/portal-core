@@ -555,6 +555,7 @@ Jahia.Portal.Widget = function ($widget, $htmlToReplace, forcedOriginalView, are
     this._jcrIdentifier = this._id.substring(2);
     this._columnJcrIdentifier = $widget.data("col-id");
     this._isGadget = $widget.data("widget-gadget");
+    this._isReference = $widget.data("widget-reference");
     this._path = $widget.data('widget-path');
     this._area = area;
     this._portal = area._portal;

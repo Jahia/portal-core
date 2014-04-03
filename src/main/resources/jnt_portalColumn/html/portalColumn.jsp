@@ -25,6 +25,7 @@
 <c:set var="portalGadgetMixin" value="<%= PortalConstants.JMIX_PORTAL_GADGET %>"/>
 <c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
 <c:set var="portalWidgetMixin" value="<%= PortalConstants.JMIX_PORTAL_WIDGET %>"/>
+<c:set var="portalWidgetReferenceNT" value="<%= PortalConstants.JNT_PORTAL_WIDGET_REFERENCE %>"/>
 <c:set var="portalNode" value="${jcr:getParentOfType(renderContext.mainResource.node, portalMixin)}"/>
 
 <c:set var="widgetIdentifier" value="${not empty renderContext.request.parameterMap['w'] ? renderContext.request.parameterMap['w'][0] : null}"/>
@@ -39,6 +40,7 @@
         <c:set var="isGadget" value="${jcr:isNodeType(widgetNode, portalGadgetMixin)}"/>
         <div id="w_${widgetNode.identifier}" class="portal_widget"
              data-widget-gadget="${isGadget}"
+             data-widget-reference="${jcr:isNodeType(widgetNode, portalWidgetReferenceNT)}"
              data-widget-path="${widgetNode.path}"
              data-widget-state="${widgetState}"
              data-widget-view="${widgetView}"
@@ -54,6 +56,7 @@
             <c:set var="isGadget" value="${jcr:isNodeType(widgetNode, portalGadgetMixin)}"/>
             <div id="w_${widgetNode.identifier}" class="portal_widget"
                 data-widget-gadget="${isGadget}"
+                data-widget-reference="${jcr:isNodeType(widgetNode, portalWidgetReferenceNT)}"
                 data-widget-path="${widgetNode.path}"
                 <c:if test="${widgetIdentifier != null && widgetNode.identifier == widgetIdentifier}">
                     data-widget-state="${widgetState}"

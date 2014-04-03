@@ -23,7 +23,13 @@
 
 [jmix:portalWidget] > mix:referenceable, mix:title, jmix:portalWidgetSkin mixin
 
+[jmix:portalWidgetCore] mixin
+
 [jmix:portalWidgetModel] mixin
+ - j:behavior (string, choicelist[resourceBundle]) = 'copy' < 'copy', 'ref'
+
+ [jnt:portalWidgetReference] > jnt:content, jmix:portalWidget, jmix:nodeReference, jmix:portalWidgetCore
+  - j:node (weakreference) < jmix:portalWidget
 
 [jnt:portalsFolder] > jnt:content
  + * (jnt:portalsFolder)
@@ -41,6 +47,7 @@
 
 [jnt:portalColumn] > jnt:content, mix:title, jmix:list
 orderable
+ + * (jnt:portalWidgetReference)
  + * (jmix:portalWidget)
 
 [jnt:portalArea] > jnt:content, jmix:layoutComponentContent, jmix:studioOnly

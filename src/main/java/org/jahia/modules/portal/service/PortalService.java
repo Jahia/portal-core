@@ -439,6 +439,20 @@ public class PortalService {
                 tabNode.copy(portal.getPath());
             }
 
+            // copy/ref behavior for widgets
+            for (JCRNodeWrapper portalTab : JCRContentUtils.getChildrenOfType(portal, PortalConstants.JNT_PORTAL_TAB)){
+                for (JCRNodeWrapper portalColumn : JCRContentUtils.getChildrenOfType(portalTab, PortalConstants.JNT_PORTAL_COLUMN)){
+                    for (JCRNodeWrapper widget : JCRContentUtils.getChildrenOfType(portalColumn, PortalConstants.JMIX_PORTAL_WIDGET_MODEL)){
+                        if(widget.hasProperty(PortalConstants.J_BEHAVIOR) && widget.getProperty(PortalConstants.J_BEHAVIOR).getString().equals(PortalConstants.J_BEHAVIOR_REF)){
+                            JCRNodeWrapper widgetRef = portalColumn.addNode(widget.getName() + "_ref", PortalConstants.JNT_PORTAL_WIDGET_REFERENCE);
+                            widgetRef.setProperty("j:node", sessionWrapper.getNode(modelNode.getPath() + "/" + portalTab.getName() + "/" + portalColumn.getName() + "/" + widget.getName()));
+                            contentManager.moveOnTopOf(widgetRef.getPath(), widget.getPath(), sessionWrapper);
+                            widget.remove();
+                        }
+                    }
+                }
+            }
+
             //set roles
             portal.denyRoles("g:users", Collections.singleton("reader"));
             portal.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("reader"));
@@ -496,7 +510,9 @@ public class PortalService {
         while (nodeTypes.hasNext()) {
             ExtendedNodeType nodeType = (ExtendedNodeType) nodeTypes.next();
             for (ExtendedNodeType superType : nodeType.getSupertypes()) {
-                if (superType.getName().equals(PortalConstants.JMIX_PORTAL_WIDGET) && installedModules.contains(nodeType.getSystemId())) {
+                if (superType.getName().equals(PortalConstants.JMIX_PORTAL_WIDGET)
+                        && !nodeType.isNodeType(PortalConstants.JMIX_PORTAL_WIDGET_CORE)
+                        && installedModules.contains(nodeType.getSystemId())) {
                     widgetTypes.add(nodeType);
                     break;
                 }
@@ -517,10 +533,12 @@ public class PortalService {
                         @Override
                         public boolean apply(@Nullable ExtendedNodeType input) {
                             try {
-                                JCRValueWrapper[] values = portalModelNode.getProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES).getValues();
-                                for (JCRValueWrapper value : values) {
-                                    if (input != null && input.getName().equals(value.getString())) {
-                                        return true;
+                                if(input != null && !input.isNodeType(PortalConstants.JMIX_PORTAL_WIDGET_CORE)){
+                                    JCRValueWrapper[] values = portalModelNode.getProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES).getValues();
+                                    for (JCRValueWrapper value : values) {
+                                        if (input.getName().equals(value.getString())) {
+                                            return true;
+                                        }
                                     }
                                 }
                             } catch (RepositoryException e) {

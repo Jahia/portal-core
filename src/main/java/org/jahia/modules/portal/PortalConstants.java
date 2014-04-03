@@ -18,7 +18,9 @@ public class PortalConstants {
     public static final String JNT_PORTAL_COLUMN = "jnt:portalColumn";
     public static final String JMIX_PORTAL_WIDGET = "jmix:portalWidget";
     public static final String JMIX_PORTAL_WIDGET_MODEL = "jmix:portalWidgetModel";
+    public static final String JMIX_PORTAL_WIDGET_CORE = "jmix:portalWidgetCore";
     public static final String JMIX_PORTAL_GADGET = "jmix:portalGadget";
+    public static final String JNT_PORTAL_WIDGET_REFERENCE = "jnt:portalWidgetReference";
     public static final String J_TEMPLATE_ROOT_PATH = "j:templateRootPath";
     public static final String J_FULL_TEMPLATE = "j:fullTemplate";
     public static final String J_ALLOWED_WIDGET_TYPES = "j:allowedWidgetTypes";
@@ -27,6 +29,9 @@ public class PortalConstants {
     public static final String J_MODEL = "j:model";
     public static final String J_SITEKEY = "j:siteKey";
     public static final String J_LASTVIEWED = "j:lastViewed";
+    public static final String J_BEHAVIOR = "j:behavior";
+    public static final String J_BEHAVIOR_COPY = "copy";
+    public static final String J_BEHAVIOR_REF = "ref";
 
     public static final String JNT_CONTENT_TEMPLATE = "jnt:contentTemplate";
     public static final String J_TEMPLATE_NAME = "j:templateName";

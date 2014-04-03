@@ -10,6 +10,7 @@ import org.jahia.services.render.filter.AbstractFilter;
 import org.jahia.services.render.filter.RenderChain;
 
 import javax.jcr.RepositoryException;
+import java.io.Serializable;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,10 +26,14 @@ public class PortalSkinFilter extends AbstractFilter {
         JCRNodeWrapper portalNode = JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JMIX_PORTAL);
         resource.getDependencies().add(JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JNT_PORTAL_TAB).getCanonicalPath());
         resource.getDependencies().add(portalNode.getCanonicalPath());
-        if (portalNode.hasProperty("j:locked") && portalNode.getProperty("j:locked").getBoolean()){
-            resource.pushWrapper("locked");
-        }else {
-            pushWidgetSkinWrapperForNode(resource.getNode(), resource);
+        Serializable skipSkinParam = resource.getModuleParams().get("skipSkin");
+        boolean skipSkin = skipSkinParam != null && Boolean.parseBoolean(skipSkinParam.toString());
+        if(!skipSkin){
+            if (portalNode.hasProperty("j:locked") && portalNode.getProperty("j:locked").getBoolean()){
+                resource.pushWrapper("locked");
+            }else {
+                pushWidgetSkinWrapperForNode(resource.getNode(), resource);
+            }
         }
         return null;
     }
