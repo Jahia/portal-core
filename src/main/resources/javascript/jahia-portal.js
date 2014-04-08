@@ -84,7 +84,7 @@ Jahia.Portal.constants = {
     WIDGET_EVENT_MOVED_FAILED: "moveFailed",
     WIDGET_EVENT_MOVED_CANCELED: "moveCanceled",
 
-    EXTERNAL_WIDGET_DROP_CLASS: "widget_nodetype",
+    EXTERNAL_WIDGET_DROP_CLASS: "widget_external_drop",
     EXTERNAL_WIDGET_DROP_NODEYPE: "widget_nodetype",
     EXTERNAL_WIDGET_DROP_VIEW: "widget_view",
 
