@@ -4,7 +4,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.ajax.gwt.helper.ContentManagerHelper;
-import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
@@ -361,10 +360,10 @@ public class PortalService {
         return null;
     }
 
-    public SortedSet<JCRNodeWrapper> getUserPortalsBySite(String siteKey) {
+    public SortedSet<JCRNodeWrapper> getUserPortalsBySite(String siteKey, Locale locale) {
         SortedSet<JCRNodeWrapper> portals = new TreeSet<JCRNodeWrapper>(PORTALS_COMPARATOR);
         try {
-            JCRSessionWrapper sessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession("live");
+            JCRSessionWrapper sessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession("live", locale);
             QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
             if (queryManager == null) {
                 logger.error("Unable to obtain QueryManager instance");

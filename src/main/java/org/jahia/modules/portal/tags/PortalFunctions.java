@@ -1,7 +1,6 @@
 package org.jahia.modules.portal.tags;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.jahia.data.templates.JahiaTemplatesPackage;
@@ -137,8 +136,8 @@ public class PortalFunctions {
         return widgetNode;
     }
 
-    public static Set<JCRNodeWrapper> getUserPortalsBySite(String siteKey) {
-        return portalService.getUserPortalsBySite(siteKey);
+    public static Set<JCRNodeWrapper> getUserPortalsBySite(String siteKey, Locale locale) {
+        return portalService.getUserPortalsBySite(siteKey, locale);
     }
 
     public static Collection<JCRNodeWrapper> getUserPortalsByModel(JCRNodeWrapper portalModelNode) {
