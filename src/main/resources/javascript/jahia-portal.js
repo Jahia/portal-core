@@ -257,9 +257,6 @@ Jahia.Portal.prototype = {
      *
      * @this {Portal}
      * @param htmlID {String} area id, mandatory
-     * @param widgetPath {String} widget path to load in this area, optional, used for load a specific widget in this area
-     * @param widgetState {String} widget state to load in this area, optional, used for full state
-     * @param widgetView {String} widget view to load in this area, optional, used for full view
      */
     registerArea: function (htmlID) {
         var instance = this;
@@ -268,6 +265,13 @@ Jahia.Portal.prototype = {
         instance.initDragDrop();
     },
 
+    /**
+     * return the Area corresponding to a given index
+     *
+     * @this {Portal}
+     * @param name {Number} area name
+     * @returns {Area}
+     */
     getArea: function (name) {
         var instance = this;
         return instance.areas[name];
@@ -441,9 +445,14 @@ Jahia.Portal.prototype = {
     },
 
     /**
-     * Reload the current portal tab
+     * load a widget in the current portal tab
      *
      * @this {Portal}
+     * @param widgetId
+     * @param widgetView
+     * @param widgetState
+     * @param widgetSolo
+     * @param tabTemplate
      */
     loadInCurrentTab: function (widgetId, widgetView, widgetState, widgetSolo, tabTemplate) {
         var instance = this;
@@ -451,6 +460,16 @@ Jahia.Portal.prototype = {
         instance.loadTab(tabPath, widgetId, widgetView, widgetState, widgetSolo);
     },
 
+    /**
+     * load a widget in the specify portal tab
+     *
+     * @this {Portal}
+     * @param tabPath
+     * @param widgetId
+     * @param widgetView
+     * @param widgetState
+     * @param widgetSolo
+     */
     loadTab: function (tabPath, widgetId, widgetView, widgetState, widgetSolo) {
         var instance = this;
         var url = instance.baseURL + tabPath + ".html";
@@ -485,11 +504,17 @@ Jahia.Portal.prototype = {
         window.location.href = url;
     },
 
+    /**
+     * Lock the current portal
+     */
     lockPortal: function () {
         var instance = this;
         instance._lockOrUnlockPortal(true);
     },
 
+    /**
+     * Unlock the current portal
+     */
     unlockPortal: function () {
         var instance = this;
         instance._lockOrUnlockPortal(false);
@@ -527,7 +552,7 @@ Jahia.Portal.Area = function ($area, portal) {
 Jahia.Portal.Area.prototype = {
 
     /**
-     * Load all widgets for the current area
+     * Load all widgets for the current column
      *
      * @this Area
      */
@@ -543,6 +568,14 @@ Jahia.Portal.Area.prototype = {
         });
     },
 
+    /**
+     * Load the specific widget
+     *
+     * @this Area
+     * @param $widget
+     * @param $htmlToReplace
+     * @param forcedOriginalView
+     */
     registerWidget: function ($widget, $htmlToReplace, forcedOriginalView) {
         var instance = this;
         instance._portal.widgets[$widget.attr('id')] = new Jahia.Portal.Widget($widget, $htmlToReplace, forcedOriginalView, instance);
@@ -571,7 +604,9 @@ Jahia.Portal.Widget.prototype = {
     /**
      * Init the widget
      *
+     * @this Widget
      * @param $htmlToReplace
+     * @param $widget jQuery html element that represent the widget
      */
     init: function ($widget, $htmlToReplace) {
         var instance = this;
@@ -580,7 +615,7 @@ Jahia.Portal.Widget.prototype = {
         if ($htmlToReplace) {
             $htmlToReplace.replaceWith($widget);
         }else {
-            this._area._$area.append($widget);
+            instance._area._$area.append($widget);
         }
 
         if (!instance._isGadget) {
@@ -592,6 +627,8 @@ Jahia.Portal.Widget.prototype = {
 
     /**
      * Attach event related to drag&drop actions on the widget
+     *
+     * @this Widget
      */
     attachEvents: function () {
         var instance = this;
@@ -618,6 +655,7 @@ Jahia.Portal.Widget.prototype = {
     /**
      * Return the jQuery object corresponding to the widget
      *
+     * @this Widget
      * @returns {*|jQuery|HTMLElement}
      */
     getjQueryWidget: function () {
@@ -628,6 +666,7 @@ Jahia.Portal.Widget.prototype = {
     /**
      * Load or reload the widget
      *
+     * @this Widget
      * @param view {String} specify a view, optional
      * @param callback {function}
      */
@@ -663,6 +702,7 @@ Jahia.Portal.Widget.prototype = {
     /**
      * Perform a move to a specific Area
      *
+     * @this Widget
      * @param toArea {Area}
      */
     performMove: function (toArea) {
@@ -689,6 +729,8 @@ Jahia.Portal.Widget.prototype = {
 
     /**
      * Perform delete action on the current widget
+     *
+     * @this Widget
      */
     performDelete: function () {
         var instance = this;
@@ -707,6 +749,7 @@ Jahia.Portal.Widget.prototype = {
     /**
      * Perform update action on the current widget
      *
+     * @this Widget
      * @param array {Array} array representing the serialized form
      * @param callback
      */
