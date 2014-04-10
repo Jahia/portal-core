@@ -446,6 +446,7 @@ public class PortalService {
 
             //set roles
             portal.denyRoles("g:users", Collections.singleton("reader"));
+            portal.denyRoles("u:guest", Collections.singleton("reader"));
             portal.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("reader"));
             portal.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("owner"));
 
