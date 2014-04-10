@@ -160,21 +160,13 @@ public class PortalService {
     public List<JCRNodeWrapper> getPortalTabs(JCRNodeWrapper portalNode, JCRSessionWrapper session) {
         List<JCRNodeWrapper> portalTabs = new LinkedList<JCRNodeWrapper>();
 
-        QueryManager queryManager = session.getWorkspace().getQueryManager();
-        if (queryManager == null) {
-            logger.error("Unable to obtain QueryManager instance");
-        }
-
         try {
-            StringBuilder q = new StringBuilder();
-            q.append("select * from [" + PortalConstants.JNT_PORTAL_TAB + "] as t where isdescendantnode(t, ['").append(portalNode.getPath())
-                    .append("'])");
-            Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
-
-            NodeIterator nodes = query.execute().getNodes();
+            NodeIterator nodes = portalNode.getNodes();
             while (nodes.hasNext()) {
                 JCRNodeWrapper node = (JCRNodeWrapper) nodes.next();
-                portalTabs.add(node);
+                if(node.isNodeType(PortalConstants.JNT_PORTAL_TAB)){
+                    portalTabs.add(node);
+                }
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
