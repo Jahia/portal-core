@@ -30,6 +30,7 @@
                                j:defaultTemplate="false"
                                j:hiddenTemplate="true"
                                j:icon="/modules/portal-factory_core/templates/files/Portal-Factory-icon.png"
+                               j:requiredPermissionNames="siteAdminPortalFactory"
                                j:view="portalSettings"
                                jcr:primaryType="jnt:contentTemplate">
                             <j:translation_en jcr:language="en"
