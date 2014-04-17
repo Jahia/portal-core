@@ -189,7 +189,7 @@ Jahia.Portal.prototype = {
     _debug: function (message) {
         var instance = this;
         if (instance.debug) {
-            console.debug("Portal: " + message)
+            console.log("Portal: " + message)
         }
     },
 
