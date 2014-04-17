@@ -91,20 +91,6 @@
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <p><fmt:message key="newPortalModelForm.portal.form.allowedWidgetTypes"/> <span class="text-error"><strong>*</strong></span></p>
-
-                <c:forEach items="${portal:getWidgetNodeTypes(renderContext.site)}" var="widgetNodeType">
-                    <label for="widgetType_${widgetNodeType.name}">
-                        <form:checkbox path="portal.allowedWidgetTypes" value="${widgetNodeType.name}" id="widgetType_${widgetNodeType.name}"/>
-                            &nbsp; ${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}
-                        </label>
-                </c:forEach>
-            </div>
-        </div>
-
-
-        <div class="row-fluid">
-            <div class="span12">
                 <h3><fmt:message key="newPortalModelForm.tab.info"/></h3>
             </div>
         </div>
@@ -128,6 +114,22 @@
                         </c:if>
                     </c:forEach>
                 </form:select>
+            </div>
+        </div>
+
+        <div class="row-fluid">
+            <div class="span12">
+                <h3><fmt:message key="newPortalModelForm.portal.form.allowedWidgetTypes"/> <span class="text-error"><strong>*</strong></span></h3>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span12">
+                <c:forEach items="${portal:getWidgetNodeTypes(renderContext.site)}" var="widgetNodeType">
+                    <label for="widgetType_${widgetNodeType.name}">
+                        <form:checkbox path="portal.allowedWidgetTypes" value="${widgetNodeType.name}" id="widgetType_${widgetNodeType.name}"/>
+                        &nbsp; ${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}
+                    </label>
+                </c:forEach>
             </div>
         </div>
 
