@@ -23,7 +23,7 @@
                         </Portal-Factory-icon.png>
                     </files>
                     <contents jcr:primaryType="jnt:contentFolder"/>
-                    <site-settings-base j:view="portalSettings"
+                    <site-settings-base j:view="siteSettings"
                                 jcr:mixinTypes="jmix:useUILocale"
                                 jcr:primaryType="jnt:template">
                         <portal-factory j:applyOn="jnt:virtualsite"
@@ -31,7 +31,7 @@
                                j:hiddenTemplate="true"
                                j:icon="/modules/portal-factory_core/templates/files/Portal-Factory-icon.png"
                                j:requiredPermissionNames="siteAdminPortalFactory"
-                               j:view="portalSettings"
+                               j:view="siteSettings"
                                jcr:primaryType="jnt:contentTemplate">
                             <j:translation_en jcr:language="en"
                                     jcr:mixinTypes="mix:title"
