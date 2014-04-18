@@ -37,7 +37,8 @@
 <c:choose>
     <c:when test="${widgetSolo != null && widgetIdentifier != null}">
         <c:set var="widgetNode" value="${portal:getWidget(widgetIdentifier, portalNode)}"/>
-        <c:set var="isGadget" value="${jcr:isNodeType(widgetNode, portalGadgetMixin)}"/>
+        <c:set var="isGadget" value="${jcr:isNodeType(widgetNode, portalGadgetMixin) ||
+        (jcr:isNodeType(widgetNode, 'jnt:portalWidgetReference') && not empty widgetNode.properties['j:node'] && jcr:isNodeType(widgetNode.properties['j:node'].node, 'jmix:portalGadget'))}"/>
         <div id="w_${widgetNode.identifier}" class="portal_widget"
              data-widget-gadget="${isGadget}"
              data-widget-reference="${jcr:isNodeType(widgetNode, portalWidgetReferenceNT)}"
@@ -53,7 +54,8 @@
     </c:when>
     <c:otherwise>
         <c:forEach var="widgetNode" items="${jcr:getChildrenOfType(currentNode, portalWidgetMixin)}">
-            <c:set var="isGadget" value="${jcr:isNodeType(widgetNode, portalGadgetMixin)}"/>
+            <c:set var="isGadget" value="${jcr:isNodeType(widgetNode, portalGadgetMixin) ||
+        (jcr:isNodeType(widgetNode, 'jnt:portalWidgetReference') && not empty widgetNode.properties['j:node'] && jcr:isNodeType(widgetNode.properties['j:node'].node, 'jmix:portalGadget'))}"/>
             <div id="w_${widgetNode.identifier}" class="portal_widget"
                 data-widget-gadget="${isGadget}"
                 data-widget-reference="${jcr:isNodeType(widgetNode, portalWidgetReferenceNT)}"
