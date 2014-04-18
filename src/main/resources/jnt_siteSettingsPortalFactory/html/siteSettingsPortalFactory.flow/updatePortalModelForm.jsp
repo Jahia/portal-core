@@ -73,6 +73,12 @@
         </div --%>
         <div class="row-fluid">
             <div class="span12">
+                <form:label path="allowCustomization"><fmt:message key="newPortalModelForm.portal.form.allowCustomization"/></form:label>
+                <form:checkbox path="allowCustomization"/>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span12">
                 <p><fmt:message key="newPortalModelForm.portal.form.allowedWidgetTypes"/> <span class="text-error"><strong>*</strong></span></p>
 
                 <c:forEach items="${portal:getWidgetNodeTypes(renderContext.site)}" var="widgetNodeType">

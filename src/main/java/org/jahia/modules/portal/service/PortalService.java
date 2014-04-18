@@ -133,6 +133,7 @@ public class PortalService {
 		}else {
 			portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, "");
 		}
+        portalNode.setProperty(PortalConstants.J_ALLOW_CUSTOMIZATION, form.getPortal().getAllowCustomization());
         portalNode.setProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES, form.getPortal().getAllowedWidgetTypes());
         setReadRoleForPortalModel(portalNode, false);
 
@@ -151,6 +152,7 @@ public class PortalService {
     public void updatePortalModel(PortalForm form, JCRSessionWrapper sessionWrapper) throws RepositoryException {
         JCRNodeWrapper portalModelNode = sessionWrapper.getNodeByIdentifier(form.getPortalModelIdentifier());
         portalModelNode.setProperty(PortalConstants.JCR_TITLE, form.getName());
+        portalModelNode.setProperty(PortalConstants.J_ALLOW_CUSTOMIZATION, form.getAllowCustomization());
         // TODO: make it works (update full template)
         //portalModelNode.setProperty(PortalConstants.J_FULL_TEMPLATE, form.getTemplateFull());
         portalModelNode.setProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES, form.getAllowedWidgetTypes());
@@ -412,6 +414,12 @@ public class PortalService {
 
     public JCRNodeWrapper initUserPortalFromModel(JCRNodeWrapper modelNode, JCRSessionWrapper sessionWrapper) {
         try {
+            // test if the model is customizable
+            if(modelNode.hasProperty(PortalConstants.J_ALLOW_CUSTOMIZATION) &&
+                    !modelNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean()){
+                return null;
+            }
+
             // Create/get portal folders
             JCRNodeWrapper portalFolderRoot = getPortalFolder(sessionWrapper.getNode(sessionWrapper.getUser().getLocalPath()), "portals", true);
             JCRNodeWrapper sitePortalFolder = getPortalFolder(portalFolderRoot, modelNode.getResolveSite().getSiteKey(), true);

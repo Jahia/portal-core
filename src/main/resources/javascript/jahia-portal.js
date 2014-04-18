@@ -52,6 +52,7 @@ Jahia.Portal = function (options) {
     this.conf = Jahia.Portal.default;
     this.debug = options.debug ? options.debug : false;
     this.isModel = options.isModel ? options.isModel : false;
+    this.isCustomizationAllowed = options.isCustomizationAllowed ? options.isCustomizationAllowed : false;
     this.isEditable = options.isEditable ? options.isEditable : false;
     this.isLocked = options.isLocked ? options.isLocked : false;
     this.fullTemplate = options.fullTemplate ? options.fullTemplate : false;

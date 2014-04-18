@@ -23,6 +23,7 @@ public class PortalForm implements Serializable {
     private String[] allowedWidgetTypes;
 	@PortalTemplate
     private String templateFull;
+    private Boolean allowCustomization;
 
     public String getName() {
         return name;
@@ -54,5 +55,13 @@ public class PortalForm implements Serializable {
 
     public void setPortalModelIdentifier(String portalModelIdentifier) {
         this.portalModelIdentifier = portalModelIdentifier;
+    }
+
+    public Boolean getAllowCustomization() {
+        return allowCustomization;
+    }
+
+    public void setAllowCustomization(Boolean allowCustomization) {
+        this.allowCustomization = allowCustomization;
     }
 }

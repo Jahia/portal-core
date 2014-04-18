@@ -91,6 +91,12 @@
         </div>
         <div class="row-fluid">
             <div class="span12">
+                <form:label path="portal.allowCustomization"><fmt:message key="newPortalModelForm.portal.form.allowCustomization"/></form:label>
+                <form:checkbox path="portal.allowCustomization"/>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span12">
                 <h3><fmt:message key="newPortalModelForm.tab.info"/></h3>
             </div>
         </div>

@@ -38,6 +38,7 @@
 [jnt:portalModel] > jnt:content, jmix:portal, mix:title, jmix:list
 orderable
  - j:enabled (boolean) = false autocreated
+ - j:allowCustomization (boolean)
  - j:allowedWidgetTypes (string) multiple
 
 [jnt:portalUser] > jnt:content, mix:title, jmix:list, jmix:portal, jmix:hasModel

@@ -45,6 +45,7 @@ public class PortalLibFilter extends AbstractFilter {
     public static final String PORTAL_INIT_IS_EDITABLE = "isEditable";
     public static final String PORTAL_INIT_IS_LOCKED = "isLocked";
     public static final String PORTAL_INIT_IS_MODEL = "isModel";
+    public static final String PORTAL_INIT_IS_CUSTOMIZATION_ALLOWED = "isCustomizationAllowed";
     public static final String PORTAL_INIT_FULL_TEMPLATE = "fullTemplate";
     public static final String PORTAL_INIT_PORTAL_PATH = "portalPath";
     public static final String PORTAL_INIT_PORTAL_IDENTIFIER = "portalIdentifier";
@@ -93,6 +94,7 @@ public class PortalLibFilter extends AbstractFilter {
 
     private HashMap<String, Object> getBindingMap(RenderContext renderContext, Resource resource) throws RepositoryException {
         JCRNodeWrapper portalNode = JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JMIX_PORTAL);
+        boolean isModel = portalNode.isNodeType(PortalConstants.JNT_PORTAL_MODEL);
         HashMap<String, Object> bindingMap = new HashMap<String, Object>();
         bindingMap.put(PORTAL_INIT_BASE_URL,
                 stringifyJsParam(StringUtils.isNotEmpty(renderContext.getURLGenerator().getContext())
@@ -104,7 +106,8 @@ public class PortalLibFilter extends AbstractFilter {
         bindingMap.put(PORTAL_INIT_PORTAL_TAB_IDENTIFIER, stringifyJsParam(resource.getNode().getIdentifier()));
         bindingMap.put(PORTAL_INIT_IS_EDITABLE, resource.getNode().hasPermission("jcr:write_live"));
         bindingMap.put(PORTAL_INIT_IS_LOCKED, portalNode.hasProperty("j:locked") && portalNode.getProperty("j:locked").getBoolean());
-        bindingMap.put(PORTAL_INIT_IS_MODEL, portalNode.isNodeType(PortalConstants.JNT_PORTAL_MODEL));
+        bindingMap.put(PORTAL_INIT_IS_MODEL, isModel);
+        bindingMap.put(PORTAL_INIT_IS_CUSTOMIZATION_ALLOWED, isModel && portalNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean());
         bindingMap.put(PORTAL_INIT_FULL_TEMPLATE, stringifyJsParam(portalNode.getProperty(PortalConstants.J_FULL_TEMPLATE).getString()));
         bindingMap.put(PORTAL_INIT_DEBUG, debugEnabled);
         return bindingMap;

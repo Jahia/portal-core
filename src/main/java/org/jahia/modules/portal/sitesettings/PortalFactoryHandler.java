@@ -99,7 +99,8 @@ public class PortalFactoryHandler implements Serializable {
                 ctx.getRequestScope().put("portalNode", portalNode);
 
                 form.setName(portalNode.getDisplayableName());
-                
+                form.setAllowCustomization(portalNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean());
+
                 List<String> allowedWidgetTypes = new ArrayList<String>();
                 JCRPropertyWrapper allowedWidgetTypesProp = portalNode.getProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES);
                 for(JCRValueWrapper allowedWidgetType : allowedWidgetTypesProp.getValues()){

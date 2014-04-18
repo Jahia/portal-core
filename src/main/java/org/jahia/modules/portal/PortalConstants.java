@@ -24,6 +24,7 @@ public class PortalConstants {
     public static final String J_TEMPLATE_ROOT_PATH = "j:templateRootPath";
     public static final String J_FULL_TEMPLATE = "j:fullTemplate";
     public static final String J_ALLOWED_WIDGET_TYPES = "j:allowedWidgetTypes";
+    public static final String J_ALLOW_CUSTOMIZATION = "j:allowCustomization";
     public static final String J_ENABLED = "j:enabled";
     public static final String J_WIDGET_SKIN = "j:widgetSkin";
     public static final String J_MODEL = "j:model";
