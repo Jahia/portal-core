@@ -9,6 +9,11 @@
     <var name="portalModelForm" class="org.jahia.modules.portal.sitesettings.form.PortalModelForm"/>
     <var name="portalForm" class="org.jahia.modules.portal.sitesettings.form.PortalForm"/>
 
+    <on-start>
+        <evaluate expression="flowHandler.initCriteria(flowRequestContext)" result="flowScope.searchCriteria"/>
+        <set name="flowScope.siteSettingsProperties" value="siteSettingsProperties" type="java.util.Map" />
+    </on-start>
+
     <view-state id="portalFactory">
         <on-render>
             <evaluate expression="flowHandler.getSitePortalModels(flowRequestContext)" result="requestScope.portals"/>
@@ -24,8 +29,30 @@
         <transition on="enablePortal" to="portalFactory" bind="false" validate="false">
             <evaluate expression="flowHandler.enablePortalModel(flowRequestContext, requestParameters.selectedPortal)"/>
         </transition>
+        <transition on="manageGroups" to="managePortalModelGroups" bind="false" validate="false">
+            <evaluate expression="flowHandler.initManageGroups(flowRequestContext, searchCriteria, requestParameters.selectedPortal)" result="flowScope.portalModelGroups"/>
+            <evaluate expression="flowHandler.search(portalModelGroups)" result="flowScope.groups"/>
+        </transition>
         <transition on="disablePortal" to="portalFactory" bind="false" validate="false">
             <evaluate expression="flowHandler.disablePortalModel(flowRequestContext, requestParameters.selectedPortal)"/>
+        </transition>
+    </view-state>
+
+    <view-state id="managePortalModelGroups" model="portalModelGroups">
+        <on-render>
+            <evaluate expression="flowHandler.providers" result="requestScope.providers"/>
+        </on-render>
+
+        <transition on="search" to="managePortalModelGroups">
+            <evaluate expression="flowHandler.search(portalModelGroups)" result="flowScope.groups"/>
+        </transition>
+
+        <transition on="addGroups" to="managePortalModelGroups">
+            <evaluate expression="flowHandler.addToRestrictedGroup(flowRequestContext, portalModelGroups)"/>
+        </transition>
+
+        <transition on="removeGroups" to="managePortalModelGroups">
+            <evaluate expression="flowHandler.removeFromRestrictedGroup(flowRequestContext, portalModelGroups)"/>
         </transition>
     </view-state>
 

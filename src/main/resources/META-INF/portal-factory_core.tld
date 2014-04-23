@@ -95,6 +95,12 @@
     </function>
 
     <function>
+        <name>getRestrictedGroups</name>
+        <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
+        <function-signature>java.util.List getPortalRestrictedGroups(org.jahia.services.content.JCRNodeWrapper)</function-signature>
+    </function>
+
+    <function>
         <name>getDaysSinceDate</name>
         <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
         <function-signature>long daysBetweenSinceDate(java.lang.String)</function-signature>

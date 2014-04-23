@@ -83,7 +83,8 @@
             <tr>
                 <th width="3%">#</th>
                 <th><fmt:message key="portalFactory.name"/></th>
-                <th width="10%"><fmt:message key="portalFactory.userPortalsNbr"/></th>
+                <th width="11%"><fmt:message key="portalFactory.userPortalsNbr"/></th>
+                <th width="11%"><fmt:message key="portalFactory.groupRestrictions"/></th>
                 <th width="15%"><fmt:message key="label.actions"/></th>
                 <th width="10%"><fmt:message key="portalFactory.state"/></th>
             </tr>
@@ -99,6 +100,7 @@
                     <c:forEach items="${portals}" var="portal" varStatus="loopStatus">
                         <fmt:message var="i18nRemove" key="label.remove"/><c:set var="i18nRemove" value="${functions:escapeJavaScript(i18nRemove)}"/>
                         <fmt:message var="i18nEdit" key="label.edit"/><c:set var="i18nEdit" value="${functions:escapeJavaScript(i18nEdit)}"/>
+                        <fmt:message var="i18nManageGroups" key="portalFactory.manageGroups"/><c:set var="i18nManageGroups" value="${functions:escapeJavaScript(i18nManageGroups)}"/>
                         <fmt:message var="i18nLiveMode" key="portalFactory.goToLive"/><c:set var="i18nLiveMode" value="${functions:escapeJavaScript(i18nLiveMode)}"/>
                         <c:url var="portalURL" value="${url.baseLive}${portal.path}"/>
                         <tr>
@@ -110,12 +112,32 @@
                                 ${fn:length(portal:userPortalsByModel(portal))}
                             </td>
                             <td>
+                                <%--@elvariable id="groups" type="java.util.List<org.jahia.services.usermanager.JahiaGroup>"--%>
+                                <c:set var="groups" value="${portal:getRestrictedGroups(portal)}"/>
+                                <c:choose>
+                                    <c:when test="${not empty groups}">
+                                        <ul>
+                                            <c:forEach items="${groups}" var="group">
+                                                <li>${group.name}</li>
+                                            </c:forEach>
+                                        </ul>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <fmt:message key="manageRestrictedGroups.noRestrictions"/>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td>
                                 <a style="margin-bottom:0;" class="btn btn-small" title="${i18nLiveMode}" href="${portalURL}">
                                     <i class="icon-globe"></i>
                                 </a>
 
                                 <a style="margin-bottom:0;" class="btn btn-small" title="${i18nEdit}" href="#edit" onclick="submitPortalForm('editPortal', '${portal.identifier}')">
                                     <i class="icon-edit"></i>
+                                </a>
+
+                                <a style="margin-bottom:0;" class="btn btn-small" title="${i18nManageGroups}" href="#groups" onclick="submitPortalForm('manageGroups', '${portal.identifier}')">
+                                    <i class="icon-user"></i>
                                 </a>
 
                                 <a style="margin-bottom:0;" class="btn btn-danger btn-small" title="${i18nRemove}" href="#delete">

@@ -7,12 +7,15 @@ import org.jahia.ajax.gwt.helper.ContentManagerHelper;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
+import org.jahia.modules.portal.sitesettings.form.PortalModelGroups;
 import org.jahia.services.content.*;
 import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.SiteInfo;
+import org.jahia.services.usermanager.JahiaGroup;
+import org.jahia.services.usermanager.JahiaGroupManagerService;
 import org.jahia.utils.i18n.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +55,14 @@ public class PortalService {
 
     private ContentManagerHelper contentManager;
 
+    private JahiaGroupManagerService groupManagerService;
+
     public void setContentManager(ContentManagerHelper contentManager) {
         this.contentManager = contentManager;
+    }
+
+    public void setGroupManagerService(JahiaGroupManagerService groupManagerService) {
+        this.groupManagerService = groupManagerService;
     }
 
     public JCRNodeWrapper getPortalFolder(JCRNodeWrapper node, String folderName, boolean createIfNotExist) {
@@ -330,6 +339,10 @@ public class PortalService {
         }
     }
 
+    public boolean isPortalModelEnabled(JCRNodeWrapper modelNode) throws RepositoryException {
+        return modelNode.getProperty(PortalConstants.J_ENABLED).getBoolean();
+    }
+
     public JCRNodeWrapper getUserPortalByModel(JCRNodeWrapper modelNode) {
         try {
             JCRSessionWrapper sessionWrapper = modelNode.getSession();
@@ -558,16 +571,74 @@ public class PortalService {
         return Collections.emptySet();
     }
 
+    public List<String> getRestrictedGroups(JCRNodeWrapper modelNode) throws RepositoryException {
+        ArrayList<String> allowedGroups = new ArrayList<String>();
+        if(modelNode.hasProperty(PortalConstants.J_ALLOWED_USER_GROUPS) && modelNode.getProperty(PortalConstants.J_ALLOWED_USER_GROUPS).getValues().length > 0){
+            for (JCRValueWrapper value : modelNode.getProperty(PortalConstants.J_ALLOWED_USER_GROUPS).getValues()){
+                allowedGroups.add(value.getString());
+            }
+        }
+        return allowedGroups;
+    }
+
+    public void addRestrictedGroupsToModel(JCRNodeWrapper modelNode, PortalModelGroups portalModelGroups) throws RepositoryException {
+        Set<String> allowedGroups = new HashSet<String>(getRestrictedGroups(modelNode));
+        if(portalModelGroups.getGroupsKey() != null && portalModelGroups.getGroupsKey().size() > 0){
+            for (String groupKey : portalModelGroups.getGroupsKey()){
+                allowedGroups.add(groupKey);
+            }
+            modelNode.setProperty(PortalConstants.J_ALLOWED_USER_GROUPS, allowedGroups.toArray(new String[allowedGroups.size()]));
+        }
+        modelNode.getSession().save();
+
+        if(isPortalModelEnabled(modelNode)){
+            setReadRoleForPortalModel(modelNode, true);
+        }
+    }
+
+    public void removeRestrictedGroupsFromModel(JCRNodeWrapper modelNode, PortalModelGroups portalModelGroups) throws RepositoryException {
+        List<String> allowedGroups = new ArrayList<String>(getRestrictedGroups(modelNode));
+        if(portalModelGroups.getGroupsKey() != null && portalModelGroups.getGroupsKey().size() > 0){
+            for (String groupKey : portalModelGroups.getGroupsKey()){
+                allowedGroups.remove(groupKey);
+            }
+            modelNode.setProperty(PortalConstants.J_ALLOWED_USER_GROUPS, allowedGroups.toArray(new String[allowedGroups.size()]));
+        }
+        modelNode.getSession().save();
+
+        if(isPortalModelEnabled(modelNode)){
+            setReadRoleForPortalModel(modelNode, true);
+        }
+    }
+
+    public JahiaGroup getGroupFromKey(String grpKey){
+        return groupManagerService.lookupGroup(grpKey);
+    }
+
     private void setReadRoleForPortalModel(JCRNodeWrapper portalModelNode, boolean enabled) {
         Set<String> roles = Collections.singleton("reader");
         try {
+            portalModelNode.revokeAllRoles();
             portalModelNode.denyRoles("u:guest", roles);
+            portalModelNode.denyRoles("g:users", roles);
 
             if (enabled) {
-                portalModelNode.grantRoles("g:users", roles);
-            } else {
-                portalModelNode.denyRoles("g:users", roles);
+                List<String> restrictedGroups = getRestrictedGroups(portalModelNode);
+                if(restrictedGroups != null && restrictedGroups.size() > 0) {
+                    for(String groupKey : restrictedGroups){
+                        try{
+                            JahiaGroup group = groupManagerService.lookupGroup(groupKey);
+                            portalModelNode.grantRoles("g:" + group.getName(), roles);
+                        } catch (Exception e) {
+                            logger.error(e.getMessage(), e);    
+                        }
+                    }
+                } else {
+                    portalModelNode.grantRoles("g:users", roles);
+                }
             }
+
+            portalModelNode.getSession().save();
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
         }

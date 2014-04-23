@@ -12,6 +12,7 @@ import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderService;
 import org.jahia.services.render.View;
+import org.jahia.services.usermanager.JahiaGroup;
 import org.jahia.utils.i18n.Messages;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -147,5 +148,21 @@ public class PortalFunctions {
     public static long daysBetweenSinceDate(String date) {
         DateTime sinceDate = ISODateTimeFormat.dateOptionalTimeParser().parseDateTime(date);
         return Days.daysBetween(new LocalDate(sinceDate), new LocalDate()).getDays();
+    }
+
+    public static List<JahiaGroup> getPortalRestrictedGroups(JCRNodeWrapper portal) {
+        List<JahiaGroup> groups = new ArrayList<JahiaGroup>();
+        try {
+            for (String groupKey : portalService.getRestrictedGroups(portal)){
+                try{
+                    groups.add(portalService.getGroupFromKey(groupKey));
+                }catch (Exception e){
+                    logger.error("Cannot find group with key: " + groupKey, e);
+                }
+            }
+        } catch (RepositoryException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return groups;
     }
 }

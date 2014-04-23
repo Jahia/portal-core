@@ -1,22 +1,24 @@
 package org.jahia.modules.portal.sitesettings;
 
+import com.google.common.base.Joiner;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.data.viewhelper.principal.PrincipalViewHelper;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
+import org.jahia.modules.portal.sitesettings.form.PortalModelGroups;
 import org.jahia.modules.portal.sitesettings.table.UserPortalsPager;
 import org.jahia.modules.portal.sitesettings.table.UserPortalsSearchCriteria;
 import org.jahia.modules.portal.sitesettings.table.UserPortalsTable;
 import org.jahia.modules.portal.sitesettings.table.UserPortalsTableRow;
+import org.jahia.modules.portal.tags.PortalFunctions;
 import org.jahia.services.content.*;
 import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
-import org.jahia.services.query.QueryResultWrapperImpl;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.RenderService;
-import org.jahia.services.usermanager.JahiaUser;
+import org.jahia.services.usermanager.*;
 import org.jahia.utils.i18n.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,9 @@ public class PortalFactoryHandler implements Serializable {
 
     @Autowired
     private transient PortalService portalService;
+
+    @Autowired
+    private transient JahiaGroupManagerService groupManagerService;
 
     public List<JCRNodeWrapper> getSitePortalModels(RequestContext ctx) {
         return portalService.getSitePortalModels(getRenderContext(ctx).getSite(), null, false, getCurrentUserSession(ctx, "live"));
@@ -215,6 +220,84 @@ public class PortalFactoryHandler implements Serializable {
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
         }
+    }
+
+    public PortalModelGroups initManageGroups(RequestContext ctx, SearchCriteria searchCriteria, String portalModelIdentifier) throws RepositoryException {
+        PortalModelGroups portalModelGroups = new PortalModelGroups();
+        portalModelGroups.setPortalIdentifier(portalModelIdentifier);
+
+        if(StringUtils.isEmpty(searchCriteria.getStoredOn())){
+            searchCriteria.setStoredOn("everywhere");
+        }
+        if(StringUtils.isEmpty(searchCriteria.getSearchIn())){
+            searchCriteria.setSearchIn("allProps");
+        }
+        if(StringUtils.isEmpty(searchCriteria.getSearchString())){
+            searchCriteria.setSearchString("");
+        }
+        
+        portalModelGroups.setSearchCriteria(searchCriteria);
+
+        JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
+        portalModelGroups.setGroupsKey(portalService.getRestrictedGroups(portalNode));
+        setCurrentRestrictions(portalModelGroups, portalNode);
+
+        return portalModelGroups;
+    }
+
+    /**
+     * Returns an empty (newly initialized) search criteria bean.
+     *
+     * @return an empty (newly initialized) search criteria bean
+     */
+    public SearchCriteria initCriteria(RequestContext ctx) {
+        return new SearchCriteria(((RenderContext) ctx.getExternalContext().getRequestMap().get("renderContext")).getSite().getID());
+    }
+
+    public Set<Principal> search(PortalModelGroups portalModelGroups) {
+        SearchCriteria searchCriteria = portalModelGroups.getSearchCriteria();
+        long timer = System.currentTimeMillis();
+        Set<Principal> searchResult = PrincipalViewHelper.getGroupSearchResult(searchCriteria.getSearchIn(),
+                searchCriteria.getSiteId(), searchCriteria.getSearchString(), searchCriteria.getProperties(),
+                searchCriteria.getStoredOn(), searchCriteria.getProviders());
+        logger.info("Found {} groups in {} ms", searchResult.size(), System.currentTimeMillis() - timer);
+        return searchResult;
+    }
+
+    private void setCurrentRestrictions(PortalModelGroups portalModelGroups, JCRNodeWrapper portalNode) throws RepositoryException {
+        List<String> restrictedGroupsNames = new ArrayList<String>();
+        for(JahiaGroup group : PortalFunctions.getPortalRestrictedGroups(portalNode)){
+            restrictedGroupsNames.add(group.getName());
+        }
+
+        Joiner joiner = Joiner.on(", ");
+        if (restrictedGroupsNames.size() > 0){
+            portalModelGroups.setCurrentRestrictions(joiner.join(restrictedGroupsNames));
+        }else {
+            portalModelGroups.setCurrentRestrictions(null);
+        }
+    }
+
+    public Map<String, ? extends JahiaGroupManagerProvider> getProviders() {
+        Map<String, JahiaGroupManagerProvider> providers = new LinkedHashMap<String, JahiaGroupManagerProvider>();
+        for (JahiaGroupManagerProvider p : groupManagerService.getProviderList()) {
+            providers.put(p.getKey(), p);
+        }
+        return providers;
+    }
+
+    public void addToRestrictedGroup(RequestContext ctx, PortalModelGroups portalModelGroups) throws RepositoryException {
+        JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
+        portalService.addRestrictedGroupsToModel(portalNode, portalModelGroups);
+        portalModelGroups.setGroupsKey(portalService.getRestrictedGroups(portalNode));
+        setCurrentRestrictions(portalModelGroups, portalNode);
+    }
+
+    public void removeFromRestrictedGroup(RequestContext ctx, PortalModelGroups portalModelGroups) throws RepositoryException {
+        JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
+        portalService.removeRestrictedGroupsFromModel(portalNode, portalModelGroups);
+        portalModelGroups.setGroupsKey(portalService.getRestrictedGroups(portalNode));
+        setCurrentRestrictions(portalModelGroups, portalNode);
     }
 
     public boolean enablePortalModel(RequestContext ctx, String selectedPortalModelIdentifier){

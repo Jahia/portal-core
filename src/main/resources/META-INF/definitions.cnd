@@ -40,6 +40,7 @@ orderable
  - j:enabled (boolean) = false autocreated
  - j:allowCustomization (boolean)
  - j:allowedWidgetTypes (string) multiple
+ - j:allowedUserGroups (string) multiple
 
 [jnt:portalUser] > jnt:content, mix:title, jmix:list, jmix:portal, jmix:hasModel
 orderable
