@@ -141,7 +141,7 @@
         <configuration>
           <instructions>
             <Jahia-Depends>default,jcr-rest-javascript-utils,siteSettings</Jahia-Depends>
-            <Export-Package>org.jahia.modules.portal,org.jahia.modules.portal.tags</Export-Package>
+            <Export-Package>org.jahia.modules.portal,org.jahia.modules.portal.tags,org.jahia.modules.portal.service.bean</Export-Package>
             <Import-Package>org.jahia.services.usermanager.ldap;resolution:=optional,${jahia.plugin.projectPackageImport},*</Import-Package>
           </instructions>
         </configuration>

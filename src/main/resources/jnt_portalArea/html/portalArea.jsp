@@ -26,8 +26,7 @@
         portal Area
     </c:when>
     <c:otherwise>
-        <c:set var="portalColNode" value="${portal:getPortalColForArea(renderContext.mainResource.node, currentNode.name)}"/>
-
+        <jcr:node var="portalColNode" path="${renderContext.mainResource.node.path}/${currentNode.name}"/>
         <div id="portal_area_${currentNode.identifier}" class="portal_area" data-area-name="${currentNode.name}">
             <c:if test="${not empty portalColNode}">
                 <template:area path="${portalColNode.path}"/>

@@ -25,9 +25,9 @@
 <%--@elvariable id="newsletter" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="newslettersRootNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="portalModelForm" type="org.jahia.modules.portal.sitesettings.form.PortalModelForm"--%>
-<%--@elvariable id="skin" type="org.jahia.services.render.View"--%>
+<%--@elvariable id="skin" type="org.jahia.modules.portal.service.bean.PortalKeyNameObject"--%>
 <%--@elvariable id="portalNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
-<%--@elvariable id="widgetNodeType" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
+<%--@elvariable id="widgetNodeType" type="org.jahia.modules.portal.service.bean.PortalKeyNameObject"--%>
 <c:set var="portalWidgetMixin" value="<%= PortalConstants.JMIX_PORTAL_WIDGET %>"/>
 
 <template:addResources type="javascript"
@@ -113,11 +113,9 @@
                     <span class="text-error"><strong>*</strong></span></form:label>
                 <form:select path="tabWidgetSkin">
                     <c:forEach items="${allowedWidgetsSkin}" var="skin">
-                        <c:if test="${fn:startsWith(skin.key, 'box')}">
-                            <form:option value="${skin.key}">
-                                ${portal:getMessage(skin.module, skin.displayName, renderContext.mainResourceLocale)}
-                            </form:option>
-                        </c:if>
+                        <form:option value="${skin.key}">
+                            ${skin.name}
+                        </form:option>
                     </c:forEach>
                 </form:select>
             </div>
@@ -130,10 +128,10 @@
         </div>
         <div class="row-fluid">
             <div class="span12">
-                <c:forEach items="${portal:getWidgetNodeTypes(renderContext.site)}" var="widgetNodeType">
-                    <label for="widgetType_${widgetNodeType.name}">
-                        <form:checkbox path="portal.allowedWidgetTypes" value="${widgetNodeType.name}" id="widgetType_${widgetNodeType.name}"/>
-                        &nbsp; ${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}
+                <c:forEach items="${widgetTypes}" var="widgetNodeType">
+                    <label for="widgetType_${widgetNodeType.key}">
+                        <form:checkbox path="portal.allowedWidgetTypes" value="${widgetNodeType.key}" id="widgetType_${widgetNodeType.key}"/>
+                        &nbsp; ${widgetNodeType.name}
                     </label>
                 </c:forEach>
             </div>

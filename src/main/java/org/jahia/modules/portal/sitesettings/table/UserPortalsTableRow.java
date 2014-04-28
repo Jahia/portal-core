@@ -11,7 +11,7 @@ public class UserPortalsTableRow implements Serializable{
 
     private String userNodeIdentifier;
     private String modelName;
-    private String lastUsed;
+    private long lastUsed;
     private Date created;
 
     public String getUserNodeIdentifier() {
@@ -30,11 +30,11 @@ public class UserPortalsTableRow implements Serializable{
         this.modelName = modelName;
     }
 
-    public String getLastUsed() {
+    public long getLastUsed() {
         return lastUsed;
     }
 
-    public void setLastUsed(String lastUsed) {
+    public void setLastUsed(long lastUsed) {
         this.lastUsed = lastUsed;
     }
 

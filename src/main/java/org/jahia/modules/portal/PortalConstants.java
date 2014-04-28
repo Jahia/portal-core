@@ -27,6 +27,7 @@ public class PortalConstants {
     public static final String J_ALLOW_CUSTOMIZATION = "j:allowCustomization";
     public static final String J_ALLOWED_USER_GROUPS = "j:allowedUserGroups";
     public static final String J_ENABLED = "j:enabled";
+    public static final String J_LOCKED = "j:locked";
     public static final String J_WIDGET_SKIN = "j:widgetSkin";
     public static final String J_MODEL = "j:model";
     public static final String J_SITEKEY = "j:siteKey";

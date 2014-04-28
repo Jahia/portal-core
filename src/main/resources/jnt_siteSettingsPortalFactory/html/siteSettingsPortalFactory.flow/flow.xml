@@ -14,9 +14,9 @@
         <set name="flowScope.siteSettingsProperties" value="siteSettingsProperties" type="java.util.Map" />
     </on-start>
 
-    <view-state id="portalFactory">
+    <view-state id="portalFactory" model="portalModelTable">
         <on-render>
-            <evaluate expression="flowHandler.getSitePortalModels(flowRequestContext)" result="requestScope.portals"/>
+            <evaluate expression="flowHandler.initPortalModelsTable(flowRequestContext)" result="flowScope.portalModelTable"/>
         </on-render>
         <transition on="createPortal" to="newPortalModelForm" bind="false" validate="false"/>
         <transition on="manageUserPortals" to="manageUserPortals" bind="false" validate="false">

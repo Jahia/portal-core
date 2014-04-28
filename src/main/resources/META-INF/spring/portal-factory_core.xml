@@ -27,6 +27,15 @@
     <bean id="messageSource" class="org.jahia.utils.i18n.ModuleMessageSource"/>
 
     <!-- Filters -->
+    <bean class="org.jahia.modules.portal.filter.PortalInitFilter">
+        <property name="priority" value="17"/>
+        <property name="description" value="set the good site for the user portal"/>
+        <property name="applyOnConfigurations" value="page" />
+        <property name="applyOnTemplateTypes" value="html"/>
+        <property name="applyOnNodeTypes" value="jnt:portalTab,jmix:portalWidget"/>
+        <property name="portalService" ref="portalService"/>
+    </bean>
+
     <bean name="PortalLibFilter" class="org.jahia.modules.portal.filter.PortalLibFilter">
         <property name="priority" value="18"/>
         <property name="description" value="Add portal JavaScript API in the page before the static asset filter"/>
@@ -61,20 +70,6 @@
         <property name="applyOnNodeTypes" value="jmix:portalWidget"/>
         <property name="skipOnConfigurations" value="wrapper"/>
         <property name="skipOnModes" value="studio"/>
-    </bean>
-    <bean class="org.jahia.modules.portal.filter.PortalSiteFilter">
-        <property name="portalService" ref="PortalService"/>
-        <property name="priority" value="10"/>
-        <property name="description" value="set the good site for the user portal"/>
-        <property name="applyOnNodeTypes" value="jnt:portalTab,jmix:portalWidget,jmix:portal"/>
-    </bean>
-    <bean name="PortalLastWatchFilter" class="org.jahia.modules.portal.filter.PortalLastWatchFilter">
-        <property name="priority" value="11"/>
-        <property name="description" value="update last watch property for a portal"/>
-        <property name="applyOnConfigurations" value="page" />
-        <property name="applyOnTemplateTypes" value="html"/>
-        <property name="applyOnNodeTypes" value="jnt:portalTab"/>
-        <property name="applyOnFirstWatchInTheDay" value="true"/>
     </bean>
 
     <!-- Error handlers -->

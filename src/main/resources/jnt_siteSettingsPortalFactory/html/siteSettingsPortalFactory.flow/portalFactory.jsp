@@ -19,7 +19,7 @@
 <%--@elvariable id="flowRequestContext" type="org.springframework.webflow.execution.RequestContext"--%>
 <%--@elvariable id="flowExecutionUrl" type="java.lang.String"--%>
 <%--@elvariable id="searchCriteria" type="org.jahia.services.usermanager.SearchCriteria"--%>
-<%--@elvariable id="portals" type="java.util.List<org.jahia.services.content.JCRNodeWrapper>"--%>
+<%--@elvariable id="portalModelTable" type="org.jahia.modules.portal.sitesettings.table.PortalModelTable"--%>
 
 <template:addResources type="javascript" resources="jquery.min.js,jquery-ui.min.js,jquery.blockUI.js,workInProgress.js,admin-bootstrap.js"/>
 <template:addResources type="css" resources="admin-bootstrap.css"/>
@@ -75,7 +75,7 @@
     </p>
 
     <div>
-        <c:set var="portalsCount" value="${fn:length(portals)}"/>
+        <c:set var="portalsCount" value="${fn:length(portalModelTable.portalModelTableRows)}"/>
         <c:set var="portalsFound" value="${portalsCount > 0}"/>
 
         <table class="table table-bordered table-striped table-hover">
@@ -97,23 +97,23 @@
                     </tr>
                 </c:when>
                 <c:otherwise>
-                    <c:forEach items="${portals}" var="portal" varStatus="loopStatus">
+                    <c:forEach items="${portalModelTable.portalModelTableRows}" var="portalTableRow" varStatus="loopStatus">
                         <fmt:message var="i18nRemove" key="label.remove"/><c:set var="i18nRemove" value="${functions:escapeJavaScript(i18nRemove)}"/>
                         <fmt:message var="i18nEdit" key="label.edit"/><c:set var="i18nEdit" value="${functions:escapeJavaScript(i18nEdit)}"/>
                         <fmt:message var="i18nManageGroups" key="portalFactory.manageGroups"/><c:set var="i18nManageGroups" value="${functions:escapeJavaScript(i18nManageGroups)}"/>
                         <fmt:message var="i18nLiveMode" key="portalFactory.goToLive"/><c:set var="i18nLiveMode" value="${functions:escapeJavaScript(i18nLiveMode)}"/>
-                        <c:url var="portalURL" value="${url.baseLive}${portal.path}"/>
+                        <c:url var="portalURL" value="${url.baseLive}${portalTableRow.path}"/>
                         <tr>
                             <td align="center" class="center">${loopStatus.count}</td>
                             <td>
-                                <a title="${i18nEdit}" href="#details" onclick="submitPortalForm('editPortal', '${portal.identifier}')">${fn:escapeXml(portal.displayableName)}</a>
+                                <a title="${i18nEdit}" href="#details" onclick="submitPortalForm('editPortal', '${portalTableRow.uuid}')">${fn:escapeXml(portalTableRow.name)}</a>
                             </td>
                             <td align="center" class="center">
-                                ${fn:length(portal:userPortalsByModel(portal))}
+                                ${portalTableRow.userPortals}
                             </td>
                             <td>
                                 <%--@elvariable id="groups" type="java.util.List<org.jahia.services.usermanager.JahiaGroup>"--%>
-                                <c:set var="groups" value="${portal:getRestrictedGroups(portal)}"/>
+                                <c:set var="groups" value="${portalTableRow.restrictedGroups}"/>
                                 <c:choose>
                                     <c:when test="${not empty groups}">
                                         <ul>
@@ -132,11 +132,11 @@
                                     <i class="icon-globe"></i>
                                 </a>
 
-                                <a style="margin-bottom:0;" class="btn btn-small" title="${i18nEdit}" href="#edit" onclick="submitPortalForm('editPortal', '${portal.identifier}')">
+                                <a style="margin-bottom:0;" class="btn btn-small" title="${i18nEdit}" href="#edit" onclick="submitPortalForm('editPortal', '${portalTableRow.uuid}')">
                                     <i class="icon-edit"></i>
                                 </a>
 
-                                <a style="margin-bottom:0;" class="btn btn-small" title="${i18nManageGroups}" href="#groups" onclick="submitPortalForm('manageGroups', '${portal.identifier}')">
+                                <a style="margin-bottom:0;" class="btn btn-small" title="${i18nManageGroups}" href="#groups" onclick="submitPortalForm('manageGroups', '${portalTableRow.uuid}')">
                                     <i class="icon-user"></i>
                                 </a>
 
@@ -146,15 +146,15 @@
                             </td>
                             <td>
                                 <c:choose>
-                                    <c:when test="${portal.properties['j:enabled'].boolean}">
+                                    <c:when test="${portalTableRow.enabled}">
                                         <button class="btn btn-danger" type="button"
-                                                onclick="submitPortalForm('disablePortal', '${portal.identifier}')">
+                                                onclick="submitPortalForm('disablePortal', '${portalTableRow.uuid}')">
                                             <i class=" icon-stop icon-white"></i><fmt:message key="portalFactory.disable"/>
                                         </button>
                                     </c:when>
                                     <c:otherwise>
                                         <button class="btn btn-success" type="button"
-                                                onclick="submitPortalForm('enablePortal', '${portal.identifier}')">
+                                                onclick="submitPortalForm('enablePortal', '${portalTableRow.uuid}')">
                                             <i class=" icon-play icon-white"></i><fmt:message key="portalFactory.enable"/>
                                         </button>
                                     </c:otherwise>

@@ -218,7 +218,7 @@
                                 ${fn:escapeXml(userNode.displayableName)}
                             </td>
                             <td>
-                                <c:set var="lastViewed" value="${portal:getDaysSinceDate(userPortalRow.value.lastUsed)}" />
+                                <c:set var="lastViewed" value="${userPortalRow.value.lastUsed}" />
                                 <c:choose>
                                     <c:when test="${lastViewed == 0}">
                                         <fmt:message key="manageUserPortals.today" />

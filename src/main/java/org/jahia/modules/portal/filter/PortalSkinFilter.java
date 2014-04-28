@@ -2,6 +2,7 @@ package org.jahia.modules.portal.filter;
 
 import org.apache.commons.lang.StringUtils;
 import org.jahia.modules.portal.PortalConstants;
+import org.jahia.modules.portal.service.bean.PortalContext;
 import org.jahia.services.content.JCRContentUtils;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.render.RenderContext;
@@ -22,14 +23,14 @@ import java.io.Serializable;
 public class PortalSkinFilter extends AbstractFilter {
 
     public String prepare(RenderContext renderContext, Resource resource, RenderChain chain) throws Exception {
-        // Add cache dependancy to portal tab
-        JCRNodeWrapper portalNode = JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JMIX_PORTAL);
-        resource.getDependencies().add(JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JNT_PORTAL_TAB).getCanonicalPath());
-        resource.getDependencies().add(portalNode.getCanonicalPath());
+        // Add cache dependency to portal tab
+        PortalContext portal = (PortalContext) renderContext.getRequest().getAttribute("portalContext");
+        resource.getDependencies().add(portal.getTabPath());
+        resource.getDependencies().add(portal.getPath());
         Serializable skipSkinParam = resource.getModuleParams().get("skipSkin");
         boolean skipSkin = skipSkinParam != null && Boolean.parseBoolean(skipSkinParam.toString());
         if(!skipSkin){
-            if (portalNode.hasProperty("j:locked") && portalNode.getProperty("j:locked").getBoolean()){
+            if (portal.isLock()){
                 resource.pushWrapper("locked");
             }else {
                 pushWidgetSkinWrapperForNode(resource.getNode(), resource);

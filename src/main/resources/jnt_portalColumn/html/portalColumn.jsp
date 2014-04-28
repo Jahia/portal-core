@@ -26,7 +26,7 @@
 <c:set var="portalMixin" value="<%= PortalConstants.JMIX_PORTAL %>"/>
 <c:set var="portalWidgetMixin" value="<%= PortalConstants.JMIX_PORTAL_WIDGET %>"/>
 <c:set var="portalWidgetReferenceNT" value="<%= PortalConstants.JNT_PORTAL_WIDGET_REFERENCE %>"/>
-<c:set var="portalNode" value="${jcr:getParentOfType(renderContext.mainResource.node, portalMixin)}"/>
+<c:set var="portalTabNode" value="${renderContext.mainResource.node}"/>
 
 <c:set var="widgetIdentifier" value="${not empty renderContext.request.parameterMap['w'] ? renderContext.request.parameterMap['w'][0] : null}"/>
 <c:set var="widgetSolo" value="${not empty renderContext.request.parameterMap['w_solo'] ? renderContext.request.parameterMap['w_solo'][0] : null}"/>
@@ -36,7 +36,7 @@
 
 <c:choose>
     <c:when test="${widgetSolo != null && widgetIdentifier != null}">
-        <c:set var="widgetNode" value="${portal:getWidget(widgetIdentifier, portalNode)}"/>
+        <jcr:node var="widgetNode" uuid="${widgetIdentifier}"/>
         <c:set var="isGadget" value="${jcr:isNodeType(widgetNode, portalGadgetMixin) ||
         (jcr:isNodeType(widgetNode, 'jnt:portalWidgetReference') && not empty widgetNode.properties['j:node'] && jcr:isNodeType(widgetNode.properties['j:node'].node, 'jmix:portalGadget'))}"/>
         <div id="w_${widgetNode.identifier}" class="portal_widget"

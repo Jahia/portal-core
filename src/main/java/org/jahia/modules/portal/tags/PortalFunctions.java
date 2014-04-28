@@ -1,30 +1,12 @@
 package org.jahia.modules.portal.tags;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Sets;
-import org.apache.commons.collections.CollectionUtils;
-import org.jahia.data.templates.JahiaTemplatesPackage;
-import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.services.content.JCRNodeWrapper;
-import org.jahia.services.content.decorator.JCRSiteNode;
-import org.jahia.services.content.nodetypes.ExtendedNodeType;
-import org.jahia.services.content.nodetypes.NodeTypeRegistry;
-import org.jahia.services.render.RenderService;
-import org.jahia.services.render.View;
-import org.jahia.services.usermanager.JahiaGroup;
-import org.jahia.utils.i18n.Messages;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nullable;
-import javax.jcr.RepositoryException;
 import java.util.*;
 
 /**
@@ -45,124 +27,7 @@ public class PortalFunctions {
         PortalFunctions.portalService = portalService;
     }
 
-    public static Collection<ExtendedNodeType> getWidgetNodeTypes(JCRSiteNode site) {
-        return portalService.getWidgetNodeTypes(site);
-    }
-
-    public static Collection<ExtendedNodeType> getPortalWidgetNodeTypes(JCRSiteNode site, JCRNodeWrapper portalNode) {
-        return portalService.getPortalWidgetNodeTypes(site, portalNode);
-    }
-
-    public static String getI18nNodetypeName(ExtendedNodeType nodeType, Locale locale) {
-        return portalService.getI18NodeTypeName(nodeType, locale);
-    }
-
-    public static String geti18Message(JahiaTemplatesPackage module, String key, Locale locale) {
-        try {
-            return Messages.get(module, key, locale);
-        }catch (Exception e){
-            return key;
-        }
-    }
-
-    public static JCRNodeWrapper getPortalColNameForArea(JCRNodeWrapper portalTabNode, String areaName) {
-        return portalService.getPortalColNodeForArea(portalTabNode, areaName);
-    }
-
-    public static JCRNodeWrapper getTemplateNodeForName(String name, JCRNodeWrapper portalNode) {
-        try {
-            return portalService.getPortalTabTemplateNode(name, portalNode.getPropertyAsString(PortalConstants.J_TEMPLATE_ROOT_PATH), portalNode.getSession());
-        } catch (RepositoryException e) {
-            logger.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    public static List<JCRNodeWrapper> getPortalTabTemplates(JCRNodeWrapper portalNode) {
-        try {
-            return portalService.getPortalTabTemplates(portalNode.getPropertyAsString(PortalConstants.J_TEMPLATE_ROOT_PATH), portalNode.getSession());
-        } catch (RepositoryException e) {
-            logger.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    public static View getSpecificView(String nt, String view, JCRNodeWrapper portalNode) {
-        SortedSet<View> skins = getViewSet(nt, portalNode);
-        if (CollectionUtils.isNotEmpty(skins)) {
-            for (View skin : skins) {
-                if (skin.getKey().equals(view)) {
-                    return skin;
-                }
-            }
-        }
-        return null;
-    }
-
-    public static SortedSet<View> getViewSet(String nt, JCRNodeWrapper portalNode){
-        try {
-            return RenderService.getInstance().getViewsSet(NodeTypeRegistry.getInstance().getNodeType(nt), portalService.getPortalSite(portalNode), "html");
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    public static SortedSet<View> getWidgetPortalViewSet(String nt, JCRNodeWrapper portalNode){
-        try {
-            return Sets.filter(getViewSet(nt, portalNode), new Predicate<View>() {
-                @Override
-                public boolean apply(@Nullable View input) {
-                    return input != null && input.getKey().startsWith("portal.");
-                }
-            });
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    public static boolean userPortalExist(JCRNodeWrapper modelNode){
-        JCRNodeWrapper userPortal = portalService.getUserPortalByModel(modelNode);
-        return userPortal != null;
-    }
-
-    public static JCRNodeWrapper getWidgetNode(String widgetId, JCRNodeWrapper portalNode){
-        JCRNodeWrapper widgetNode = null;
-        try {
-            widgetNode = portalNode.getSession().getNodeByIdentifier(widgetId);
-        } catch (RepositoryException e) {
-            logger.error(e.getMessage(), e);
-        }
-        return widgetNode;
-    }
-
     public static Set<JCRNodeWrapper> getUserPortalsBySite(String siteKey, Locale locale) {
         return portalService.getUserPortalsBySite(siteKey, locale);
-    }
-
-    public static Collection<JCRNodeWrapper> getUserPortalsByModel(JCRNodeWrapper portalModelNode) {
-        return portalService.getUserPortalsInstanceByModel(portalModelNode);
-    }
-
-    public static long daysBetweenSinceDate(String date) {
-        DateTime sinceDate = ISODateTimeFormat.dateOptionalTimeParser().parseDateTime(date);
-        return Days.daysBetween(new LocalDate(sinceDate), new LocalDate()).getDays();
-    }
-
-    public static List<JahiaGroup> getPortalRestrictedGroups(JCRNodeWrapper portal) {
-        List<JahiaGroup> groups = new ArrayList<JahiaGroup>();
-        try {
-            for (String groupKey : portalService.getRestrictedGroups(portal)){
-                try{
-                    groups.add(portalService.getGroupFromKey(groupKey));
-                }catch (Exception e){
-                    logger.error("Cannot find group with key: " + groupKey, e);
-                }
-            }
-        } catch (RepositoryException e) {
-            logger.error(e.getMessage(), e);
-        }
-        return groups;
     }
 }

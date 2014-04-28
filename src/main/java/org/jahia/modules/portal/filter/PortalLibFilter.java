@@ -1,16 +1,14 @@
 package org.jahia.modules.portal.filter;
 
 
-import net.htmlparser.jericho.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
-import org.jahia.modules.portal.PortalConstants;
-import org.jahia.services.content.JCRContentUtils;
-import org.jahia.services.content.JCRNodeWrapper;
+import org.jahia.modules.portal.service.bean.PortalContext;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.Resource;
 import org.jahia.services.render.filter.AbstractFilter;
 import org.jahia.services.render.filter.RenderChain;
-import org.jahia.services.render.filter.cache.AggregateCacheFilter;
 import org.jahia.utils.ScriptEngineUtils;
 import org.jahia.utils.WebUtils;
 import org.slf4j.LoggerFactory;
@@ -25,8 +23,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,18 +35,6 @@ public class PortalLibFilter extends AbstractFilter {
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(PortalLibFilter.class);
 
     private static final String JS_API_FILE = "jahia-portal.js";
-
-    public static final String PORTAL_INIT_BASE_URL = "baseURL";
-    public static final String PORTAL_INIT_DEBUG = "debug";
-    public static final String PORTAL_INIT_IS_EDITABLE = "isEditable";
-    public static final String PORTAL_INIT_IS_LOCKED = "isLocked";
-    public static final String PORTAL_INIT_IS_MODEL = "isModel";
-    public static final String PORTAL_INIT_IS_CUSTOMIZATION_ALLOWED = "isCustomizationAllowed";
-    public static final String PORTAL_INIT_FULL_TEMPLATE = "fullTemplate";
-    public static final String PORTAL_INIT_PORTAL_PATH = "portalPath";
-    public static final String PORTAL_INIT_PORTAL_IDENTIFIER = "portalIdentifier";
-    public static final String PORTAL_INIT_PORTAL_TAB_PATH = "portalTabPath";
-    public static final String PORTAL_INIT_PORTAL_TAB_IDENTIFIER = "portalTabIdentifier";
 
     private ScriptEngineUtils scriptEngineUtils;
     private String template;
@@ -77,7 +61,7 @@ public class PortalLibFilter extends AbstractFilter {
             final Bindings bindings = scriptEngine.createBindings();
 
             // bindings
-            bindings.put("options", getBindingMap(renderContext, resource));
+            bindings.put("portalContext", serializePortal(renderContext));
             scriptContext.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
             // The following binding is necessary for Javascript, which doesn't offer a console by default.
             bindings.put("out", new PrintWriter(scriptContext.getWriter()));
@@ -92,31 +76,14 @@ public class PortalLibFilter extends AbstractFilter {
         return out;
     }
 
-    private HashMap<String, Object> getBindingMap(RenderContext renderContext, Resource resource) throws RepositoryException {
-        JCRNodeWrapper portalNode = JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JMIX_PORTAL);
-        boolean isModel = portalNode.isNodeType(PortalConstants.JNT_PORTAL_MODEL);
-        HashMap<String, Object> bindingMap = new HashMap<String, Object>();
-        bindingMap.put(PORTAL_INIT_BASE_URL,
-                stringifyJsParam(StringUtils.isNotEmpty(renderContext.getURLGenerator().getContext())
-                        ? renderContext.getURLGenerator().getContext() + renderContext.getURLGenerator().getBaseLive()
-                        : renderContext.getURLGenerator().getBaseLive()));
-        bindingMap.put(PORTAL_INIT_PORTAL_PATH, stringifyJsParam(portalNode.getPath()));
-        bindingMap.put(PORTAL_INIT_PORTAL_TAB_PATH, stringifyJsParam(resource.getNode().getPath()));
-        bindingMap.put(PORTAL_INIT_PORTAL_IDENTIFIER, stringifyJsParam(portalNode.getIdentifier()));
-        bindingMap.put(PORTAL_INIT_PORTAL_TAB_IDENTIFIER, stringifyJsParam(resource.getNode().getIdentifier()));
-        bindingMap.put(PORTAL_INIT_IS_EDITABLE, resource.getNode().hasPermission("jcr:write_live"));
-        bindingMap.put(PORTAL_INIT_IS_LOCKED, portalNode.hasProperty("j:locked") && portalNode.getProperty("j:locked").getBoolean());
-        bindingMap.put(PORTAL_INIT_IS_MODEL, isModel);
-        bindingMap.put(PORTAL_INIT_IS_CUSTOMIZATION_ALLOWED, isModel && portalNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean());
-        bindingMap.put(PORTAL_INIT_FULL_TEMPLATE, stringifyJsParam(portalNode.getProperty(PortalConstants.J_FULL_TEMPLATE).getString()));
-        bindingMap.put(PORTAL_INIT_DEBUG, debugEnabled);
-        return bindingMap;
-    }
+    private String serializePortal(RenderContext renderContext) throws RepositoryException, JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        PortalContext portal = (PortalContext) renderContext.getRequest().getAttribute("portalContext");
+        portal.setDebug(debugEnabled);
 
-    private String stringifyJsParam(String param) {
-        return "'" + param + "'";
+        return objectMapper.writeValueAsString(portal);
     }
-
+    
     protected String getResolvedTemplate() throws IOException {
         if (resolvedTemplate == null) {
             resolvedTemplate = WebUtils.getResourceAsString(template);

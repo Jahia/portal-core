@@ -5,21 +5,22 @@ import org.apache.commons.lang.StringUtils;
 import org.jahia.data.viewhelper.principal.PrincipalViewHelper;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
+import org.jahia.modules.portal.service.bean.PortalKeyNameObject;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelGroups;
-import org.jahia.modules.portal.sitesettings.table.UserPortalsPager;
-import org.jahia.modules.portal.sitesettings.table.UserPortalsSearchCriteria;
-import org.jahia.modules.portal.sitesettings.table.UserPortalsTable;
-import org.jahia.modules.portal.sitesettings.table.UserPortalsTableRow;
-import org.jahia.modules.portal.tags.PortalFunctions;
+import org.jahia.modules.portal.sitesettings.table.*;
 import org.jahia.services.content.*;
 import org.jahia.services.content.decorator.JCRSiteNode;
-import org.jahia.services.content.nodetypes.NodeTypeRegistry;
+import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.render.RenderContext;
-import org.jahia.services.render.RenderService;
+import org.jahia.services.render.View;
 import org.jahia.services.usermanager.*;
 import org.jahia.utils.i18n.Messages;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,6 @@ import org.springframework.webflow.execution.RequestContext;
 
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
-import javax.jcr.nodetype.NoSuchNodeTypeException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import java.io.Serializable;
@@ -56,8 +56,27 @@ public class PortalFactoryHandler implements Serializable {
     @Autowired
     private transient JahiaGroupManagerService groupManagerService;
 
-    public List<JCRNodeWrapper> getSitePortalModels(RequestContext ctx) {
-        return portalService.getSitePortalModels(getRenderContext(ctx).getSite(), null, false, getCurrentUserSession(ctx, "live"));
+    public PortalModelTable initPortalModelsTable(RequestContext ctx) throws RepositoryException {
+        List<JCRNodeWrapper> portalModelNodes = portalService.getSitePortalModels(getRenderContext(ctx).getSite(), null, false, getCurrentUserSession(ctx, "live"));
+
+        PortalModelTable portalModelTable = new PortalModelTable();
+        List<PortalModelTableRow> portalModelTableRows = new ArrayList<PortalModelTableRow>();
+
+        for (JCRNodeWrapper portalModelNode : portalModelNodes){
+            PortalModelTableRow portalModelTableRow = new PortalModelTableRow();
+            portalModelTableRow.setName(portalModelNode.getDisplayableName());
+            portalModelTableRow.setPath(portalModelNode.getPath());
+            portalModelTableRow.setUuid(portalModelNode.getIdentifier());
+            portalModelTableRow.setEnabled(portalModelNode.hasProperty(PortalConstants.J_ENABLED) && portalModelNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
+            portalModelTableRow.setRestrictedGroups(portalService.getRestrictedGroups(portalModelNode));
+            portalModelTableRow.setUserPortals(portalService.getUserPortalsByModel(portalModelNode).size());
+
+            portalModelTableRows.add(portalModelTableRow);
+        }
+
+        portalModelTable.setPortalModelTableRows(portalModelTableRows);
+
+        return portalModelTable;
     }
 
     public boolean createPortalModel(RequestContext ctx, PortalModelForm form){
@@ -80,22 +99,50 @@ public class PortalFactoryHandler implements Serializable {
     }
 
     public void initPortalForm(RequestContext ctx){
-        JCRSiteNode site = getRenderContext(ctx).getSite();
+        RenderContext renderContext = getRenderContext(ctx);
+        JCRSiteNode site = renderContext.getSite();
 
         ctx.getRequestScope().put("templatesPath", site.getTemplatePackage().getRootFolderPath() + "/" + site.getTemplatePackage().getVersion() + "/templates");
-        try {
-            ctx.getRequestScope().put("allowedWidgetsSkin", RenderService.getInstance().getViewsSet(
-                    NodeTypeRegistry.getInstance().getNodeType(PortalConstants.JMIX_PORTAL_WIDGET),
-                    getRenderContext(ctx).getSite(), "html"));
-        } catch (NoSuchNodeTypeException e) {
-            logger.error(e.getMessage(), e);
+
+        List<PortalKeyNameObject> widgetTypes = new ArrayList<PortalKeyNameObject>();
+        for (ExtendedNodeType nodeType : portalService.getWidgetNodeTypes(site)){
+            PortalKeyNameObject widgetType = new PortalKeyNameObject();
+            widgetType.setName(portalService.getI18NodeTypeName(nodeType, renderContext.getMainResourceLocale()));
+            widgetType.setKey(nodeType.getName());
+            widgetTypes.add(widgetType);
         }
+        ctx.getRequestScope().put("widgetTypes", widgetTypes);
+
+        List<PortalKeyNameObject> skins = new ArrayList<PortalKeyNameObject>();
+        for (View widgetView : portalService.getViewSet(PortalConstants.JMIX_PORTAL_WIDGET, site)) {
+            if (widgetView.getKey().startsWith("box")) {
+                PortalKeyNameObject portalTabSkin = new PortalKeyNameObject();
+                try {
+                    portalTabSkin.setName(Messages.get(widgetView.getModule(), widgetView.getKey(), renderContext.getMainResourceLocale()));
+                } catch (MissingResourceException e) {
+                    // no resourceBundle for skin
+                    portalTabSkin.setName(widgetView.getKey());
+                }
+
+                portalTabSkin.setKey(widgetView.getKey());
+                skins.add(portalTabSkin);
+            }
+        }
+        ctx.getRequestScope().put("allowedWidgetsSkin", skins);
     }
 
     public PortalForm initEditPortalForm(RequestContext ctx, String identifier) {
-        JCRSiteNode site = getRenderContext(ctx).getSite();
+        RenderContext renderContext = getRenderContext(ctx);
+        JCRSiteNode site = renderContext.getSite();
 
-        ctx.getRequestScope().put("templatesPath", site.getTemplatePackage().getRootFolderPath() + "/" + site.getTemplatePackage().getVersion() + "/templates");
+        List<PortalKeyNameObject> widgetTypes = new ArrayList<PortalKeyNameObject>();
+        for (ExtendedNodeType nodeType : portalService.getWidgetNodeTypes(site)){
+            PortalKeyNameObject widgetType = new PortalKeyNameObject();
+            widgetType.setName(portalService.getI18NodeTypeName(nodeType, renderContext.getMainResourceLocale()));
+            widgetType.setKey(nodeType.getName());
+            widgetTypes.add(widgetType);
+        }
+        ctx.getRequestScope().put("widgetTypes", widgetTypes);
 
         PortalForm form = new PortalForm();
         if(StringUtils.isNotEmpty(identifier)){
@@ -213,7 +260,8 @@ public class PortalFactoryHandler implements Serializable {
                 UserPortalsTableRow row = new UserPortalsTableRow();
                 row.setUserNodeIdentifier(JCRContentUtils.getParentOfType(portalNode, "jnt:user").getIdentifier());
                 row.setModelName(((JCRNodeWrapper) portalNode.getProperty("j:model").getNode()).getDisplayableName());
-                row.setLastUsed(portalNode.getPropertyAsString("j:lastViewed"));
+                DateTime sinceDate = ISODateTimeFormat.dateOptionalTimeParser().parseDateTime(portalNode.getPropertyAsString("j:lastViewed"));
+                row.setLastUsed(Days.daysBetween(new LocalDate(sinceDate), new LocalDate()).getDays());
                 row.setCreated(portalNode.getProperty("jcr:created").getDate().getTime());
                 userPortalsTable.getRows().put(portalNode.getPath(), row);
             }
@@ -239,7 +287,7 @@ public class PortalFactoryHandler implements Serializable {
         portalModelGroups.setSearchCriteria(searchCriteria);
 
         JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
-        portalModelGroups.setGroupsKey(portalService.getRestrictedGroups(portalNode));
+        portalModelGroups.setGroupsKey(portalService.getRestrictedGroupNames(portalNode));
         setCurrentRestrictions(portalModelGroups, portalNode);
 
         return portalModelGroups;
@@ -266,7 +314,7 @@ public class PortalFactoryHandler implements Serializable {
 
     private void setCurrentRestrictions(PortalModelGroups portalModelGroups, JCRNodeWrapper portalNode) throws RepositoryException {
         List<String> restrictedGroupsNames = new ArrayList<String>();
-        for(JahiaGroup group : PortalFunctions.getPortalRestrictedGroups(portalNode)){
+        for(JahiaGroup group : portalService.getRestrictedGroups(portalNode)){
             restrictedGroupsNames.add(group.getName());
         }
 
@@ -289,14 +337,14 @@ public class PortalFactoryHandler implements Serializable {
     public void addToRestrictedGroup(RequestContext ctx, PortalModelGroups portalModelGroups) throws RepositoryException {
         JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
         portalService.addRestrictedGroupsToModel(portalNode, portalModelGroups);
-        portalModelGroups.setGroupsKey(portalService.getRestrictedGroups(portalNode));
+        portalModelGroups.setGroupsKey(portalService.getRestrictedGroupNames(portalNode));
         setCurrentRestrictions(portalModelGroups, portalNode);
     }
 
     public void removeFromRestrictedGroup(RequestContext ctx, PortalModelGroups portalModelGroups) throws RepositoryException {
         JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
         portalService.removeRestrictedGroupsFromModel(portalNode, portalModelGroups);
-        portalModelGroups.setGroupsKey(portalService.getRestrictedGroups(portalNode));
+        portalModelGroups.setGroupsKey(portalService.getRestrictedGroupNames(portalNode));
         setCurrentRestrictions(portalModelGroups, portalNode);
     }
 

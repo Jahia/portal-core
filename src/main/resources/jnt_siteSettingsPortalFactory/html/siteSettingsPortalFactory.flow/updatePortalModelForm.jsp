@@ -27,7 +27,7 @@
 <%--@elvariable id="portalForm" type="org.jahia.modules.portal.sitesettings.form.PortalForm"--%>
 <%--@elvariable id="skin" type="org.jahia.services.render.View"--%>
 <%--@elvariable id="portalNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
-<%--@elvariable id="widgetNodeType" type="org.jahia.services.content.nodetypes.ExtendedNodeType"--%>
+<%--@elvariable id="widgetNodeType" type="org.jahia.modules.portal.service.bean.PortalKeyNameObject"--%>
 <c:set var="portalWidgetMixin" value="<%= PortalConstants.JMIX_PORTAL_WIDGET %>"/>
 
 <template:addResources type="javascript"
@@ -81,10 +81,10 @@
             <div class="span12">
                 <p><fmt:message key="newPortalModelForm.portal.form.allowedWidgetTypes"/> <span class="text-error"><strong>*</strong></span></p>
 
-                <c:forEach items="${portal:getWidgetNodeTypes(renderContext.site)}" var="widgetNodeType">
-                    <label for="widgetType_${widgetNodeType.name}">
-                        <form:checkbox path="allowedWidgetTypes" value="${widgetNodeType.name}" id="widgetType_${widgetNodeType.name}"/>
-                            &nbsp;${portal:getNodeTypeDisplayableName(widgetNodeType, renderContext.mainResourceLocale)}
+                <c:forEach items="${widgetTypes}" var="widgetNodeType">
+                    <label for="widgetType_${widgetNodeType.key}">
+                        <form:checkbox path="allowedWidgetTypes" value="${widgetNodeType.key}" id="widgetType_${widgetNodeType.key}"/>
+                            &nbsp;${widgetNodeType.name}
                     </label>
                 </c:forEach>
             </div>

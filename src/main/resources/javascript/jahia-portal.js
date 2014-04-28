@@ -49,20 +49,38 @@ Jahia.Utils = {
  * @author kevan
  */
 Jahia.Portal = function (options) {
+    // Store the options
+    this.options = options;
     this.conf = Jahia.Portal.default;
+
+    // Specific options
     this.debug = options.debug ? options.debug : false;
     this.isModel = options.isModel ? options.isModel : false;
     this.isCustomizationAllowed = options.isCustomizationAllowed ? options.isCustomizationAllowed : false;
     this.isEditable = options.isEditable ? options.isEditable : false;
+    this.isEnabled = options.isEnabled ? options.isEnabled : false;
     this.isLocked = options.isLocked ? options.isLocked : false;
     this.fullTemplate = options.fullTemplate ? options.fullTemplate : false;
-
     this.baseURL = options.baseURL;
     this.portalPath = options.portalPath;
     this.portalIdentifier = options.portalIdentifier;
+    this.portalModelPath = !this.isModel ? options.portalModelPath : false;
+    this.portalModelIdentifier = !this.isModel ? options.portalModelIdentifier : false;
     this.portalTabPath = options.portalTabPath;
     this.portalTabNodeName = this.portalTabPath.substring(this.portalTabPath.lastIndexOf("/") + 1);
     this.portalTabIdentifier = options.portalTabIdentifier;
+
+    this.portalTabs = options.portalTabs;
+    this.portalTabTemplates = options.portalTabTemplates;
+    this.portalTabSkins = options.portalTabSkins;
+    this.portalWidgetTypes = options.portalWidgetTypes;
+    for (var index = 0; index < this.portalTabs.length; ++index) {
+        if(this.portalTabs[index].current){
+            this.portalCurrentTab = this.portalTabs[index];
+            break;
+        }
+    }
+
 
     this.$areas = [];
     this.areas = [];
@@ -75,7 +93,6 @@ Jahia.Portal = function (options) {
  */
 Jahia.Portal.constants = {
     WIDGETS_PORTAL_VIEW: ".widgets.json",
-    TABS_PORTAL_VIEW: ".tabs.json",
     ADD_WIDGET_ACTION: ".addWidget.do",
     MOVE_WIDGET_ACTION: ".moveWidget.do",
     COPY_PORTALMODEL_ACTION: ".copyPortalModel.do",
@@ -192,20 +209,6 @@ Jahia.Portal.prototype = {
         if (instance.debug) {
             console.log("Portal: " + message)
         }
-    },
-
-    /**
-     * Call the widgets types allowed for the current portal
-     *
-     * @this {Portal}
-     * @param callback callback with widgets types in json format
-     */
-    getWidgetTypes: function (callback) {
-        var instance = this;
-        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalPath, Jahia.Portal.constants.WIDGETS_PORTAL_VIEW, "GET", undefined, function (result) {
-            instance._debug(result.length + " widgets type allowed for this portal");
-            callback(result);
-        }, undefined);
     },
 
     /**
@@ -331,23 +334,6 @@ Jahia.Portal.prototype = {
     },
 
     /**
-     * return the portal tab information in JSON format
-     *
-     * @this {Portal}
-     * @param callback {function}
-     */
-    getTabFormInfo: function (callback) {
-        var instance = this;
-        instance._debug("Load form infos for portal tab: " + instance.portalTabPath);
-        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalTabPath, Jahia.Portal.constants.FORM_TAB_VIEW, "GET", undefined, function (result) {
-            instance._debug("Portal tab form info successfully loaded");
-            if (callback) {
-                callback(result);
-            }
-        });
-    },
-
-    /**
      * save the portal tab form
      *
      * @this {Portal}
@@ -358,13 +344,12 @@ Jahia.Portal.prototype = {
     saveTabForm: function (form, callback, isNew) {
         var instance = this;
         var action = isNew ? "Add new" : "Edit";
-        instance._debug(action + " portal tab: " + form.name);
+        instance._debug(action + " portal tab");
 
-        var formSerialized = instance._convertTabFormToJCRProps(form);
         if (isNew) {
             var url = JCRRestUtils.buildURL("", "", "", instance.portalIdentifier);
-            var normalizedName = JCRRestUtils.normalizeNodeName(form.name, true, true, "-", /\W/g);
-            var data = JCRRestUtils.createUpdateChildData(normalizedName, "jnt:portalTab", JCRRestUtils.arrayToDataProperties(formSerialized, true));
+            var normalizedName = JCRRestUtils.normalizeNodeName(form[0].value, true, true, "-", /\W/g);
+            var data = JCRRestUtils.createUpdateChildData(normalizedName, "jnt:portalTab", JCRRestUtils.arrayToDataProperties(form, true));
 
             JCRRestUtils.standardCall(url, "PUT",
                 JSON.stringify(data),
@@ -377,7 +362,7 @@ Jahia.Portal.prototype = {
                 });
         } else {
             JCRRestUtils.standardCall(JCRRestUtils.buildURL(), "PUT",
-                JSON.stringify({properties: JCRRestUtils.arrayToDataProperties(formSerialized, true)}),
+                JSON.stringify({properties: JCRRestUtils.arrayToDataProperties(form, true)}),
                 function (data) {
                     instance._debug("Portal tab form successfully updated");
                     if (callback) {
@@ -426,23 +411,6 @@ Jahia.Portal.prototype = {
         } else {
             instance._debug("Impossible to copy this portal, because is not a model");
         }
-    },
-
-    /**
-     * Return portal tabs for the current portal in json format
-     *
-     * @this {Portal}
-     * @param callback {function}
-     */
-    getTabs: function (callback) {
-        var instance = this;
-        instance._debug("Load tabs for portal tab: " + instance.portalPath);
-        Jahia.Utils.ajaxJahiaActionCall(instance.baseURL + instance.portalPath, Jahia.Portal.constants.TABS_PORTAL_VIEW, "GET", undefined, function (result) {
-            instance._debug(result.length + "portal tabs successfully loaded");
-            if (callback) {
-                callback(result);
-            }
-        }, undefined);
     },
 
     /**
@@ -530,14 +498,6 @@ Jahia.Portal.prototype = {
             JSON.stringify({properties: JCRRestUtils.arrayToDataProperties([{name:"j:locked",value:bool}], true)}), function(data){
                 instance.loadInCurrentTab();
             });
-    },
-
-    _convertTabFormToJCRProps: function (form) {
-        return [
-            {"name":"jcr:title", "value":form.name},
-            {"name":"j:templateName", "value":form.template.key},
-            {"name":"j:widgetSkin", "value":form.widgetSkin.key}
-        ];
     }
 };
 
