@@ -1,0 +1,1 @@
+[consequence][]Update accessibility for {node}=portalRules.updatePortalAccessibility({node}, drools);

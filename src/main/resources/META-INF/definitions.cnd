@@ -48,6 +48,7 @@ orderable
 
 [jnt:portalTab] > jnt:content, mix:title, jmix:list, jmix:hasTemplateNode, jmix:portalWidgetSkin
  + * (nt:base) = nt:base version
+ - j:accessibility (string, choicelist[resourceBundle]) = 'me' < 'me', 'all', 'users'
 
 [jnt:portalColumn] > jnt:content, mix:title, jmix:list
 orderable

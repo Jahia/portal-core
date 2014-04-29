@@ -1,4 +1,4 @@
-package org.jahia.modules.jahiaportal.rules
+package org.jahia.modules.portal.rules
 
 // list any import classes here.
 import org.jahia.services.content.rules.*
@@ -12,3 +12,13 @@ global User user
 global Service service
 global Logger logger
 global JCRContentUtils jcrUtils
+global PortalRules portalRules
+
+rule "Set portal tab public"
+  when
+    A property has been set on a node
+    			- the node has the type jnt:portalTab
+    			- its name is j:accessibility
+  then
+    Update accessibility for node
+end

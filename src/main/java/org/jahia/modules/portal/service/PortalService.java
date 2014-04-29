@@ -443,43 +443,43 @@ public class PortalService {
         return null;
     }
 
-    public PortalContext buildPortalFromTabNode(RenderContext renderContext, JCRNodeWrapper portalTabNode, JCRSessionWrapper sessionWrapper, final boolean updateLastPortalUsed) throws RepositoryException {
+    public PortalContext buildPortalContext(RenderContext renderContext, JCRNodeWrapper portalTabNode, JCRSessionWrapper sessionWrapper, final boolean updateLastPortalUsed) throws RepositoryException {
         final String currentPath = portalTabNode.getPath();
         final boolean isEditable = portalTabNode.hasPermission("jcr:write_live");
         final Locale mainResourceLocale = renderContext.getMainResourceLocale();
 
-        PortalContext portal = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), sessionWrapper.getWorkspace().getName(), sessionWrapper.getLocale(), new JCRCallback<PortalContext>() {
+        PortalContext portalContext = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), sessionWrapper.getWorkspace().getName(), sessionWrapper.getLocale(), new JCRCallback<PortalContext>() {
             @Override
             public PortalContext doInJCR(JCRSessionWrapper session) throws RepositoryException {
                 JCRNodeWrapper currentNode = session.getNode(currentPath);
                 JCRNodeWrapper portalTabNode = currentNode.isNodeType(PortalConstants.JNT_PORTAL_TAB) ? currentNode : JCRContentUtils.getParentOfType(currentNode, PortalConstants.JNT_PORTAL_TAB);
                 JCRNodeWrapper portalNode = JCRContentUtils.getParentOfType(portalTabNode, PortalConstants.JMIX_PORTAL);
 
-                PortalContext portal = new PortalContext();
+                PortalContext portalContext = new PortalContext();
                 boolean isModel = portalNode.isNodeType(PortalConstants.JNT_PORTAL_MODEL);
-                portal.setEditable(isEditable);
-                portal.setPath(portalNode.getPath());
-                portal.setIdentifier(portalNode.getIdentifier());
-                portal.setTabPath(portalTabNode.getPath());
-                portal.setTabIdentifier(portalTabNode.getIdentifier());
-                portal.setFullTemplate(portalNode.getProperty(PortalConstants.J_FULL_TEMPLATE).getString());
-                portal.setLock(portalNode.hasProperty(PortalConstants.J_LOCKED) && portalNode.getProperty(PortalConstants.J_LOCKED).getBoolean());
-                portal.setModel(isModel);
-                portal.setCustomizable(isModel && portalNode.hasProperty(PortalConstants.J_ALLOW_CUSTOMIZATION) && portalNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean());
-                portal.setEnabled(isModel && portalNode.hasProperty(PortalConstants.J_ENABLED) && portalNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
+                portalContext.setEditable(isEditable);
+                portalContext.setPath(portalNode.getPath());
+                portalContext.setIdentifier(portalNode.getIdentifier());
+                portalContext.setTabPath(portalTabNode.getPath());
+                portalContext.setTabIdentifier(portalTabNode.getIdentifier());
+                portalContext.setFullTemplate(portalNode.getProperty(PortalConstants.J_FULL_TEMPLATE).getString());
+                portalContext.setLock(portalNode.hasProperty(PortalConstants.J_LOCKED) && portalNode.getProperty(PortalConstants.J_LOCKED).getBoolean());
+                portalContext.setModel(isModel);
+                portalContext.setCustomizable(isModel && portalNode.hasProperty(PortalConstants.J_ALLOW_CUSTOMIZATION) && portalNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean());
+                portalContext.setEnabled(isModel && portalNode.hasProperty(PortalConstants.J_ENABLED) && portalNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
                 JCRSiteNode site;
                 if(!isModel){
                     JCRNodeWrapper modelNode = portalNode.getSession().getNodeByIdentifier(portalNode.getProperty(PortalConstants.J_MODEL).getString());
-                    portal.setModelPath(modelNode.getPath());
-                    portal.setModelIdentifier(modelNode.getIdentifier());
+                    portalContext.setModelPath(modelNode.getPath());
+                    portalContext.setModelIdentifier(modelNode.getIdentifier());
                     site = modelNode.getResolveSite();
                 } else {
                     site = portalNode.getResolveSite();
                 }
-                portal.setSiteId(site.getID());
-                portal.setPortalTabTemplates(new ArrayList<PortalKeyNameObject>());
-                portal.setPortalTabSkins(new ArrayList<PortalKeyNameObject>());
-                portal.setPortalWidgetTypes(new ArrayList<PortalWidgetType>());
+                portalContext.setSiteId(site.getID());
+                portalContext.setPortalTabTemplates(new ArrayList<PortalKeyNameObject>());
+                portalContext.setPortalTabSkins(new ArrayList<PortalKeyNameObject>());
+                portalContext.setPortalWidgetTypes(new ArrayList<PortalWidgetType>());
                 if(isEditable){
 
                     // Templates for portal tabs
@@ -488,7 +488,7 @@ public class PortalService {
                         PortalKeyNameObject portalTabTemplate = new PortalKeyNameObject();
                         portalTabTemplate.setName(template.getDisplayableName());
                         portalTabTemplate.setKey(template.getName());
-                        portal.getPortalTabTemplates().add(portalTabTemplate);
+                        portalContext.getPortalTabTemplates().add(portalTabTemplate);
                     }
 
                     // Widget skins
@@ -504,7 +504,7 @@ public class PortalService {
                             }
 
                             portalTabSkin.setKey(widgetView.getKey());
-                            portal.getPortalTabSkins().add(portalTabSkin);
+                            portalContext.getPortalTabSkins().add(portalTabSkin);
                         }
                     }
 
@@ -526,7 +526,7 @@ public class PortalService {
                             }
                         }
 
-                        portal.getPortalWidgetTypes().add(portalWidgetType);
+                        portalContext.getPortalWidgetTypes().add(portalWidgetType);
                     }
                 }
 
@@ -541,35 +541,49 @@ public class PortalService {
                     }
 
                 }
-                return portal;
+
+                //set tabs
+                portalContext.setPortalTabs(new LinkedList<PortalTab>());
+                QueryManager queryManager = session.getWorkspace().getQueryManager();
+                if (queryManager != null) {
+                    NodeIterator result = queryManager.createQuery("select * from [" + PortalConstants.JNT_PORTAL_TAB
+                            + "] as p where isdescendantnode(p, ['" + portalContext.getPath() + "'])", Query.JCR_SQL2).execute().getNodes();
+
+                    while (result.hasNext()) {
+                        JCRNodeWrapper tabNode = (JCRNodeWrapper) result.next();
+                        PortalTab portalTab = new PortalTab();
+                        portalTab.setPath(tabNode.getPath());
+                        portalContext.getPortalTabs().add(portalTab);
+                    }
+                }
+
+                return portalContext;
             }
         });
 
-        portal.setBaseUrl(StringUtils.isNotEmpty(renderContext.getURLGenerator().getContext())
+        portalContext.setBaseUrl(StringUtils.isNotEmpty(renderContext.getURLGenerator().getContext())
                 ? renderContext.getURLGenerator().getContext() + renderContext.getURLGenerator().getBaseLive()
                 : renderContext.getURLGenerator().getBaseLive());
 
-        //set tabs
-        portal.setPortalTabs(new LinkedList<PortalTab>());
-        QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
-        if (queryManager != null) {
-            NodeIterator result = queryManager.createQuery("select * from [" + PortalConstants.JNT_PORTAL_TAB
-                    + "] as p where isdescendantnode(p, ['" + portal.getPath() + "'])", Query.JCR_SQL2).execute().getNodes();
-
-            while (result.hasNext()) {
-                JCRNodeWrapper tabNode = (JCRNodeWrapper) result.next();
-                PortalTab portalTab = new PortalTab();
-                portalTab.setPath(tabNode.getPath());
+        // Filter on tabs allow to current user
+        for(Iterator<PortalTab> itr = portalContext.getPortalTabs().iterator();itr.hasNext();)
+        {
+            PortalTab portalTab = itr.next();
+            try{
+                JCRNodeWrapper tabNode = sessionWrapper.getNode(portalTab.getPath());
                 portalTab.setDisplayableName(tabNode.getDisplayableName());
-                portalTab.setUrl(portal.getBaseUrl() + tabNode.getPath() + ".html");
+                portalTab.setUrl(portalContext.getBaseUrl() + tabNode.getPath() + ".html");
                 portalTab.setCurrent(tabNode.getIdentifier().equals(portalTabNode.getIdentifier()));
                 portalTab.setTemplateKey(tabNode.getProperty(PortalConstants.J_TEMPLATE_NAME).getString());
                 portalTab.setSkinKey(tabNode.getProperty(PortalConstants.J_WIDGET_SKIN).getString());
-                portal.getPortalTabs().add(portalTab);
+                portalTab.setAccessibility(tabNode.hasProperty(PortalConstants.J_ACCESSIBILITY) ? tabNode.getProperty(PortalConstants.J_ACCESSIBILITY).getString() : "me");
+            }catch (PathNotFoundException e) {
+                // path not found, the user doesn't have the permission to see the tab node, just remove it
+                itr.remove();
             }
         }
 
-        return portal;
+        return portalContext;
     }
 
     public SortedSet<View> getViewSet(String nt, JCRSiteNode site){

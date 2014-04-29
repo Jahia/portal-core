@@ -28,7 +28,7 @@ public class PortalInitFilter extends AbstractFilter{
         }
 
         boolean updateLastViewed = resource.getNode().isNodeType(PortalConstants.JNT_PORTAL_TAB);
-        PortalContext portal = portalService.buildPortalFromTabNode(renderContext, resource.getNode(), resource.getNode().getSession(), updateLastViewed);
+        PortalContext portal = portalService.buildPortalContext(renderContext, resource.getNode(), resource.getNode().getSession(), updateLastViewed);
 
         // Add dependency to other tabs
         for (PortalTab portalTab : portal.getPortalTabs()){

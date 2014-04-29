@@ -89,4 +89,15 @@
     <bean class="org.jahia.modules.portal.action.CopyPortalModelAction">
         <property name="portalService" ref="PortalService"/>
     </bean>
+
+    <!-- Rules -->
+    <bean class="org.jahia.services.content.rules.ModuleGlobalObject">
+        <property name="globalRulesObject">
+            <map>
+                <entry key="portalRules">
+                    <bean class="org.jahia.modules.portal.rules.PortalRules"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
 </beans>

@@ -13,6 +13,7 @@ public class PortalTab implements Serializable{
     private String url;
     private String templateKey;
     private String skinKey;
+    private String accessibility;
     private boolean isCurrent;
 
     public String getDisplayableName() {
@@ -61,5 +62,13 @@ public class PortalTab implements Serializable{
 
     public void setCurrent(boolean isCurrent) {
         this.isCurrent = isCurrent;
+    }
+
+    public String getAccessibility() {
+        return accessibility;
+    }
+
+    public void setAccessibility(String accessibility) {
+        this.accessibility = accessibility;
     }
 }
