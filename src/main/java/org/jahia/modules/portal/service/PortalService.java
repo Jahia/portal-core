@@ -546,14 +546,15 @@ public class PortalService {
                 portalContext.setPortalTabs(new LinkedList<PortalTab>());
                 QueryManager queryManager = session.getWorkspace().getQueryManager();
                 if (queryManager != null) {
-                    NodeIterator result = queryManager.createQuery("select * from [" + PortalConstants.JNT_PORTAL_TAB
-                            + "] as p where isdescendantnode(p, ['" + portalContext.getPath() + "'])", Query.JCR_SQL2).execute().getNodes();
+                    NodeIterator result = portalNode.getNodes();
 
                     while (result.hasNext()) {
                         JCRNodeWrapper tabNode = (JCRNodeWrapper) result.next();
-                        PortalTab portalTab = new PortalTab();
-                        portalTab.setPath(tabNode.getPath());
-                        portalContext.getPortalTabs().add(portalTab);
+                        if(tabNode.isNodeType(PortalConstants.JNT_PORTAL_TAB)){
+                            PortalTab portalTab = new PortalTab();
+                            portalTab.setPath(tabNode.getPath());
+                            portalContext.getPortalTabs().add(portalTab);
+                        }
                     }
                 }
 
