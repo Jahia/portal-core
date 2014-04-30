@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedSet;
 
 /**
  * Created by kevan on 23/04/14.
@@ -37,7 +38,7 @@ public class PortalContext implements Serializable{
     @JsonProperty("portalTabTemplates")
     private List<PortalKeyNameObject> portalTabTemplates;
     @JsonProperty("portalWidgetTypes")
-    private List<PortalWidgetType> portalWidgetTypes;
+    private SortedSet<PortalWidgetType> portalWidgetTypes;
     @JsonProperty("isLocked")
     private boolean isLock;
     @JsonProperty("isModel")
@@ -189,11 +190,11 @@ public class PortalContext implements Serializable{
         this.portalTabSkins = portalTabSkins;
     }
 
-    public List<PortalWidgetType> getPortalWidgetTypes() {
+    public SortedSet<PortalWidgetType> getPortalWidgetTypes() {
         return portalWidgetTypes;
     }
 
-    public void setPortalWidgetTypes(List<PortalWidgetType> portalWidgetTypes) {
+    public void setPortalWidgetTypes(SortedSet<PortalWidgetType> portalWidgetTypes) {
         this.portalWidgetTypes = portalWidgetTypes;
     }
 

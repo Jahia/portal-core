@@ -12,6 +12,15 @@ public class PortalWidgetType implements Serializable{
     private String name;
     private String displayableName;
     private List<PortalWidgetTypeView> views;
+    private boolean isNew;
+
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public void setNew(boolean isNew) {
+        this.isNew = isNew;
+    }
 
     public String getName() {
         return name;

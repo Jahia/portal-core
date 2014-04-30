@@ -57,6 +57,13 @@ public class PortalService {
         }
     };
 
+    private static final Comparator<? super PortalWidgetType> WIDGET_TYPES_COMPARATOR = new Comparator<PortalWidgetType>() {
+        @Override
+        public int compare(PortalWidgetType o1, PortalWidgetType o2) {
+            return o1.getDisplayableName().compareTo(o2.getDisplayableName());
+        }
+    };
+
     private ContentManagerHelper contentManager;
 
     private JahiaGroupManagerService groupManagerService;
@@ -403,6 +410,7 @@ public class PortalService {
             // Create portal
             JCRNodeWrapper portal = sitePortalFolder.addNode(modelNode.getName(), PortalConstants.JNT_PORTAL_USER);
             portal.setProperty(PortalConstants.J_TEMPLATE_ROOT_PATH, modelNode.getPropertyAsString(PortalConstants.J_TEMPLATE_ROOT_PATH));
+            portal.setProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES, modelNode.getProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES).getValues());
             portal.setProperty(PortalConstants.JCR_TITLE, modelNode.getDisplayableName());
             portal.setProperty(PortalConstants.J_FULL_TEMPLATE, modelNode.getPropertyAsString(PortalConstants.J_FULL_TEMPLATE));
             portal.setProperty(PortalConstants.J_MODEL, modelNode);
@@ -468,8 +476,10 @@ public class PortalService {
                 portalContext.setCustomizable(isModel && portalNode.hasProperty(PortalConstants.J_ALLOW_CUSTOMIZATION) && portalNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean());
                 portalContext.setEnabled(isModel && portalNode.hasProperty(PortalConstants.J_ENABLED) && portalNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
                 JCRSiteNode site;
+
+                JCRNodeWrapper modelNode = null;
                 if(!isModel){
-                    JCRNodeWrapper modelNode = portalNode.getSession().getNodeByIdentifier(portalNode.getProperty(PortalConstants.J_MODEL).getString());
+                    modelNode = portalNode.getSession().getNodeByIdentifier(portalNode.getProperty(PortalConstants.J_MODEL).getString());
                     portalContext.setModelPath(modelNode.getPath());
                     portalContext.setModelIdentifier(modelNode.getIdentifier());
                     site = modelNode.getResolveSite();
@@ -479,7 +489,7 @@ public class PortalService {
                 portalContext.setSiteId(site.getID());
                 portalContext.setPortalTabTemplates(new ArrayList<PortalKeyNameObject>());
                 portalContext.setPortalTabSkins(new ArrayList<PortalKeyNameObject>());
-                portalContext.setPortalWidgetTypes(new ArrayList<PortalWidgetType>());
+                portalContext.setPortalWidgetTypes(new TreeSet<PortalWidgetType>(WIDGET_TYPES_COMPARATOR));
                 if(isEditable){
 
                     // Templates for portal tabs
@@ -509,24 +519,25 @@ public class PortalService {
                     }
 
                     // Widget types
-                    Collection<ExtendedNodeType> widgetTypes = getPortalWidgetNodeTypes(site, portalNode);
+                    Collection<ExtendedNodeType> widgetTypes = getPortalWidgetNodeTypes(portalNode);
+                    Collection<ExtendedNodeType> modelWidgetTypes = !isModel ? getPortalWidgetNodeTypes(modelNode) : null;
                     for (ExtendedNodeType widgetType : widgetTypes){
-                        PortalWidgetType portalWidgetType = new PortalWidgetType();
-                        portalWidgetType.setName(widgetType.getName());
-                        portalWidgetType.setDisplayableName(getI18NodeTypeName(widgetType, mainResourceLocale));
-                        portalWidgetType.setViews(new ArrayList<PortalWidgetTypeView>());
-
-                        SortedSet<View> widgetViews = getViewSet(widgetType.getName(), site);
-                        for(View widgetView : widgetViews){
-                            if(widgetView != null && widgetView.getKey().startsWith("portal.")){
-                                PortalWidgetTypeView widgetViewTypeView = new PortalWidgetTypeView();
-                                widgetViewTypeView.setPath(widgetView.getPath());
-                                widgetViewTypeView.setKey(widgetView.getKey());
-                                portalWidgetType.getViews().add(widgetViewTypeView);
+                        if(!isModel){
+                            if(modelWidgetTypes.contains(widgetType)){
+                                PortalWidgetType portalWidgetType = buildPortalWidgetType(widgetType, site, mainResourceLocale, false);
+                                portalContext.getPortalWidgetTypes().add(portalWidgetType);
+                                modelWidgetTypes.remove(widgetType);
                             }
+                        }else {
+                            PortalWidgetType portalWidgetType = buildPortalWidgetType(widgetType, site, mainResourceLocale, false);
+                            portalContext.getPortalWidgetTypes().add(portalWidgetType);
                         }
-
-                        portalContext.getPortalWidgetTypes().add(portalWidgetType);
+                    }
+                    if(!isModel){
+                        for (ExtendedNodeType modelWidgetType : modelWidgetTypes){
+                            PortalWidgetType portalWidgetType = buildPortalWidgetType(modelWidgetType, site, mainResourceLocale, true);
+                            portalContext.getPortalWidgetTypes().add(portalWidgetType);
+                        }
                     }
                 }
 
@@ -587,6 +598,26 @@ public class PortalService {
         return portalContext;
     }
 
+    private PortalWidgetType buildPortalWidgetType(ExtendedNodeType widgetType, JCRSiteNode site, Locale locale, boolean isNew){
+        PortalWidgetType portalWidgetType = new PortalWidgetType();
+        portalWidgetType.setName(widgetType.getName());
+        portalWidgetType.setDisplayableName(getI18NodeTypeName(widgetType, locale));
+        portalWidgetType.setViews(new ArrayList<PortalWidgetTypeView>());
+        portalWidgetType.setNew(isNew);
+
+        SortedSet<View> widgetViews = getViewSet(widgetType.getName(), site);
+        for(View widgetView : widgetViews){
+            if(widgetView != null && widgetView.getKey().startsWith("portal.")){
+                PortalWidgetTypeView widgetViewTypeView = new PortalWidgetTypeView();
+                widgetViewTypeView.setPath(widgetView.getPath());
+                widgetViewTypeView.setKey(widgetView.getKey());
+                portalWidgetType.getViews().add(widgetViewTypeView);
+            }
+        }
+
+        return portalWidgetType;
+    }
+
     public SortedSet<View> getViewSet(String nt, JCRSiteNode site){
         try {
             return RenderService.getInstance().getViewsSet(NodeTypeRegistry.getInstance().getNodeType(nt), site, "html");
@@ -630,41 +661,13 @@ public class PortalService {
         return widgetTypes;
     }
 
-    public Collection<ExtendedNodeType> getPortalWidgetNodeTypes(JCRSiteNode site, JCRNodeWrapper portalNode) {
-        try {
-            if (!portalIsModel(portalNode) && portalHasModel(portalNode)) {
-                portalNode = getPortalModel(portalNode);
-            }
-            final JCRNodeWrapper portalModelNode = portalNode;
-            if (portalModelNode != null && portalIsModel(portalModelNode)) {
-                if (portalModelNode.hasProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES)) {
-                    Predicate<ExtendedNodeType> isAllowedWidgetPredicate = new Predicate<ExtendedNodeType>() {
-                        @Override
-                        public boolean apply(@Nullable ExtendedNodeType input) {
-                            try {
-                                if(input != null && !input.isNodeType(PortalConstants.JMIX_PORTAL_WIDGET_CORE)){
-                                    JCRValueWrapper[] values = portalModelNode.getProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES).getValues();
-                                    for (JCRValueWrapper value : values) {
-                                        if (input.getName().equals(value.getString())) {
-                                            return true;
-                                        }
-                                    }
-                                }
-                            } catch (RepositoryException e) {
-                                logger.error(e.getMessage(), e);
-                            }
-                            return false;
-                        }
-                    };
-
-                    return Collections2.filter(getWidgetNodeTypes(site), isAllowedWidgetPredicate);
-                }
-            }
-        } catch (RepositoryException e) {
-            logger.error(e.getMessage(), e);
+    public Collection<ExtendedNodeType> getPortalWidgetNodeTypes(JCRNodeWrapper portalNode) throws RepositoryException {
+        List<ExtendedNodeType> widgetTypes = new ArrayList<ExtendedNodeType>();
+        JCRValueWrapper[] values = portalNode.getProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES).getValues();
+        for (JCRValueWrapper value : values) {
+            widgetTypes.add(NodeTypeRegistry.getInstance().getNodeType(value.getString()));
         }
-
-        return Collections.emptySet();
+        return widgetTypes;
     }
 
     public List<String> getRestrictedGroupNames(JCRNodeWrapper modelNode) throws RepositoryException {
