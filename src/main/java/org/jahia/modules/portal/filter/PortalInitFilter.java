@@ -46,13 +46,6 @@ public class PortalInitFilter extends AbstractFilter{
 
         // Add portal bean in request attributes, so it's can be used in jsp
         renderContext.getRequest().setAttribute("portalContext", portal);
-
-        // Fix site in rendercontext in case of user portal
-        if(!portal.isModel()){
-            JCRSiteNode site = JahiaSitesService.getInstance().getSite(portal.getSiteId(), resource.getNode().getSession());
-            renderContext.setSite(site);
-            renderContext.setSiteInfo(new SiteInfo(site));
-        }
         return null;
     }
 

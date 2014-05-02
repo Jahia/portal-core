@@ -27,6 +27,13 @@
     <bean id="messageSource" class="org.jahia.utils.i18n.ModuleMessageSource"/>
 
     <!-- Filters -->
+    <bean class="org.jahia.modules.portal.filter.PortalSiteFilter">
+        <property name="portalService" ref="PortalService"/>
+        <property name="priority" value="10"/>
+        <property name="description" value="set the good site for the user portal"/>
+        <property name="applyOnNodeTypes" value="jnt:portalTab,jmix:portalWidget,jmix:portal"/>
+    </bean>
+
     <bean class="org.jahia.modules.portal.filter.PortalInitFilter">
         <property name="priority" value="17"/>
         <property name="description" value="set the good site for the user portal"/>

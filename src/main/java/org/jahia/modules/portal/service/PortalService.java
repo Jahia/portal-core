@@ -15,7 +15,9 @@ import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.RenderService;
+import org.jahia.services.render.SiteInfo;
 import org.jahia.services.render.View;
+import org.jahia.services.sites.JahiaSitesService;
 import org.jahia.services.usermanager.JahiaGroup;
 import org.jahia.services.usermanager.JahiaGroupManagerService;
 import org.jahia.utils.i18n.Messages;
@@ -366,6 +368,38 @@ public class PortalService {
         }
 
         return portals;
+    }
+
+    public void fixPortalSiteInContext(RenderContext renderContext, final String nodePath, JCRSessionWrapper sessionWrapper) throws RepositoryException {
+        Integer siteId = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), sessionWrapper.getWorkspace().getName(), sessionWrapper.getLocale(), new JCRCallback<Integer>() {
+            @Override
+            public Integer doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                JCRNodeWrapper currentNode = session.getNode(nodePath);
+                JCRNodeWrapper portalNode = currentNode.isNodeType(PortalConstants.JMIX_PORTAL) ? currentNode : JCRContentUtils.getParentOfType(currentNode, PortalConstants.JMIX_PORTAL);
+
+                if (portalHasModel(portalNode)) {
+                    return getPortalSite(portalNode).getID();
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        if(siteId != null){
+            JCRSiteNode portalSite = JahiaSitesService.getInstance().getSite(siteId, sessionWrapper);
+            renderContext.setSite(portalSite);
+            renderContext.setSiteInfo(new SiteInfo(portalSite));
+        }
+    }
+
+    public JCRSiteNode getPortalSite(JCRNodeWrapper portalNode) throws RepositoryException {
+        if (portalHasModel(portalNode)) {
+            JCRNodeWrapper portalModelNode = getPortalModel(portalNode);
+            if (portalModelNode != null) {
+                return portalModelNode.getResolveSite();
+            }
+        }
+        return portalNode.getResolveSite();
     }
 
     public Collection<JCRNodeWrapper> getUserPortalsByModel(JCRNodeWrapper portalModelNode) {
