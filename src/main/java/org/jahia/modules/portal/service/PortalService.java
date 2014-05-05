@@ -449,6 +449,7 @@ public class PortalService {
             portal.setProperty(PortalConstants.J_FULL_TEMPLATE, modelNode.getPropertyAsString(PortalConstants.J_FULL_TEMPLATE));
             portal.setProperty(PortalConstants.J_MODEL, modelNode);
             portal.setProperty(PortalConstants.J_SITEKEY, modelNode.getResolveSite().getSiteKey());
+            portal.grantRoles("u:guest", Collections.singleton("reader"));
 
             //copy tabs
             List<JCRNodeWrapper> tabNodes = getPortalTabs(modelNode, sessionWrapper);
@@ -458,6 +459,11 @@ public class PortalService {
 
             // copy/ref behavior for widgets
             for (JCRNodeWrapper portalTab : JCRContentUtils.getChildrenOfType(portal, PortalConstants.JNT_PORTAL_TAB)){
+                portalTab.denyRoles("g:users", Collections.singleton("reader"));
+                portalTab.denyRoles("u:guest", Collections.singleton("reader"));
+                portalTab.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("reader"));
+                portalTab.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("owner"));
+                
                 for (JCRNodeWrapper portalColumn : JCRContentUtils.getChildrenOfType(portalTab, PortalConstants.JNT_PORTAL_COLUMN)){
                     for (JCRNodeWrapper widget : JCRContentUtils.getChildrenOfType(portalColumn, PortalConstants.JMIX_PORTAL_WIDGET_MODEL)){
                         if(widget.hasProperty(PortalConstants.J_BEHAVIOR) && widget.getProperty(PortalConstants.J_BEHAVIOR).getString().equals(PortalConstants.J_BEHAVIOR_REF)){
@@ -469,13 +475,6 @@ public class PortalService {
                     }
                 }
             }
-
-            //set roles
-            portal.denyRoles("g:users", Collections.singleton("reader"));
-            portal.denyRoles("u:guest", Collections.singleton("reader"));
-            portal.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("reader"));
-            portal.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("owner"));
-
             sessionWrapper.save();
 
             return portal;
@@ -584,23 +583,6 @@ public class PortalService {
                         portalNode.setProperty(PortalConstants.J_LASTVIEWED, currentDateTime.toCalendar(mainResourceLocale));
                         portalNode.saveSession();
                     }
-
-                }
-
-                //set tabs
-                portalContext.setPortalTabs(new LinkedList<PortalTab>());
-                QueryManager queryManager = session.getWorkspace().getQueryManager();
-                if (queryManager != null) {
-                    NodeIterator result = portalNode.getNodes();
-
-                    while (result.hasNext()) {
-                        JCRNodeWrapper tabNode = (JCRNodeWrapper) result.next();
-                        if(tabNode.isNodeType(PortalConstants.JNT_PORTAL_TAB)){
-                            PortalTab portalTab = new PortalTab();
-                            portalTab.setPath(tabNode.getPath());
-                            portalContext.getPortalTabs().add(portalTab);
-                        }
-                    }
                 }
 
                 return portalContext;
@@ -611,23 +593,6 @@ public class PortalService {
                 ? renderContext.getURLGenerator().getContext() + renderContext.getURLGenerator().getBaseLive()
                 : renderContext.getURLGenerator().getBaseLive());
 
-        // Filter on tabs allow to current user
-        for(Iterator<PortalTab> itr = portalContext.getPortalTabs().iterator();itr.hasNext();)
-        {
-            PortalTab portalTab = itr.next();
-            try{
-                JCRNodeWrapper tabNode = sessionWrapper.getNode(portalTab.getPath());
-                portalTab.setDisplayableName(tabNode.getDisplayableName());
-                portalTab.setUrl(portalContext.getBaseUrl() + tabNode.getPath() + ".html");
-                portalTab.setCurrent(tabNode.getIdentifier().equals(portalTabNode.getIdentifier()));
-                portalTab.setTemplateKey(tabNode.getProperty(PortalConstants.J_TEMPLATE_NAME).getString());
-                portalTab.setSkinKey(tabNode.getProperty(PortalConstants.J_WIDGET_SKIN).getString());
-                portalTab.setAccessibility(tabNode.hasProperty(PortalConstants.J_ACCESSIBILITY) ? tabNode.getProperty(PortalConstants.J_ACCESSIBILITY).getString() : "me");
-            }catch (PathNotFoundException e) {
-                // path not found, the user doesn't have the permission to see the tab node, just remove it
-                itr.remove();
-            }
-        }
 
         return portalContext;
     }

@@ -70,17 +70,9 @@ Jahia.Portal = function (options) {
     this.portalTabNodeName = this.portalTabPath.substring(this.portalTabPath.lastIndexOf("/") + 1);
     this.portalTabIdentifier = options.portalTabIdentifier;
 
-    this.portalTabs = options.portalTabs;
     this.portalTabTemplates = options.portalTabTemplates;
     this.portalTabSkins = options.portalTabSkins;
     this.portalWidgetTypes = options.portalWidgetTypes;
-    for (var index = 0; index < this.portalTabs.length; ++index) {
-        if(this.portalTabs[index].current){
-            this.portalCurrentTab = this.portalTabs[index];
-            break;
-        }
-    }
-
 
     this.$areas = [];
     this.areas = [];
