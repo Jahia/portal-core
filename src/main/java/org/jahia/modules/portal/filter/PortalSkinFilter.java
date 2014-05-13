@@ -40,13 +40,28 @@ public class PortalSkinFilter extends AbstractFilter {
     }
 
     private void pushWidgetSkinWrapperForNode(JCRNodeWrapper node, Resource resource) throws RepositoryException {
-        if(node.hasProperty(PortalConstants.J_WIDGET_SKIN) && StringUtils.isNotEmpty(node.getPropertyAsString(PortalConstants.J_WIDGET_SKIN))){
-            resource.pushWrapper(node.getPropertyAsString(PortalConstants.J_WIDGET_SKIN));
-        }else {
-            JCRNodeWrapper parentNodeWithWidgetSkinMixin = JCRContentUtils.getParentOfType(node, PortalConstants.JMIX_PORTAL_WIDGET_SKIN);
-            if(parentNodeWithWidgetSkinMixin != null){
-                pushWidgetSkinWrapperForNode(parentNodeWithWidgetSkinMixin, resource);
+        if(!handleReferenceWidget(node, resource)){
+            if(node.hasProperty(PortalConstants.J_WIDGET_SKIN) && StringUtils.isNotEmpty(node.getPropertyAsString(PortalConstants.J_WIDGET_SKIN))){
+                resource.pushWrapper(node.getPropertyAsString(PortalConstants.J_WIDGET_SKIN));
+            }else {
+                JCRNodeWrapper parentNodeWithWidgetSkinMixin = JCRContentUtils.getParentOfType(node, PortalConstants.JMIX_PORTAL_WIDGET_SKIN);
+                if(parentNodeWithWidgetSkinMixin != null){
+                    pushWidgetSkinWrapperForNode(parentNodeWithWidgetSkinMixin, resource);
+                }
             }
         }
+    }
+
+    private boolean handleReferenceWidget(JCRNodeWrapper widgetNode, Resource resource) throws RepositoryException {
+        if(widgetNode.isNodeType(PortalConstants.JMIX_PORTAL_WIDGET) && widgetNode.isNodeType(PortalConstants.JNT_PORTAL_WIDGET_REFERENCE)){
+            if(widgetNode.hasProperty("j:node") && StringUtils.isNotEmpty(widgetNode.getPropertyAsString("j:node"))){
+                JCRNodeWrapper ref = (JCRNodeWrapper) widgetNode.getProperty("j:node").getNode();
+                if(ref.hasProperty(PortalConstants.J_WIDGET_SKIN) && StringUtils.isNotEmpty(ref.getPropertyAsString(PortalConstants.J_WIDGET_SKIN))){
+                    resource.pushWrapper(ref.getPropertyAsString(PortalConstants.J_WIDGET_SKIN));
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
