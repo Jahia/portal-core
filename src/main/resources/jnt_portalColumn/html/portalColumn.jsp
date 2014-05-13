@@ -37,40 +37,44 @@
 <c:choose>
     <c:when test="${widgetSolo != null && widgetIdentifier != null}">
         <jcr:node var="widgetNode" uuid="${widgetIdentifier}"/>
-        <c:set var="isGadget" value="${jcr:isNodeType(widgetNode, portalGadgetMixin) ||
-        (jcr:isNodeType(widgetNode, 'jnt:portalWidgetReference') && not empty widgetNode.properties['j:node'] && jcr:isNodeType(widgetNode.properties['j:node'].node, 'jmix:portalGadget'))}"/>
-        <div id="w_${widgetNode.identifier}" class="portal_widget"
-             data-widget-gadget="${isGadget}"
-             data-widget-reference="${jcr:isNodeType(widgetNode, portalWidgetReferenceNT)}"
-             data-widget-path="${widgetNode.path}"
-             data-widget-state="${widgetState}"
-             data-widget-view="${widgetView}"
-             data-col-id="${currentNode.identifier}"
-                >
-            <c:if test="${isGadget}">
-                <template:module path="${widgetNode.path}" view="${widgetView}"/>
-            </c:if>
-        </div>
-    </c:when>
-    <c:otherwise>
-        <c:forEach var="widgetNode" items="${jcr:getChildrenOfType(currentNode, portalWidgetMixin)}">
+        <c:if test="${not empty widgetNode}">
             <c:set var="isGadget" value="${jcr:isNodeType(widgetNode, portalGadgetMixin) ||
         (jcr:isNodeType(widgetNode, 'jnt:portalWidgetReference') && not empty widgetNode.properties['j:node'] && jcr:isNodeType(widgetNode.properties['j:node'].node, 'jmix:portalGadget'))}"/>
             <div id="w_${widgetNode.identifier}" class="portal_widget"
-                data-widget-gadget="${isGadget}"
-                data-widget-reference="${jcr:isNodeType(widgetNode, portalWidgetReferenceNT)}"
-                data-widget-path="${widgetNode.path}"
-                <c:if test="${widgetIdentifier != null && widgetNode.identifier == widgetIdentifier}">
-                    data-widget-state="${widgetState}"
-                    data-widget-view="${widgetView}"
-                </c:if>
-                data-col-id="${currentNode.identifier}"
-                >
+                 data-widget-gadget="${isGadget}"
+                 data-widget-reference="${jcr:isNodeType(widgetNode, portalWidgetReferenceNT)}"
+                 data-widget-path="${widgetNode.path}"
+                 data-widget-state="${widgetState}"
+                 data-widget-view="${widgetView}"
+                 data-col-id="${currentNode.identifier}"
+                    >
                 <c:if test="${isGadget}">
-                    <template:module path="${widgetNode.path}"
-                                     view="${widgetIdentifier != null && widgetNode.identifier == widgetIdentifier && not empty widgetView ? widgetView : 'portal.view'}"/>
+                    <template:module path="${widgetNode.path}" view="${widgetView}"/>
                 </c:if>
             </div>
+        </c:if>
+    </c:when>
+    <c:otherwise>
+        <c:forEach var="widgetNode" items="${jcr:getChildrenOfType(currentNode, portalWidgetMixin)}">
+            <c:if test="${not empty widgetNode}">
+                <c:set var="isGadget" value="${jcr:isNodeType(widgetNode, portalGadgetMixin) ||
+        (jcr:isNodeType(widgetNode, 'jnt:portalWidgetReference') && (not empty widgetNode.properties['j:node'].node) && jcr:isNodeType(widgetNode.properties['j:node'].node, 'jmix:portalGadget'))}"/>
+                <div id="w_${widgetNode.identifier}" class="portal_widget"
+                     data-widget-gadget="${isGadget}"
+                     data-widget-reference="${jcr:isNodeType(widgetNode, portalWidgetReferenceNT)}"
+                     data-widget-path="${widgetNode.path}"
+                        <c:if test="${widgetIdentifier != null && widgetNode.identifier == widgetIdentifier}">
+                            data-widget-state="${widgetState}"
+                            data-widget-view="${widgetView}"
+                        </c:if>
+                     data-col-id="${currentNode.identifier}"
+                        >
+                    <c:if test="${isGadget}">
+                        <template:module path="${widgetNode.path}"
+                                         view="${widgetIdentifier != null && widgetNode.identifier == widgetIdentifier && not empty widgetView ? widgetView : 'portal.view'}"/>
+                    </c:if>
+                </div>
+            </c:if>
         </c:forEach>
     </c:otherwise>
 </c:choose>
