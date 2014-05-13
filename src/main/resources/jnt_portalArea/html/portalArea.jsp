@@ -29,7 +29,7 @@
         <jcr:node var="portalColNode" path="${renderContext.mainResource.node.path}/${currentNode.name}"/>
         <div id="portal_area_${currentNode.identifier}" class="portal_area" data-area-name="${currentNode.name}">
             <c:if test="${not empty portalColNode}">
-                <template:module path="${portalColNode.path}"/>
+                <template:area path="${portalColNode.path}"/>
             </c:if>
         </div>
 
