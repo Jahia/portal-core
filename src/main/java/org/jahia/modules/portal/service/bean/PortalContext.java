@@ -31,6 +31,8 @@ public class PortalContext implements Serializable{
     private String fullTemplate;
     @JsonProperty("baseURL")
     private String baseUrl;
+    @JsonProperty("portalTabs")
+    private LinkedList<PortalTab> portalTabs;
     @JsonProperty("portalTabSkins")
     private List<PortalKeyNameObject> portalTabSkins;
     @JsonProperty("portalTabTemplates")
@@ -146,6 +148,14 @@ public class PortalContext implements Serializable{
 
     public void setModelIdentifier(String modelIdentifier) {
         this.modelIdentifier = modelIdentifier;
+    }
+
+    public LinkedList<PortalTab> getPortalTabs() {
+        return portalTabs;
+    }
+
+    public void setPortalTabs(LinkedList<PortalTab> portalTabs) {
+        this.portalTabs = portalTabs;
     }
 
     public boolean isDebug() {

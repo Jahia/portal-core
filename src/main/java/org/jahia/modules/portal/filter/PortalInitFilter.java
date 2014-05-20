@@ -3,10 +3,16 @@ package org.jahia.modules.portal.filter;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.*;
 import org.jahia.modules.portal.service.bean.*;
+import org.jahia.services.content.JCRContentUtils;
+import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.Resource;
 import org.jahia.services.render.filter.AbstractFilter;
 import org.jahia.services.render.filter.RenderChain;
+
+import javax.jcr.NodeIterator;
+import javax.jcr.query.QueryManager;
+import java.util.LinkedList;
 
 
 /**
@@ -26,6 +32,30 @@ public class PortalInitFilter extends AbstractFilter{
 
         boolean updateLastViewed = resource.getNode().isNodeType(PortalConstants.JNT_PORTAL_TAB);
         PortalContext portal = portalService.buildPortalContext(renderContext, resource.getNode(), resource.getNode().getSession(), updateLastViewed);
+
+        //set tabs
+        JCRNodeWrapper portalNode = JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JMIX_PORTAL);
+        portal.setPortalTabs(new LinkedList<PortalTab>());
+        QueryManager queryManager = resource.getNode().getSession().getWorkspace().getQueryManager();
+        if (queryManager != null) {
+            NodeIterator result = portalNode.getNodes();
+
+            while (result.hasNext()) {
+                JCRNodeWrapper tabNode = (JCRNodeWrapper) result.next();
+                if(tabNode.isNodeType(PortalConstants.JNT_PORTAL_TAB)){
+                    PortalTab portalTab = new PortalTab();
+                    portalTab.setPath(tabNode.getPath());
+                    portal.getPortalTabs().add(portalTab);
+                }
+            }
+        }
+
+        // Add dependency to other tabs
+        for (PortalTab portalTab : portal.getPortalTabs()){
+            if (!portalTab.isCurrent()){
+                resource.getDependencies().add(portalTab.getPath());
+            }
+        }
 
         // Add dependency to model portal
         if(!portal.isModel()){
