@@ -26,6 +26,12 @@
         <transition on="editPortal" to="updatePortalModelForm" bind="false" validate="false">
             <set name="flowScope.portalIdentifier" value="requestParameters.selectedPortal" type="java.lang.String" />
         </transition>
+        <transition on="grantWriteOnPortal" to="portalFactory" bind="false" validate="false">
+            <evaluate expression="flowHandler.grantWriteOnModel(flowRequestContext, requestParameters.selectedPortal)"/>
+        </transition>
+        <transition on="removePortal" to="portalFactory" bind="false" validate="false">
+            <evaluate expression="flowHandler.deletePortalModel(flowRequestContext, requestParameters.selectedPortal)"/>
+        </transition>
         <transition on="enablePortal" to="portalFactory" bind="false" validate="false">
             <evaluate expression="flowHandler.enablePortalModel(flowRequestContext, requestParameters.selectedPortal)"/>
         </transition>

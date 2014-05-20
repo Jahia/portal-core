@@ -1,6 +1,5 @@
 package org.jahia.modules.portal.sitesettings;
 
-import com.google.common.base.Joiner;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.data.viewhelper.principal.PrincipalViewHelper;
 import org.jahia.modules.portal.PortalConstants;
@@ -15,6 +14,7 @@ import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.View;
+import org.jahia.services.sites.JahiaSitesService;
 import org.jahia.services.usermanager.*;
 import org.jahia.utils.i18n.Messages;
 import org.joda.time.DateTime;
@@ -57,31 +57,62 @@ public class PortalFactoryHandler implements Serializable {
     private transient JahiaGroupManagerService groupManagerService;
 
     public PortalModelTable initPortalModelsTable(RequestContext ctx) throws RepositoryException {
-        List<JCRNodeWrapper> portalModelNodes = portalService.getSitePortalModels(getRenderContext(ctx).getSite(), null, false, getCurrentUserSession(ctx, "live"));
+        JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+        final int siteId = getRenderContext(ctx).getSite().getID();
+        PortalModelTable result = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<PortalModelTable>() {
+            @Override
+            public PortalModelTable doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                List<JCRNodeWrapper> portalModelNodes = portalService.getSitePortalModels(JahiaSitesService.getInstance().getSite(siteId, session), null, false, session);
 
-        PortalModelTable portalModelTable = new PortalModelTable();
-        List<PortalModelTableRow> portalModelTableRows = new ArrayList<PortalModelTableRow>();
+                PortalModelTable portalModelTable = new PortalModelTable();
+                List<PortalModelTableRow> portalModelTableRows = new ArrayList<PortalModelTableRow>();
 
-        for (JCRNodeWrapper portalModelNode : portalModelNodes){
-            PortalModelTableRow portalModelTableRow = new PortalModelTableRow();
-            portalModelTableRow.setName(portalModelNode.getDisplayableName());
-            portalModelTableRow.setPath(portalModelNode.getPath());
-            portalModelTableRow.setUuid(portalModelNode.getIdentifier());
-            portalModelTableRow.setEnabled(portalModelNode.hasProperty(PortalConstants.J_ENABLED) && portalModelNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
-            portalModelTableRow.setRestrictedGroups(portalService.getRestrictedGroups(portalModelNode));
-            portalModelTableRow.setUserPortals(portalService.getUserPortalsByModel(portalModelNode).size());
+                for (JCRNodeWrapper portalModelNode : portalModelNodes){
+                    PortalModelTableRow portalModelTableRow = new PortalModelTableRow();
+                    portalModelTableRow.setName(portalModelNode.getDisplayableName());
+                    portalModelTableRow.setPath(portalModelNode.getPath());
+                    portalModelTableRow.setUuid(portalModelNode.getIdentifier());
+                    portalModelTableRow.setEnabled(portalModelNode.hasProperty(PortalConstants.J_ENABLED) && portalModelNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
+                    portalModelTableRow.setRestrictedGroups(portalService.getRestrictedGroups(portalModelNode));
+                    portalModelTableRow.setUserPortals(portalService.getUserPortalsByModel(portalModelNode).size());
 
-            portalModelTableRows.add(portalModelTableRow);
-        }
+                    portalModelTableRows.add(portalModelTableRow);
+                }
 
-        portalModelTable.setPortalModelTableRows(portalModelTableRows);
+                portalModelTable.setPortalModelTableRows(portalModelTableRows);
+                return portalModelTable;
+            }
+        });
 
-        return portalModelTable;
+        return result;
     }
 
-    public boolean createPortalModel(RequestContext ctx, PortalModelForm form){
+    public void grantWriteOnModel(RequestContext ctx, final String portalModelIdentifier) throws RepositoryException {
+        JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+        final String principalKey = "u:" + sessionWrapper.getUser().getUsername();
+        JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Object>() {
+            @Override
+            public Object doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                JCRNodeWrapper portalNode = (JCRNodeWrapper) session.getNodeByIdentifier(portalModelIdentifier);
+                portalNode.grantRoles(principalKey, Collections.singleton("owner"));
+                session.save();
+                return null;
+            }
+        });
+    }
+
+    public boolean createPortalModel(final RequestContext ctx, final PortalModelForm form){
         try {
-            portalService.createPortalModel(form, getRenderContext(ctx).getSite(), getCurrentUserSession(ctx, "live"));
+            JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+            final int siteId = getRenderContext(ctx).getSite().getID();
+            JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Object>() {
+                @Override
+                public Object doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                    portalService.createPortalModel(form, JahiaSitesService.getInstance().getSite(siteId, session), session);
+                    return null;
+                }
+            });
+
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
         }
@@ -90,12 +121,33 @@ public class PortalFactoryHandler implements Serializable {
     
     public boolean updatePortalModel(RequestContext ctx, PortalForm form, String portalModelIdentifier){
         try {
+            JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
             form.setPortalModelIdentifier(portalModelIdentifier);
-            portalService.updatePortalModel(form, getCurrentUserSession(ctx, "live"));
+            final PortalForm formToUpdate = form;
+            JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Object>() {
+                @Override
+                public Object doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                    portalService.updatePortalModel(formToUpdate, session);
+                    return null;
+                }
+            });
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
         return true;
+    }
+
+    public void deletePortalModel(RequestContext ctx, final String portalModelIdentidier) throws RepositoryException {
+        JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+        JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Object>() {
+            @Override
+            public Object doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                JCRNodeWrapper portalNode = session.getNodeByIdentifier(portalModelIdentidier);
+                portalNode.remove();
+                session.save();
+                return null;
+            }
+        });
     }
 
     public void initPortalForm(RequestContext ctx){
@@ -131,7 +183,8 @@ public class PortalFactoryHandler implements Serializable {
         ctx.getRequestScope().put("allowedWidgetsSkin", skins);
     }
 
-    public PortalForm initEditPortalForm(RequestContext ctx, String identifier) {
+    public PortalForm initEditPortalForm(final RequestContext ctx, final String identifier) throws RepositoryException {
+        JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
         RenderContext renderContext = getRenderContext(ctx);
         JCRSiteNode site = renderContext.getSite();
 
@@ -144,28 +197,34 @@ public class PortalFactoryHandler implements Serializable {
         }
         ctx.getRequestScope().put("widgetTypes", widgetTypes);
 
-        PortalForm form = new PortalForm();
-        if(StringUtils.isNotEmpty(identifier)){
-            try {
-                JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(identifier);
-                ctx.getRequestScope().put("portalNode", portalNode);
+        PortalForm formToUpdate = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<PortalForm>() {
+            @Override
+            public PortalForm doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                if(StringUtils.isNotEmpty(identifier)){
+                    try {
+                        JCRNodeWrapper portalNode = session.getNodeByUUID(identifier);
 
-                form.setName(portalNode.getDisplayableName());
-                form.setAllowCustomization(portalNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean());
+                        PortalForm form = new PortalForm();
+                        form.setName(portalNode.getDisplayableName());
+                        form.setAllowCustomization(portalNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean());
 
-                List<String> allowedWidgetTypes = new ArrayList<String>();
-                JCRPropertyWrapper allowedWidgetTypesProp = portalNode.getProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES);
-                for(JCRValueWrapper allowedWidgetType : allowedWidgetTypesProp.getValues()){
-                    allowedWidgetTypes.add(allowedWidgetType.getString());
+                        List<String> allowedWidgetTypes = new ArrayList<String>();
+                        JCRPropertyWrapper allowedWidgetTypesProp = portalNode.getProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES);
+                        for(JCRValueWrapper allowedWidgetType : allowedWidgetTypesProp.getValues()){
+                            allowedWidgetTypes.add(allowedWidgetType.getString());
+                        }
+                        form.setAllowedWidgetTypes(allowedWidgetTypes.toArray(new String[allowedWidgetTypes.size()]));
+                        form.setTemplateFull(portalNode.getPropertyAsString(PortalConstants.J_FULL_TEMPLATE));
+                        return form;
+                    } catch (RepositoryException e) {
+                        logger.error(e.getMessage(), e);
+                    }
                 }
-                form.setAllowedWidgetTypes(allowedWidgetTypes.toArray(new String[allowedWidgetTypes.size()]));
-                form.setTemplateFull(portalNode.getPropertyAsString(PortalConstants.J_FULL_TEMPLATE));
-            } catch (RepositoryException e) {
-                logger.error(e.getMessage(), e);
+                return null;
             }
-        }
+        });
 
-        return form;
+        return formToUpdate;
     }
 
     public UserPortalsTable initUserPortalsManager(RequestContext ctx) {
@@ -173,6 +232,8 @@ public class PortalFactoryHandler implements Serializable {
     }
 
     public UserPortalsTable initUserPortalsManager(RequestContext ctx, UserPortalsTable userPortalsTable) {
+        JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+        final int siteId = getRenderContext(ctx).getSite().getID();
         if(userPortalsTable == null){
             userPortalsTable = new UserPortalsTable();
         }
@@ -183,7 +244,14 @@ public class PortalFactoryHandler implements Serializable {
         userPortalsTable.setRows(new LinkedHashMap<String, UserPortalsTableRow>());
 
         try {
-            pager.setMaxResults(getUserPortalsQuery(ctx, userPortalsTable).execute().getNodes().getSize());
+            final UserPortalsTable userPortalsTableToQuery = userPortalsTable;
+            long maxResults = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Long>() {
+                @Override
+                public Long doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                    return getUserPortalsQuery(siteId, userPortalsTableToQuery, session).execute().getNodes().getSize();
+                }
+            });
+            pager.setMaxResults(maxResults);
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
             pager.setMaxResults(0);
@@ -191,10 +259,9 @@ public class PortalFactoryHandler implements Serializable {
         return userPortalsTable;
     }
 
-    private Query getUserPortalsQuery(RequestContext ctx, UserPortalsTable userPortalsTable){
+    private Query getUserPortalsQuery(int siteId, UserPortalsTable userPortalsTable, JCRSessionWrapper sessionWrapper){
         Query query = null;
         try {
-            JCRSessionWrapper sessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession("live");
             QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
             StringBuilder builder = new StringBuilder("select * from [" + PortalConstants.JNT_PORTAL_USER + "] as p where");
             boolean first = true;
@@ -221,7 +288,7 @@ public class PortalFactoryHandler implements Serializable {
             if(!first){
                 builder.append(" and");
             }
-            builder.append(" p.['").append(PortalConstants.J_SITEKEY).append("'] = '").append(getRenderContext(ctx).getSite().getSiteKey()).append("'");
+            builder.append(" p.['").append(PortalConstants.J_SITEID).append("'] = '").append(siteId).append("'");
             if(userPortalsTable.getPager() != null && StringUtils.isNotEmpty(userPortalsTable.getPager().getSortBy())){
                 builder.append(" order by '").append(userPortalsTable.getPager().getSortBy()).append("' ").append(userPortalsTable.getPager().isSortAsc() ? "ASC" : "DESC");
             }
@@ -235,10 +302,21 @@ public class PortalFactoryHandler implements Serializable {
     public void searchUserPortals(RequestContext ctx, UserPortalsTable userPortalsTable) {
         try {
             if (userPortalsTable.getSearchCriteria() != null && StringUtils.isNotEmpty(userPortalsTable.getSearchCriteria().getSearchString())) {
+                JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+                final int siteId = getRenderContext(ctx).getSite().getID();
+
                 UserPortalsSearchCriteria searchCriteria = userPortalsTable.getSearchCriteria();
                 initUserPortalsManager(ctx, userPortalsTable);
                 userPortalsTable.setSearchCriteria(searchCriteria);
-                userPortalsTable.getPager().setMaxResults(getUserPortalsQuery(ctx, userPortalsTable).execute().getNodes().getSize());
+
+                final UserPortalsTable userPortalsTableToQuery = userPortalsTable;
+                long maxResults = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Long>() {
+                    @Override
+                    public Long doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                        return getUserPortalsQuery(siteId, userPortalsTableToQuery, session).execute().getNodes().getSize();
+                    }
+                });
+                userPortalsTable.getPager().setMaxResults(maxResults);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -249,28 +327,44 @@ public class PortalFactoryHandler implements Serializable {
 
     public void doUserPortalsQuery(RequestContext ctx, UserPortalsTable userPortalsTable){
         try {
-            Query query = getUserPortalsQuery(ctx, userPortalsTable);
-            query.setLimit(userPortalsTable.getPager().getItemsPerPage());
-            query.setOffset(userPortalsTable.getPager().getItemsPerPage() * (userPortalsTable.getPager().getPage() - 1));
+            JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+            final int siteId = getRenderContext(ctx).getSite().getID();
+            final UserPortalsTable finalTable = userPortalsTable;
+            LinkedHashMap<String, UserPortalsTableRow> tableRows = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<LinkedHashMap<String, UserPortalsTableRow>>() {
+                @Override
+                public LinkedHashMap<String, UserPortalsTableRow> doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                    Query query = getUserPortalsQuery(siteId, finalTable, session);
+                    query.setLimit(finalTable.getPager().getItemsPerPage());
+                    query.setOffset(finalTable.getPager().getItemsPerPage() * (finalTable.getPager().getPage() - 1));
 
-            NodeIterator nodeIterator = query.execute().getNodes();
-            userPortalsTable.setRows(new LinkedHashMap<String, UserPortalsTableRow>());
-            while (nodeIterator.hasNext()){
-                JCRNodeWrapper portalNode = (JCRNodeWrapper) nodeIterator.next();
-                UserPortalsTableRow row = new UserPortalsTableRow();
-                row.setUserNodeIdentifier(JCRContentUtils.getParentOfType(portalNode, "jnt:user").getIdentifier());
-                row.setModelName(((JCRNodeWrapper) portalNode.getProperty("j:model").getNode()).getDisplayableName());
-                DateTime sinceDate = ISODateTimeFormat.dateOptionalTimeParser().parseDateTime(portalNode.getPropertyAsString("j:lastViewed"));
-                row.setLastUsed(Days.daysBetween(new LocalDate(sinceDate), new LocalDate()).getDays());
-                row.setCreated(portalNode.getProperty("jcr:created").getDate().getTime());
-                userPortalsTable.getRows().put(portalNode.getPath(), row);
-            }
+                    NodeIterator nodeIterator = query.execute().getNodes();
+                    LinkedHashMap<String, UserPortalsTableRow> tableRowsToReturn = new LinkedHashMap<String, UserPortalsTableRow>();
+                    while (nodeIterator.hasNext()){
+                        JCRNodeWrapper portalNode = (JCRNodeWrapper) nodeIterator.next();
+                        UserPortalsTableRow row = new UserPortalsTableRow();
+                        row.setUserNodeIdentifier(JCRContentUtils.getParentOfType(portalNode, "jnt:user").getIdentifier());
+                        try{
+                            row.setModelName(((JCRNodeWrapper) portalNode.getProperty("j:model").getNode()).getDisplayableName());
+                        }catch (Exception e){
+                            // model deleted
+                            row.setModelName("No model found");
+                        }
+                        DateTime sinceDate = ISODateTimeFormat.dateOptionalTimeParser().parseDateTime(portalNode.getPropertyAsString("j:lastViewed"));
+                        row.setLastUsed(Days.daysBetween(new LocalDate(sinceDate), new LocalDate()).getDays());
+                        row.setCreated(portalNode.getProperty("jcr:created").getDate().getTime());
+                        tableRowsToReturn.put(portalNode.getPath(), row);
+                    }
+                    return tableRowsToReturn;
+                }
+            });
+            userPortalsTable.setRows(tableRows);
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
         }
     }
 
     public PortalModelGroups initManageGroups(RequestContext ctx, SearchCriteria searchCriteria, String portalModelIdentifier) throws RepositoryException {
+        JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
         PortalModelGroups portalModelGroups = new PortalModelGroups();
         portalModelGroups.setPortalIdentifier(portalModelIdentifier);
 
@@ -286,9 +380,16 @@ public class PortalFactoryHandler implements Serializable {
         
         portalModelGroups.setSearchCriteria(searchCriteria);
 
-        JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
-        portalModelGroups.setGroupsKey(portalService.getRestrictedGroupNames(portalNode));
-        setCurrentRestrictions(portalModelGroups, portalNode);
+        final String portalIdentifier = portalModelGroups.getPortalIdentifier();
+        List<String> groupsKey = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<List<String>>() {
+            @Override
+            public List<String> doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                JCRNodeWrapper portalNode = session.getNodeByUUID(portalIdentifier);
+                return portalService.getRestrictedGroupNames(portalNode);
+            }
+        });
+
+        portalModelGroups.setGroupsKey(groupsKey);
 
         return portalModelGroups;
     }
@@ -312,20 +413,6 @@ public class PortalFactoryHandler implements Serializable {
         return searchResult;
     }
 
-    private void setCurrentRestrictions(PortalModelGroups portalModelGroups, JCRNodeWrapper portalNode) throws RepositoryException {
-        List<String> restrictedGroupsNames = new ArrayList<String>();
-        for(JahiaGroup group : portalService.getRestrictedGroups(portalNode)){
-            restrictedGroupsNames.add(group.getName());
-        }
-
-        Joiner joiner = Joiner.on(", ");
-        if (restrictedGroupsNames.size() > 0){
-            portalModelGroups.setCurrentRestrictions(joiner.join(restrictedGroupsNames));
-        }else {
-            portalModelGroups.setCurrentRestrictions(null);
-        }
-    }
-
     public Map<String, ? extends JahiaGroupManagerProvider> getProviders() {
         Map<String, JahiaGroupManagerProvider> providers = new LinkedHashMap<String, JahiaGroupManagerProvider>();
         for (JahiaGroupManagerProvider p : groupManagerService.getProviderList()) {
@@ -338,23 +425,37 @@ public class PortalFactoryHandler implements Serializable {
         JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
         portalService.addRestrictedGroupsToModel(portalNode, portalModelGroups);
         portalModelGroups.setGroupsKey(portalService.getRestrictedGroupNames(portalNode));
-        setCurrentRestrictions(portalModelGroups, portalNode);
     }
 
     public void removeFromRestrictedGroup(RequestContext ctx, PortalModelGroups portalModelGroups) throws RepositoryException {
         JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
         portalService.removeRestrictedGroupsFromModel(portalNode, portalModelGroups);
         portalModelGroups.setGroupsKey(portalService.getRestrictedGroupNames(portalNode));
-        setCurrentRestrictions(portalModelGroups, portalNode);
     }
 
-    public boolean enablePortalModel(RequestContext ctx, String selectedPortalModelIdentifier){
-        portalService.switchPortalModelActivation(getCurrentUserSession(ctx, "live"), selectedPortalModelIdentifier, true);
+    public boolean enablePortalModel(final RequestContext ctx, final String selectedPortalModelIdentifier) throws RepositoryException {
+        final JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+        JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Object>() {
+            @Override
+            public Object doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                portalService.switchPortalModelActivation(session, selectedPortalModelIdentifier, true);
+                return null;
+            }
+        });
+
         return true;
     }
 
-    public boolean disablePortalModel(RequestContext ctx, String selectedPortalModelIdentifier){
-        portalService.switchPortalModelActivation(getCurrentUserSession(ctx, "live"), selectedPortalModelIdentifier, false);
+    public boolean disablePortalModel(RequestContext ctx, final String selectedPortalModelIdentifier) throws RepositoryException {
+        final JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+        JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Object>() {
+            @Override
+            public Object doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                portalService.switchPortalModelActivation(session, selectedPortalModelIdentifier, false);
+                return null;
+            }
+        });
+
         return true;
     }
 
@@ -363,20 +464,28 @@ public class PortalFactoryHandler implements Serializable {
         return currentSite.getTemplatePackage().getRootFolderPath() + "/" + currentSite.getTemplatePackage().getVersion() + "/templates";
     }
 
-    public void deleteUserPortal(RequestContext ctx, MessageContext messageContext, String selectedPortal, UserPortalsTable userPortalsTable){
+    public void deleteUserPortal(RequestContext ctx, MessageContext messageContext, final String selectedPortal, final UserPortalsTable userPortalsTable){
         JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
         try {
-            JCRNodeWrapper portalNode = sessionWrapper.getNode(selectedPortal);
+            String portalPath = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), sessionWrapper.getWorkspace().getName(), sessionWrapper.getLocale(), new JCRCallback<String>() {
+                @Override
+                public String doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                    JCRNodeWrapper portalNode = session.getNode(selectedPortal);
+                    String path = portalNode.getPath();
+
+                    //perform delete
+                    String name = portalNode.getDisplayableName();
+                    portalNode.remove();
+                    session.save();
+                    return path;
+                }
+            });
 
             //update user portals table
-            userPortalsTable.getRows().remove(portalNode.getPath());
+            userPortalsTable.getRows().remove(portalPath);
             userPortalsTable.getPager().setMaxResults(userPortalsTable.getPager().getMaxResults() - 1);
 
-            //perform delete
-            String name = portalNode.getDisplayableName();
-            portalNode.remove();
-            sessionWrapper.save();
-            setActionMessage(messageContext, true, "manageUserPortals", ".deleted", name);
+            setActionMessage(messageContext, true, "manageUserPortals", ".deleted", null);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             setActionMessage(messageContext, false, "manageUserPortals", ".deleted", null);

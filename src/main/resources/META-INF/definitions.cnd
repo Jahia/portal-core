@@ -44,7 +44,7 @@ orderable
 
 [jnt:portalUser] > jnt:content, mix:title, jmix:list, jmix:portal, jmix:hasModel
 orderable
-- j:siteKey (string)
+- j:siteId (long)
 
 [jnt:portalTab] > jnt:content, mix:title, jmix:list, jmix:hasTemplateNode, jmix:portalWidgetSkin
  + * (nt:base) = nt:base version

@@ -341,6 +341,7 @@ public class PortalService {
 
     public SortedSet<JCRNodeWrapper> getUserPortalsBySite(String siteKey, Locale locale) {
         SortedSet<JCRNodeWrapper> portals = new TreeSet<JCRNodeWrapper>(PORTALS_COMPARATOR);
+        List<String> userPortalModelIds = new ArrayList<String>();
         try {
             JCRSessionWrapper sessionWrapper = JCRSessionFactory.getInstance().getCurrentUserSession("live", locale);
             QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
@@ -349,17 +350,21 @@ public class PortalService {
                 return portals;
             }
 
-            NodeIterator result = queryManager.createQuery("select * from [" + PortalConstants.JNT_PORTAL_MODEL
-                    + "] as p where isdescendantnode(p, ['" + "/sites/" + siteKey + "'])", Query.JCR_SQL2).execute().getNodes();
+            NodeIterator result = queryManager.createQuery("select * from [" + PortalConstants.JNT_PORTAL_USER
+                    + "] as p where isdescendantnode(p, ['" + sessionWrapper.getUser().getLocalPath() + "/portals/" + siteKey + "'])", Query.JCR_SQL2).execute().getNodes();
+
+            while (result.hasNext()) {
+                JCRNodeWrapper userPortal = (JCRNodeWrapper) result.next();
+                userPortalModelIds.add(userPortal.getProperty(PortalConstants.J_MODEL).getString());
+                portals.add(userPortal);
+            }
+
+            result = queryManager.createQuery("select * from [" + PortalConstants.JNT_PORTAL_MODEL
+                    + "] as p where isdescendantnode(p, ['/sites/" + siteKey + "'])", Query.JCR_SQL2).execute().getNodes();
 
             while (result.hasNext()) {
                 JCRNodeWrapper modelNode = (JCRNodeWrapper) result.next();
-                JCRNodeWrapper userPortalNode = getUserPortalByModel(modelNode.getIdentifier(), sessionWrapper);
-                if (userPortalNode != null) {
-                    // return user portal if exist
-                    portals.add(userPortalNode);
-                } else if (modelNode.hasProperty(PortalConstants.J_ENABLED) && modelNode.getProperty(PortalConstants.J_ENABLED).getBoolean()) {
-                    // return model portal if this one is enabled
+                if(!userPortalModelIds.contains(modelNode.getIdentifier()) && modelNode.hasProperty(PortalConstants.J_ENABLED) && modelNode.getProperty(PortalConstants.J_ENABLED).getBoolean()){
                     portals.add(modelNode);
                 }
             }
@@ -370,36 +375,12 @@ public class PortalService {
         return portals;
     }
 
-    public void fixPortalSiteInContext(RenderContext renderContext, final String nodePath, JCRSessionWrapper sessionWrapper) throws RepositoryException {
-        Integer siteId = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), sessionWrapper.getWorkspace().getName(), sessionWrapper.getLocale(), new JCRCallback<Integer>() {
-            @Override
-            public Integer doInJCR(JCRSessionWrapper session) throws RepositoryException {
-                JCRNodeWrapper currentNode = session.getNode(nodePath);
-                JCRNodeWrapper portalNode = currentNode.isNodeType(PortalConstants.JMIX_PORTAL) ? currentNode : JCRContentUtils.getParentOfType(currentNode, PortalConstants.JMIX_PORTAL);
-
-                if (portalHasModel(portalNode)) {
-                    return getPortalSite(portalNode).getID();
-                } else {
-                    return null;
-                }
-            }
-        });
-
-        if(siteId != null){
-            JCRSiteNode portalSite = JahiaSitesService.getInstance().getSite(siteId, sessionWrapper);
+    public void fixPortalSiteInContext(RenderContext renderContext, JCRNodeWrapper portalNode) throws RepositoryException {
+        if(!portalIsModel(portalNode)){
+            JCRSiteNode portalSite = JahiaSitesService.getInstance().getSite((int) portalNode.getProperty(PortalConstants.J_SITEID).getLong(), portalNode.getSession());
             renderContext.setSite(portalSite);
             renderContext.setSiteInfo(new SiteInfo(portalSite));
         }
-    }
-
-    public JCRSiteNode getPortalSite(JCRNodeWrapper portalNode) throws RepositoryException {
-        if (portalHasModel(portalNode)) {
-            JCRNodeWrapper portalModelNode = getPortalModel(portalNode);
-            if (portalModelNode != null) {
-                return portalModelNode.getResolveSite();
-            }
-        }
-        return portalNode.getResolveSite();
     }
 
     public Collection<JCRNodeWrapper> getUserPortalsByModel(JCRNodeWrapper portalModelNode) {
@@ -448,7 +429,7 @@ public class PortalService {
             portal.setProperty(PortalConstants.JCR_TITLE, modelNode.getDisplayableName());
             portal.setProperty(PortalConstants.J_FULL_TEMPLATE, modelNode.getPropertyAsString(PortalConstants.J_FULL_TEMPLATE));
             portal.setProperty(PortalConstants.J_MODEL, modelNode);
-            portal.setProperty(PortalConstants.J_SITEKEY, modelNode.getResolveSite().getSiteKey());
+            portal.setProperty(PortalConstants.J_SITEID, modelNode.getResolveSite().getID());
             portal.grantRoles("u:guest", Collections.singleton("reader"));
 
             //copy tabs
@@ -488,6 +469,7 @@ public class PortalService {
         final String currentPath = portalTabNode.getPath();
         final boolean isEditable = portalTabNode.hasPermission("jcr:write_live");
         final Locale mainResourceLocale = renderContext.getMainResourceLocale();
+        final int siteInt = renderContext.getSite().getID();
 
         PortalContext portalContext = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), sessionWrapper.getWorkspace().getName(), sessionWrapper.getLocale(), new JCRCallback<PortalContext>() {
             @Override
@@ -508,17 +490,24 @@ public class PortalService {
                 portalContext.setModel(isModel);
                 portalContext.setCustomizable(isModel && portalNode.hasProperty(PortalConstants.J_ALLOW_CUSTOMIZATION) && portalNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean());
                 portalContext.setEnabled(isModel && portalNode.hasProperty(PortalConstants.J_ENABLED) && portalNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
-                JCRSiteNode site;
+                JCRSiteNode site = JahiaSitesService.getInstance().getSite(siteInt, session);
 
                 JCRNodeWrapper modelNode = null;
+                boolean modelDeleted = false;
                 if(!isModel){
-                    modelNode = portalNode.getSession().getNodeByIdentifier(portalNode.getProperty(PortalConstants.J_MODEL).getString());
-                    portalContext.setModelPath(modelNode.getPath());
-                    portalContext.setModelIdentifier(modelNode.getIdentifier());
-                    site = modelNode.getResolveSite();
-                } else {
-                    site = portalNode.getResolveSite();
+                    try {
+                        modelNode = (JCRNodeWrapper) portalNode.getProperty(PortalConstants.J_MODEL).getNode();
+                    }catch (Exception e){
+                        // model deleted
+                    }
+                    if(modelNode != null){
+                        portalContext.setModelPath(modelNode.getPath());
+                        portalContext.setModelIdentifier(modelNode.getIdentifier());
+                    } else {
+                        modelDeleted = true;
+                    }
                 }
+
                 portalContext.setSiteId(site.getID());
                 portalContext.setPortalTabTemplates(new ArrayList<PortalKeyNameObject>());
                 portalContext.setPortalTabSkins(new ArrayList<PortalKeyNameObject>());
@@ -553,9 +542,10 @@ public class PortalService {
 
                     // Widget types
                     Collection<ExtendedNodeType> widgetTypes = getPortalWidgetNodeTypes(portalNode);
-                    Collection<ExtendedNodeType> modelWidgetTypes = !isModel ? getPortalWidgetNodeTypes(modelNode) : null;
+                    Collection<ExtendedNodeType> modelWidgetTypes = !isModel && !modelDeleted ? getPortalWidgetNodeTypes(modelNode) : null;
+
                     for (ExtendedNodeType widgetType : widgetTypes){
-                        if(!isModel){
+                        if(!isModel && !modelDeleted){
                             if(modelWidgetTypes.contains(widgetType)){
                                 PortalWidgetType portalWidgetType = buildPortalWidgetType(widgetType, site, mainResourceLocale, false);
                                 portalContext.getPortalWidgetTypes().add(portalWidgetType);
@@ -566,7 +556,7 @@ public class PortalService {
                             portalContext.getPortalWidgetTypes().add(portalWidgetType);
                         }
                     }
-                    if(!isModel){
+                    if(!isModel && !modelDeleted){
                         for (ExtendedNodeType modelWidgetType : modelWidgetTypes){
                             PortalWidgetType portalWidgetType = buildPortalWidgetType(modelWidgetType, site, mainResourceLocale, true);
                             portalContext.getPortalWidgetTypes().add(portalWidgetType);

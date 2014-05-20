@@ -41,15 +41,6 @@
 
 <h2><fmt:message key="manageRestrictedGroups.title"/></h2>
 
-<div class="alert alert-warn">
-    <fmt:message key="manageRestrictedGroups.intro"/>
-    <strong>
-        <c:set var="groupRestrictions" value="${portalModelGroups.currentRestrictions}"/>
-        <fmt:message key="manageRestrictedGroups.noRestrictions" var="noRestrictions"/>
-        ${not empty groupRestrictions ? groupRestrictions : noRestrictions}
-    </strong>
-</div>
-
 <c:set var="multipleProvidersAvailable" value="${fn:length(providers) > 1}"/>
 
 <div class="box-1">

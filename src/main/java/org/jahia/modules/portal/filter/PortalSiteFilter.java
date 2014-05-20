@@ -1,6 +1,9 @@
 package org.jahia.modules.portal.filter;
 
+import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.PortalService;
+import org.jahia.services.content.JCRContentUtils;
+import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.Resource;
 import org.jahia.services.render.filter.AbstractFilter;
@@ -18,7 +21,16 @@ public class PortalSiteFilter extends AbstractFilter{
 
     @Override
     public String prepare(RenderContext renderContext, Resource resource, RenderChain chain) throws Exception {
-        portalService.fixPortalSiteInContext(renderContext, resource.getNode().getPath(), resource.getNode().getSession());
+        JCRNodeWrapper portalNode = null;
+        if(resource.getNode().isNodeType(PortalConstants.JMIX_PORTAL)){
+            portalNode = resource.getNode();
+        } else {
+            portalNode = JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JMIX_PORTAL);
+        }
+        if(portalNode != null){
+            portalService.fixPortalSiteInContext(renderContext, portalNode);
+        }
+        
         return null;
     }
 }

@@ -26,7 +26,6 @@
 <%--@elvariable id="newslettersRootNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="portalForm" type="org.jahia.modules.portal.sitesettings.form.PortalForm"--%>
 <%--@elvariable id="skin" type="org.jahia.services.render.View"--%>
-<%--@elvariable id="portalNode" type="org.jahia.services.content.JCRNodeWrapper"--%>
 <%--@elvariable id="widgetNodeType" type="org.jahia.modules.portal.service.bean.PortalKeyNameObject"--%>
 <c:set var="portalWidgetMixin" value="<%= PortalConstants.JMIX_PORTAL_WIDGET %>"/>
 

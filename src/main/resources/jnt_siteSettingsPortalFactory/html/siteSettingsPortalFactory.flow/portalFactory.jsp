@@ -26,6 +26,25 @@
 <template:addResources type="css" resources="jquery-ui.smoothness.css,jquery-ui.smoothness-jahia.css,tablecloth.css"/>
 <template:addResources>
     <script type="text/javascript">
+
+        function ajaxSubmitForm(act, portal, cb) {
+            $('#portalFormAction').val(act);
+            if(portal){
+                $('#portalFormSelected').val(portal);
+            }
+
+            $.ajax({
+                url: $('#portalForm').attr('action'),
+                data: $('#portalForm').serialize(),
+                type: 'POST',
+                success: function(){
+                    if(cb){
+                        cb();
+                    }
+                }
+            });
+        }
+
         function submitPortalForm(act, portal) {
             $('#portalFormAction').val(act);
             if(portal){
@@ -35,6 +54,7 @@
         }
     </script>
 </template:addResources>
+<fmt:message key="label.workInProgressTitle" var="i18nWaiting"/><c:set var="i18nWaiting" value="${functions:escapeJavaScript(i18nWaiting)}"/>
 
 <c:set var="site" value="${renderContext.mainResource.node.resolveSite}"/>
 
@@ -128,7 +148,8 @@
                                 </c:choose>
                             </td>
                             <td>
-                                <a style="margin-bottom:0;" class="btn btn-small" title="${i18nLiveMode}" href="${portalURL}">
+                                <a style="margin-bottom:0;" class="btn btn-small" title="${i18nLiveMode}" href="#"
+                                   onclick="workInProgress('${i18nWaiting}'); ajaxSubmitForm('grantWriteOnPortal', '${portalTableRow.uuid}', function(){window.top.location.href = '${portalURL}'})">
                                     <i class="icon-globe"></i>
                                 </a>
 
@@ -140,7 +161,9 @@
                                     <i class="icon-user"></i>
                                 </a>
 
-                                <a style="margin-bottom:0;" class="btn btn-danger btn-small" title="${i18nRemove}" href="#delete">
+                                <fmt:message var="i18nRemoveConfirm" key="manageUserPortals.remove"/><c:set var="i18nRemoveConfirm" value="${functions:escapeJavaScript(i18nRemoveConfirm)}"/>
+                                <a style="margin-bottom:0;" class="btn btn-danger btn-small" title="${i18nRemove}" href="#delete"
+                                   onclick="if (confirm('${i18nRemoveConfirm}')) { submitPortalForm('removePortal', '${portalTableRow.uuid}');} return false;">
                                     <i class="icon-remove icon-white"></i>
                                 </a>
                             </td>

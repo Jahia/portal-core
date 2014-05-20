@@ -31,7 +31,7 @@ public class PortalConstants {
     public static final String J_WIDGET_SKIN = "j:widgetSkin";
     public static final String J_ACCESSIBILITY = "j:accessibility";
     public static final String J_MODEL = "j:model";
-    public static final String J_SITEKEY = "j:siteKey";
+    public static final String J_SITEID = "j:siteId";
     public static final String J_LASTVIEWED = "j:lastViewed";
     public static final String J_BEHAVIOR = "j:behavior";
     public static final String J_BEHAVIOR_COPY = "copy";
