@@ -1,14 +1,11 @@
 package org.jahia.modules.portal.service;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.ajax.gwt.helper.ContentManagerHelper;
 import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.bean.*;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
-import org.jahia.modules.portal.sitesettings.form.PortalModelGroups;
 import org.jahia.services.content.*;
 import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.ExtendedNodeType;
@@ -26,7 +23,6 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.RepositoryException;
@@ -669,10 +665,10 @@ public class PortalService {
         return allowedGroups;
     }
 
-    public void addRestrictedGroupsToModel(JCRNodeWrapper modelNode, PortalModelGroups portalModelGroups) throws RepositoryException {
+    public void addRestrictedGroupsToModel(JCRNodeWrapper modelNode, List<String> groupKeys) throws RepositoryException {
         Set<String> allowedGroups = new HashSet<String>(getRestrictedGroupNames(modelNode));
-        if(portalModelGroups.getGroupsKey() != null && portalModelGroups.getGroupsKey().size() > 0){
-            for (String groupKey : portalModelGroups.getGroupsKey()){
+        if(groupKeys != null && groupKeys.size() > 0){
+            for (String groupKey : groupKeys){
                 allowedGroups.add(groupKey);
             }
             modelNode.setProperty(PortalConstants.J_ALLOWED_USER_GROUPS, allowedGroups.toArray(new String[allowedGroups.size()]));
@@ -684,10 +680,10 @@ public class PortalService {
         }
     }
 
-    public void removeRestrictedGroupsFromModel(JCRNodeWrapper modelNode, PortalModelGroups portalModelGroups) throws RepositoryException {
+    public void removeRestrictedGroupsFromModel(JCRNodeWrapper modelNode, List<String> groupKeys) throws RepositoryException {
         List<String> allowedGroups = new ArrayList<String>(getRestrictedGroupNames(modelNode));
-        if(portalModelGroups.getGroupsKey() != null && portalModelGroups.getGroupsKey().size() > 0){
-            for (String groupKey : portalModelGroups.getGroupsKey()){
+        if(groupKeys != null && groupKeys.size() > 0){
+            for (String groupKey : groupKeys){
                 allowedGroups.remove(groupKey);
             }
             modelNode.setProperty(PortalConstants.J_ALLOWED_USER_GROUPS, allowedGroups.toArray(new String[allowedGroups.size()]));

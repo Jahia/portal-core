@@ -5,6 +5,7 @@ import org.jahia.services.usermanager.SearchCriteria;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by kevan on 22/04/14.
@@ -14,8 +15,10 @@ public class PortalModelGroups implements Serializable{
 
     private String portalIdentifier;
     private List<String> groupsKey;
+    private Map<String, Boolean> currentRestrictions;
+    private Boolean displayLimited = false;
+    private Integer displayLimit;
     private SearchCriteria searchCriteria;
-    private String currentRestrictions;
 
     public List<String> getGroupsKey() {
         return groupsKey;
@@ -41,11 +44,27 @@ public class PortalModelGroups implements Serializable{
         this.portalIdentifier = portalIdentifier;
     }
 
-    public String getCurrentRestrictions() {
+    public Map<String, Boolean> getCurrentRestrictions() {
         return currentRestrictions;
     }
 
-    public void setCurrentRestrictions(String currentRestrictions) {
+    public void setCurrentRestrictions(Map<String, Boolean> currentRestrictions) {
         this.currentRestrictions = currentRestrictions;
+    }
+
+    public Boolean getDisplayLimited() {
+        return displayLimited;
+    }
+
+    public void setDisplayLimited(Boolean displayLimited) {
+        this.displayLimited = displayLimited;
+    }
+
+    public Integer getDisplayLimit() {
+        return displayLimit;
+    }
+
+    public void setDisplayLimit(Integer displayLimit) {
+        this.displayLimit = displayLimit;
     }
 }

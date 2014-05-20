@@ -22,7 +22,6 @@
 <%--@elvariable id="flowExecutionUrl" type="java.lang.String"--%>
 <%--@elvariable id="portalModelGroups" type="org.jahia.modules.portal.sitesettings.form.PortalModelGroups"--%>
 
-<c:set var="groupDisplayLimit" value="${siteSettingsProperties.groupDisplayLimit}"/>
 <template:addResources type="javascript" resources="jquery.min.js,jquery-ui.min.js,jquery.blockUI.js,workInProgress.js,admin-bootstrap.js"/>
 <template:addResources type="css" resources="admin-bootstrap.css"/>
 <template:addResources type="css" resources="jquery-ui.smoothness.css,jquery-ui.smoothness-jahia.css"/>
@@ -79,13 +78,8 @@
     <form:form cssClass="form-inline" action="${flowExecutionUrl}" modelAttribute="portalModelGroups" method="post" id="selectGroups" onsubmit="workInProgress('${i18nWaiting}');">
         <input type="hidden" name="_eventId" id="selectGroupEvent"/>
         <div>
-                <button class="btn" type="button" onclick="submitSelectGroupsForm('addGroups')">
-                    <i class="icon-plus"></i>
-                    &nbsp;<fmt:message key="manageRestrictedGroups.add"/>
-                </button>
-                <button class="btn" type="button" onclick="submitSelectGroupsForm('removeGroups')">
-                    <i class="icon-minus"></i>
-                    &nbsp;<fmt:message key="manageRestrictedGroups.remove"/>
+                <button class="btn btn-primary" type="button" onclick="submitSelectGroupsForm('saveRestrictions')">
+                    &nbsp;<fmt:message key="label.save"/>
                 </button>
         </div>
 
@@ -107,14 +101,14 @@
         </p>
 
         <div>
-            <c:set var="groupCount" value="${fn:length(groups)}"/>
+            <c:set var="groupCount" value="${fn:length(portalModelGroups.currentRestrictions)}"/>
             <c:set var="groupsFound" value="${groupCount > 0}"/>
 
             <div class="alert alert-info">
                 <fmt:message key="siteSettings.groups.found">
                     <fmt:param value="${groupCount}"/>
-                </fmt:message><c:if test="${groupCount > groupDisplayLimit}">&nbsp;<fmt:message key="siteSettings.groups.found.limit">
-                <fmt:param value="${groupDisplayLimit}"/>
+                </fmt:message><c:if test="${portalModelGroups.displayLimited}">&nbsp;<fmt:message key="siteSettings.groups.found.limit">
+                <fmt:param value="${portalModelGroups.displayLimit}"/>
             </fmt:message>
             </c:if>
             </div>
@@ -144,7 +138,7 @@
                         </tr>
                     </c:when>
                     <c:otherwise>
-                        <c:forEach items="${groups}" var="grp" end="${groupDisplayLimit - 1}" varStatus="loopStatus">
+                        <c:forEach items="${groups}" var="grp" varStatus="loopStatus">
                             <tr>
                                 <td>
                                     <form:checkbox path="groupsKey" value="${grp.groupKey}"/>

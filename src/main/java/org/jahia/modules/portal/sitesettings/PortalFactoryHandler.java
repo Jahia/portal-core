@@ -403,13 +403,26 @@ public class PortalFactoryHandler implements Serializable {
         return new SearchCriteria(((RenderContext) ctx.getExternalContext().getRequestMap().get("renderContext")).getSite().getID());
     }
 
-    public Set<Principal> search(PortalModelGroups portalModelGroups) {
+    public Set<Principal> search(RequestContext ctx, PortalModelGroups portalModelGroups) {
+        int displayLimit = Integer.parseInt(((Map<String, String>) ctx.getFlowScope().get("siteSettingsProperties")).get("groupDisplayLimit"));
         SearchCriteria searchCriteria = portalModelGroups.getSearchCriteria();
         long timer = System.currentTimeMillis();
         Set<Principal> searchResult = PrincipalViewHelper.getGroupSearchResult(searchCriteria.getSearchIn(),
                 searchCriteria.getSiteId(), searchCriteria.getSearchString(), searchCriteria.getProperties(),
                 searchCriteria.getStoredOn(), searchCriteria.getProviders());
         logger.info("Found {} groups in {} ms", searchResult.size(), System.currentTimeMillis() - timer);
+        portalModelGroups.setCurrentRestrictions(new HashMap<String, Boolean>());
+        List<Principal> groups = new ArrayList<Principal>(searchResult);
+        for (int i = 0; i < groups.size(); i ++){
+            if(i < (displayLimit - 1)){
+                String grpKey = ((JahiaGroup) groups.get(i)).getGroupKey();
+                portalModelGroups.getCurrentRestrictions().put(grpKey, portalModelGroups.getGroupsKey().contains(grpKey));
+            }else {
+                portalModelGroups.setDisplayLimited(true);
+                portalModelGroups.setDisplayLimit(displayLimit);
+                break;
+            }
+        }
         return searchResult;
     }
 
@@ -421,15 +434,23 @@ public class PortalFactoryHandler implements Serializable {
         return providers;
     }
 
-    public void addToRestrictedGroup(RequestContext ctx, PortalModelGroups portalModelGroups) throws RepositoryException {
-        JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
-        portalService.addRestrictedGroupsToModel(portalNode, portalModelGroups);
-        portalModelGroups.setGroupsKey(portalService.getRestrictedGroupNames(portalNode));
-    }
+    public void saveRestrictions(RequestContext ctx, PortalModelGroups portalModelGroups) throws RepositoryException {
+        List<String> groupKeysToAdd = new ArrayList<String>();
+        List<String> groupKeysToRemove = new ArrayList<String>();
 
-    public void removeFromRestrictedGroup(RequestContext ctx, PortalModelGroups portalModelGroups) throws RepositoryException {
+        for (String groupKey : portalModelGroups.getCurrentRestrictions().keySet()){
+            if(portalModelGroups.getCurrentRestrictions().get(groupKey) && (portalModelGroups.getGroupsKey() == null || !portalModelGroups.getGroupsKey().contains(groupKey))){
+                groupKeysToRemove.add(groupKey);
+                portalModelGroups.getCurrentRestrictions().put(groupKey, false);
+            }else if(!portalModelGroups.getCurrentRestrictions().get(groupKey) && (portalModelGroups.getGroupsKey() != null && portalModelGroups.getGroupsKey().contains(groupKey))){
+                groupKeysToAdd.add(groupKey);
+                portalModelGroups.getCurrentRestrictions().put(groupKey, true);
+            }
+        }
+
         JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
-        portalService.removeRestrictedGroupsFromModel(portalNode, portalModelGroups);
+        portalService.addRestrictedGroupsToModel(portalNode, groupKeysToAdd);
+        portalService.removeRestrictedGroupsFromModel(portalNode, groupKeysToRemove);
         portalModelGroups.setGroupsKey(portalService.getRestrictedGroupNames(portalNode));
     }
 

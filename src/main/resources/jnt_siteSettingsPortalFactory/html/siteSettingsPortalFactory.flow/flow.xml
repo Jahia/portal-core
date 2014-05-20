@@ -37,7 +37,7 @@
         </transition>
         <transition on="manageGroups" to="managePortalModelGroups" bind="false" validate="false">
             <evaluate expression="flowHandler.initManageGroups(flowRequestContext, searchCriteria, requestParameters.selectedPortal)" result="flowScope.portalModelGroups"/>
-            <evaluate expression="flowHandler.search(portalModelGroups)" result="flowScope.groups"/>
+            <evaluate expression="flowHandler.search(flowRequestContext, portalModelGroups)" result="flowScope.groups"/>
         </transition>
         <transition on="disablePortal" to="portalFactory" bind="false" validate="false">
             <evaluate expression="flowHandler.disablePortalModel(flowRequestContext, requestParameters.selectedPortal)"/>
@@ -50,15 +50,11 @@
         </on-render>
 
         <transition on="search" to="managePortalModelGroups">
-            <evaluate expression="flowHandler.search(portalModelGroups)" result="flowScope.groups"/>
+            <evaluate expression="flowHandler.search(flowRequestContext, portalModelGroups)" result="flowScope.groups"/>
         </transition>
 
-        <transition on="addGroups" to="managePortalModelGroups">
-            <evaluate expression="flowHandler.addToRestrictedGroup(flowRequestContext, portalModelGroups)"/>
-        </transition>
-
-        <transition on="removeGroups" to="managePortalModelGroups">
-            <evaluate expression="flowHandler.removeFromRestrictedGroup(flowRequestContext, portalModelGroups)"/>
+        <transition on="saveRestrictions" to="managePortalModelGroups">
+            <evaluate expression="flowHandler.saveRestrictions(flowRequestContext, portalModelGroups)"/>
         </transition>
     </view-state>
 
