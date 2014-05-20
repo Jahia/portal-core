@@ -85,6 +85,13 @@
 </form>
 
 <div>
+    <div>
+        <button class="btn" onclick="submitPortalForm('cancel')">
+            <i class="icon-arrow-left"></i>
+            <fmt:message key="manageUserPortals.back"/>
+        </button>
+    </div>
+
     <p>
         <c:forEach items="${flowRequestContext.messageContext.allMessages}" var="message">
         <c:if test="${message.severity eq 'INFO'}">

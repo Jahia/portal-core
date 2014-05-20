@@ -381,15 +381,19 @@ public class PortalFactoryHandler implements Serializable {
         portalModelGroups.setSearchCriteria(searchCriteria);
 
         final String portalIdentifier = portalModelGroups.getPortalIdentifier();
-        List<String> groupsKey = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<List<String>>() {
+        PortalModelGroups systemModel = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<PortalModelGroups>() {
             @Override
-            public List<String> doInJCR(JCRSessionWrapper session) throws RepositoryException {
+            public PortalModelGroups doInJCR(JCRSessionWrapper session) throws RepositoryException {
                 JCRNodeWrapper portalNode = session.getNodeByUUID(portalIdentifier);
-                return portalService.getRestrictedGroupNames(portalNode);
+                PortalModelGroups systemModel = new PortalModelGroups();
+                systemModel.setGroupsKey(portalService.getRestrictedGroupNames(portalNode));
+                systemModel.setPortalDisplayableName(portalNode.getDisplayableName());
+                return systemModel;
             }
         });
 
-        portalModelGroups.setGroupsKey(groupsKey);
+        portalModelGroups.setGroupsKey(systemModel.getGroupsKey());
+        portalModelGroups.setPortalDisplayableName(systemModel.getPortalDisplayableName());
 
         return portalModelGroups;
     }

@@ -56,6 +56,8 @@
         <transition on="saveRestrictions" to="managePortalModelGroups">
             <evaluate expression="flowHandler.saveRestrictions(flowRequestContext, portalModelGroups)"/>
         </transition>
+
+        <transition on="cancel" to="portalFactory" bind="false" validate="false"/>
     </view-state>
 
     <view-state id="manageUserPortals" model="userPortalsTable">
@@ -69,6 +71,7 @@
         <transition on="search" to="manageUserPortals">
             <evaluate expression="flowHandler.searchUserPortals(flowRequestContext, userPortalsTable)" />
         </transition>
+        <transition on="cancel" to="portalFactory" bind="false" validate="false"/>
     </view-state>
 
     <view-state id="newPortalModelForm" model="portalModelForm">

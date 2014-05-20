@@ -14,6 +14,7 @@ public class PortalModelGroups implements Serializable{
     private static final long serialVersionUID = -8448050126315831852L;
 
     private String portalIdentifier;
+    private String portalDisplayableName;
     private List<String> groupsKey;
     private Map<String, Boolean> currentRestrictions;
     private Boolean displayLimited = false;
@@ -66,5 +67,13 @@ public class PortalModelGroups implements Serializable{
 
     public void setDisplayLimit(Integer displayLimit) {
         this.displayLimit = displayLimit;
+    }
+
+    public String getPortalDisplayableName() {
+        return portalDisplayableName;
+    }
+
+    public void setPortalDisplayableName(String portalDisplayableName) {
+        this.portalDisplayableName = portalDisplayableName;
     }
 }

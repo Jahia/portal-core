@@ -38,7 +38,7 @@
 
 <c:set var="site" value="${renderContext.mainResource.node.resolveSite}"/>
 
-<h2><fmt:message key="manageRestrictedGroups.title"/></h2>
+<h2><fmt:message key="manageRestrictedGroups.title"/> - ${portalModelGroups.portalDisplayableName}</h2>
 
 <c:set var="multipleProvidersAvailable" value="${fn:length(providers) > 1}"/>
 
@@ -81,6 +81,10 @@
                 <button class="btn btn-primary" type="button" onclick="submitSelectGroupsForm('saveRestrictions')">
                     &nbsp;<fmt:message key="label.save"/>
                 </button>
+
+            <button class="btn" type="button" onclick="submitSelectGroupsForm('cancel')">
+                &nbsp;<fmt:message key="label.cancel"/>
+            </button>
         </div>
 
         <p>
