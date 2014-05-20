@@ -45,15 +45,15 @@ public class PortalInitFilter extends AbstractFilter{
                 if(tabNode.isNodeType(PortalConstants.JNT_PORTAL_TAB)){
                     PortalTab portalTab = new PortalTab();
                     portalTab.setPath(tabNode.getPath());
+                    portalTab.setDisplayableName(tabNode.getDisplayableName());
+                    portalTab.setUrl(portal.getBaseUrl() + tabNode.getPath() + ".html");
+                    portalTab.setCurrent(tabNode.getIdentifier().equals(portal.getIdentifier()));
+                    portalTab.setTemplateKey(tabNode.getProperty(PortalConstants.J_TEMPLATE_NAME).getString());
+                    portalTab.setSkinKey(tabNode.getProperty(PortalConstants.J_WIDGET_SKIN).getString());
+                    portalTab.setAccessibility(tabNode.hasProperty(PortalConstants.J_ACCESSIBILITY) ? tabNode.getProperty(PortalConstants.J_ACCESSIBILITY).getString() : "me");
                     portal.getPortalTabs().add(portalTab);
+                    resource.getDependencies().add(portalTab.getPath());
                 }
-            }
-        }
-
-        // Add dependency to other tabs
-        for (PortalTab portalTab : portal.getPortalTabs()){
-            if (!portalTab.isCurrent()){
-                resource.getDependencies().add(portalTab.getPath());
             }
         }
 

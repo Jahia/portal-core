@@ -2,6 +2,7 @@ package org.jahia.modules.portal.tags;
 
 import org.jahia.modules.portal.service.PortalService;
 import org.jahia.services.content.JCRNodeWrapper;
+import org.jahia.services.content.JCRSessionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,5 +30,9 @@ public class PortalFunctions {
 
     public static Set<JCRNodeWrapper> getUserPortalsBySite(String siteKey, Locale locale) {
         return portalService.getUserPortalsBySite(siteKey, locale);
+    }
+
+    public static JCRNodeWrapper getUserPortalByModel(String modelIdentifier, JCRSessionWrapper sessionWrapper) {
+        return portalService.getUserPortalByModel(modelIdentifier, sessionWrapper);
     }
 }

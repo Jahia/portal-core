@@ -325,7 +325,7 @@ public class PortalService {
             Query query = queryManager.createQuery(q.toString(), Query.JCR_SQL2);
 
             NodeIterator nodes = query.execute().getNodes();
-            while (nodes.hasNext()) {
+            if (nodes.hasNext()) {
                 return (JCRNodeWrapper) nodes.next();
             }
         } catch (Exception e) {

@@ -15,4 +15,10 @@
         <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
         <function-signature>java.util.Set getUserPortalsBySite(java.lang.String,java.util.Locale)</function-signature>
     </function>
+
+    <function>
+        <name>userPortalByModel</name>
+        <function-class>org.jahia.modules.portal.tags.PortalFunctions</function-class>
+        <function-signature>org.jahia.services.content.JCRNodeWrapper getUserPortalByModel(java.lang.String,org.jahia.services.content.JCRSessionWrapper)</function-signature>
+    </function>
 </taglib>
