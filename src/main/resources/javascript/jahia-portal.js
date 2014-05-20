@@ -51,7 +51,7 @@ Jahia.Utils = {
 Jahia.Portal = function (options) {
     // Store the options
     this.options = options;
-    this.conf = Jahia.Portal.default;
+    this.conf = Jahia.Portal.defaultConf;
 
     // Specific options
     this.debug = options.debug ? options.debug : false;
@@ -108,11 +108,12 @@ Jahia.Portal.constants = {
 
     PORTAL_WIDGET_CLASS: "portal_widget"
 };
+
 /**
  * portal conf
  * @type {{sortable_options: {connectWith: string, handle: string, revert: boolean, iframeFix: boolean}}}
  */
-Jahia.Portal.default = {
+Jahia.Portal.defaultConf = {
     sortable_options: {
         connectWith: ".portal_area",
         handle: ".widget-header",
@@ -120,7 +121,6 @@ Jahia.Portal.default = {
         iframeFix: true
     }
 };
-
 
 Jahia.Portal.prototype = {
     /**

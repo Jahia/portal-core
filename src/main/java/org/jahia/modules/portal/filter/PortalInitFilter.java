@@ -35,6 +35,7 @@ public class PortalInitFilter extends AbstractFilter{
 
         //set tabs
         JCRNodeWrapper portalNode = JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JMIX_PORTAL);
+        JCRNodeWrapper portalTabNode = resource.getNode().isNodeType(PortalConstants.JNT_PORTAL_TAB) ? resource.getNode() : JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JNT_PORTAL_TAB);
         portal.setPortalTabs(new LinkedList<PortalTab>());
         QueryManager queryManager = resource.getNode().getSession().getWorkspace().getQueryManager();
         if (queryManager != null) {
@@ -47,7 +48,7 @@ public class PortalInitFilter extends AbstractFilter{
                     portalTab.setPath(tabNode.getPath());
                     portalTab.setDisplayableName(tabNode.getDisplayableName());
                     portalTab.setUrl(portal.getBaseUrl() + tabNode.getPath() + ".html");
-                    portalTab.setCurrent(tabNode.getIdentifier().equals(portal.getIdentifier()));
+                    portalTab.setCurrent(tabNode.getIdentifier().equals(portalTabNode.getIdentifier()));
                     portalTab.setTemplateKey(tabNode.getProperty(PortalConstants.J_TEMPLATE_NAME).getString());
                     portalTab.setSkinKey(tabNode.getProperty(PortalConstants.J_WIDGET_SKIN).getString());
                     portalTab.setAccessibility(tabNode.hasProperty(PortalConstants.J_ACCESSIBILITY) ? tabNode.getProperty(PortalConstants.J_ACCESSIBILITY).getString() : "me");
