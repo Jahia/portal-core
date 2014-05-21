@@ -439,23 +439,32 @@ public class PortalFactoryHandler implements Serializable {
     }
 
     public void saveRestrictions(RequestContext ctx, PortalModelGroups portalModelGroups) throws RepositoryException {
-        List<String> groupKeysToAdd = new ArrayList<String>();
-        List<String> groupKeysToRemove = new ArrayList<String>();
+        final PortalModelGroups copy = portalModelGroups;
+        JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+        List<String> newRestrictions = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<List<String>>() {
+            @Override
+            public List<String> doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                List<String> groupKeysToAdd = new ArrayList<String>();
+                List<String> groupKeysToRemove = new ArrayList<String>();
 
-        for (String groupKey : portalModelGroups.getCurrentRestrictions().keySet()){
-            if(portalModelGroups.getCurrentRestrictions().get(groupKey) && (portalModelGroups.getGroupsKey() == null || !portalModelGroups.getGroupsKey().contains(groupKey))){
-                groupKeysToRemove.add(groupKey);
-                portalModelGroups.getCurrentRestrictions().put(groupKey, false);
-            }else if(!portalModelGroups.getCurrentRestrictions().get(groupKey) && (portalModelGroups.getGroupsKey() != null && portalModelGroups.getGroupsKey().contains(groupKey))){
-                groupKeysToAdd.add(groupKey);
-                portalModelGroups.getCurrentRestrictions().put(groupKey, true);
+                for (String groupKey : copy.getCurrentRestrictions().keySet()){
+                    if(copy.getCurrentRestrictions().get(groupKey) && (copy.getGroupsKey() == null || !copy.getGroupsKey().contains(groupKey))){
+                        groupKeysToRemove.add(groupKey);
+                        copy.getCurrentRestrictions().put(groupKey, false);
+                    }else if(!copy.getCurrentRestrictions().get(groupKey) && (copy.getGroupsKey() != null && copy.getGroupsKey().contains(groupKey))){
+                        groupKeysToAdd.add(groupKey);
+                        copy.getCurrentRestrictions().put(groupKey, true);
+                    }
+                }
+
+                JCRNodeWrapper portalNode = session.getNodeByUUID(copy.getPortalIdentifier());
+                portalService.addRestrictedGroupsToModel(portalNode, groupKeysToAdd);
+                portalService.removeRestrictedGroupsFromModel(portalNode, groupKeysToRemove);
+                return portalService.getRestrictedGroupNames(portalNode);
             }
-        }
+        });
 
-        JCRNodeWrapper portalNode = getCurrentUserSession(ctx, "live").getNodeByUUID(portalModelGroups.getPortalIdentifier());
-        portalService.addRestrictedGroupsToModel(portalNode, groupKeysToAdd);
-        portalService.removeRestrictedGroupsFromModel(portalNode, groupKeysToRemove);
-        portalModelGroups.setGroupsKey(portalService.getRestrictedGroupNames(portalNode));
+        portalModelGroups.setGroupsKey(newRestrictions);
     }
 
     public boolean enablePortalModel(final RequestContext ctx, final String selectedPortalModelIdentifier) throws RepositoryException {
