@@ -470,8 +470,7 @@ public class PortalService {
         PortalContext portalContext = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), sessionWrapper.getWorkspace().getName(), sessionWrapper.getLocale(), new JCRCallback<PortalContext>() {
             @Override
             public PortalContext doInJCR(JCRSessionWrapper session) throws RepositoryException {
-                JCRNodeWrapper currentNode = session.getNode(currentPath);
-                JCRNodeWrapper portalTabNode = currentNode.isNodeType(PortalConstants.JNT_PORTAL_TAB) ? currentNode : JCRContentUtils.getParentOfType(currentNode, PortalConstants.JNT_PORTAL_TAB);
+                JCRNodeWrapper portalTabNode = session.getNode(currentPath);
                 JCRNodeWrapper portalNode = JCRContentUtils.getParentOfType(portalTabNode, PortalConstants.JMIX_PORTAL);
 
                 PortalContext portalContext = new PortalContext();

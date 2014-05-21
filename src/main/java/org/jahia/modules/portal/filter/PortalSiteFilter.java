@@ -21,15 +21,10 @@ public class PortalSiteFilter extends AbstractFilter{
 
     @Override
     public String prepare(RenderContext renderContext, Resource resource, RenderChain chain) throws Exception {
-        JCRNodeWrapper portalNode = null;
-        if(resource.getNode().isNodeType(PortalConstants.JMIX_PORTAL)){
-            portalNode = resource.getNode();
-        } else {
-            portalNode = JCRContentUtils.getParentOfType(resource.getNode(), PortalConstants.JMIX_PORTAL);
-        }
-        if(portalNode != null){
-            portalService.fixPortalSiteInContext(renderContext, portalNode);
-        }
+        JCRNodeWrapper portalTabNode = renderContext.getMainResource().getNode().isNodeType(PortalConstants.JNT_PORTAL_TAB)
+                ? renderContext.getMainResource().getNode() : JCRContentUtils.getParentOfType(renderContext.getMainResource().getNode(), PortalConstants.JNT_PORTAL_TAB);
+
+        portalService.fixPortalSiteInContext(renderContext, portalTabNode.getParent());
         
         return null;
     }

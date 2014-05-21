@@ -6,6 +6,8 @@
 // Portal
 //---------------------------------------------------------
 
+[jmix:portalContextWatcher] mixin
+
 [jmix:portalGadget] mixin
 
 [jmix:portalWidgetSkin] mixin
@@ -22,7 +24,7 @@
 [jmix:hasModel] mixin
  - j:model (weakreference) mandatory < jnt:portalModel
 
-[jmix:portalWidget] > mix:referenceable, mix:title, jmix:portalWidgetSkin mixin
+[jmix:portalWidget] > mix:referenceable, mix:title, jmix:portalWidgetSkin, jmix:portalContextWatcher mixin
 
 [jmix:portalWidgetCore] mixin
 
@@ -46,7 +48,7 @@ orderable
 orderable
 - j:siteId (long)
 
-[jnt:portalTab] > jnt:content, mix:title, jmix:list, jmix:hasTemplateNode, jmix:portalWidgetSkin
+[jnt:portalTab] > jnt:content, mix:title, jmix:list, jmix:hasTemplateNode, jmix:portalWidgetSkin, jmix:portalContextWatcher
  + * (nt:base) = nt:base version
  - j:accessibility (string, choicelist[resourceBundle]) = 'me' < 'me', 'all', 'users'
 

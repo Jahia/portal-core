@@ -31,21 +31,19 @@
         <property name="portalService" ref="PortalService"/>
         <property name="priority" value="10"/>
         <property name="description" value="set the good site for the user portal"/>
-        <property name="applyOnNodeTypes" value="jnt:portalTab,jmix:portalWidget,jmix:portal"/>
+        <property name="applyOnNodeTypes" value="jnt:portalTab,jmix:portalWidget"/>
     </bean>
 
     <bean class="org.jahia.modules.portal.filter.PortalInitFilter">
         <property name="priority" value="17"/>
-        <property name="description" value="set the good site for the user portal"/>
-        <property name="applyOnConfigurations" value="page,module" />
-        <property name="applyOnTemplateTypes" value="html"/>
-        <property name="applyOnNodeTypes" value="jnt:portalTab,jmix:portalWidget"/>
+        <property name="description" value="Init portal context, add it to the current request, so it can be used in script views"/>
+        <property name="applyOnNodeTypes" value="jmix:portalContextWatcher"/>
         <property name="portalService" ref="portalService"/>
     </bean>
 
     <bean name="PortalLibFilter" class="org.jahia.modules.portal.filter.PortalLibFilter">
         <property name="priority" value="18"/>
-        <property name="description" value="Add portal JavaScript API in the page before the static asset filter"/>
+        <property name="description" value="Add portal JavaScript API in the page, use the portal context"/>
         <property name="applyOnConfigurations" value="page" />
         <property name="applyOnTemplateTypes" value="html"/>
         <property name="applyOnNodeTypes" value="jnt:portalTab"/>
