@@ -1,3 +1,4 @@
+<%@ page import="org.jahia.modules.portal.PortalConstants" %>
 <%@ page language="java" contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="template" uri="http://www.jahia.org/tags/templateLib" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -26,11 +27,27 @@
         portal Area
     </c:when>
     <c:otherwise>
-        <jcr:node var="portalColNode" path="${renderContext.mainResource.node.path}/${currentNode.name}"/>
         <div id="portal_area_${currentNode.identifier}" class="portal_area" data-area-name="${currentNode.name}">
-            <c:if test="${not empty portalColNode}">
-                <template:area path="${portalColNode.path}"/>
-            </c:if>
+            <c:set var="widgetIdentifier" value="${not empty renderContext.request.parameterMap['w'] ? renderContext.request.parameterMap['w'][0] : null}"/>
+            <c:set var="widgetSolo" value="${not empty renderContext.request.parameterMap['w_solo'] ? renderContext.request.parameterMap['w_solo'][0] : null}"/>
+
+            <c:choose>
+                <c:when test="${widgetSolo != null && widgetIdentifier != null}">
+                    <jcr:node var="widgetNode" uuid="${widgetIdentifier}"/>
+                    <c:if test="${not empty widgetNode}">
+                        <jcr:node var="portalColNode" path="${widgetNode.parent.path}"/>
+                        <c:if test="${not empty portalColNode}">
+                            <template:area path="${portalColNode.path}"/>
+                        </c:if>
+                    </c:if>
+                </c:when>
+                <c:otherwise>
+                    <jcr:node var="portalColNode" path="${renderContext.mainResource.node.path}/${currentNode.name}"/>
+                    <c:if test="${not empty portalColNode}">
+                        <template:area path="${portalColNode.path}"/>
+                    </c:if>
+                </c:otherwise>
+            </c:choose>
         </div>
 
         <script type="text/javascript">
