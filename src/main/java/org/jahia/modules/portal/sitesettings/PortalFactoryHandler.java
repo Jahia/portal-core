@@ -268,7 +268,7 @@ public class PortalFactoryHandler implements Serializable {
             if(userPortalsTable.getSearchCriteria() != null && StringUtils.isNotEmpty(userPortalsTable.getSearchCriteria().getSearchString())){
                 Set<Principal> searchResult = PrincipalViewHelper.getSearchResult("allProps",
                         userPortalsTable.getSearchCriteria().getSearchString(), null, "providers",
-                        new String[]{"jcr"});
+                        null);
 
                 Iterator<Principal> principals = searchResult.iterator();
                 while (principals.hasNext()){
@@ -301,23 +301,27 @@ public class PortalFactoryHandler implements Serializable {
 
     public void searchUserPortals(RequestContext ctx, UserPortalsTable userPortalsTable) {
         try {
-            if (userPortalsTable.getSearchCriteria() != null && StringUtils.isNotEmpty(userPortalsTable.getSearchCriteria().getSearchString())) {
-                JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
-                final int siteId = getRenderContext(ctx).getSite().getID();
+            JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
+            final int siteId = getRenderContext(ctx).getSite().getID();
 
-                UserPortalsSearchCriteria searchCriteria = userPortalsTable.getSearchCriteria();
-                initUserPortalsManager(ctx, userPortalsTable);
-                userPortalsTable.setSearchCriteria(searchCriteria);
+            UserPortalsSearchCriteria searchCriteria = userPortalsTable.getSearchCriteria();
+            initUserPortalsManager(ctx, userPortalsTable);
+            userPortalsTable.setSearchCriteria(searchCriteria);
 
-                final UserPortalsTable userPortalsTableToQuery = userPortalsTable;
-                long maxResults = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Long>() {
-                    @Override
-                    public Long doInJCR(JCRSessionWrapper session) throws RepositoryException {
-                        return getUserPortalsQuery(siteId, userPortalsTableToQuery, session).execute().getNodes().getSize();
+            final UserPortalsTable userPortalsTableToQuery = userPortalsTable;
+            long maxResults = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Long>() {
+                @Override
+                public Long doInJCR(JCRSessionWrapper session) throws RepositoryException {
+                    Query query = getUserPortalsQuery(siteId, userPortalsTableToQuery, session);
+                    if (!query.getStatement().contains("isdescendantnode") && userPortalsTableToQuery.getSearchCriteria() != null &&
+                            StringUtils.isNotEmpty(userPortalsTableToQuery.getSearchCriteria().getSearchString())) {
+                        return 0l;
+                    } else {
+                        return query.execute().getNodes().getSize();
                     }
-                });
-                userPortalsTable.getPager().setMaxResults(maxResults);
-            }
+                }
+            });
+            userPortalsTable.getPager().setMaxResults(maxResults);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         } finally {
@@ -337,23 +341,26 @@ public class PortalFactoryHandler implements Serializable {
                     query.setLimit(finalTable.getPager().getItemsPerPage());
                     query.setOffset(finalTable.getPager().getItemsPerPage() * (finalTable.getPager().getPage() - 1));
 
-                    NodeIterator nodeIterator = query.execute().getNodes();
                     LinkedHashMap<String, UserPortalsTableRow> tableRowsToReturn = new LinkedHashMap<String, UserPortalsTableRow>();
-                    while (nodeIterator.hasNext()){
-                        JCRNodeWrapper portalNode = (JCRNodeWrapper) nodeIterator.next();
-                        UserPortalsTableRow row = new UserPortalsTableRow();
-                        row.setUserNodeIdentifier(JCRContentUtils.getParentOfType(portalNode, "jnt:user").getIdentifier());
-                        try{
-                            row.setModelName(((JCRNodeWrapper) portalNode.getProperty("j:model").getNode()).getDisplayableName());
-                        }catch (Exception e){
-                            // model deleted
-                            row.setModelName("No model found");
-                        }
-                        DateTime sinceDate = ISODateTimeFormat.dateOptionalTimeParser().parseDateTime(portalNode.getPropertyAsString("j:lastViewed"));
-                        row.setLastUsed(Days.daysBetween(new LocalDate(sinceDate), new LocalDate()).getDays());
-                        row.setCreated(portalNode.getProperty("jcr:created").getDate().getTime());
-                        tableRowsToReturn.put(portalNode.getPath(), row);
-                    }
+                    if (query.getStatement().contains("isdescendantnode") || finalTable.getSearchCriteria() == null ||
+                            !StringUtils.isNotEmpty(finalTable.getSearchCriteria().getSearchString())) {
+                                NodeIterator nodeIterator = query.execute().getNodes();
+                                while (nodeIterator.hasNext()) {
+                                    JCRNodeWrapper portalNode = (JCRNodeWrapper) nodeIterator.next();
+                                    UserPortalsTableRow row = new UserPortalsTableRow();
+                                    row.setUserNodeIdentifier(JCRContentUtils.getParentOfType(portalNode, "jnt:user").getIdentifier());
+                                    try {
+                                        row.setModelName(((JCRNodeWrapper) portalNode.getProperty("j:model").getNode()).getDisplayableName());
+                                    } catch (Exception e) {
+                                        // model deleted
+                                        row.setModelName("No model found");
+                                    }
+                                    DateTime sinceDate = ISODateTimeFormat.dateOptionalTimeParser().parseDateTime(portalNode.getPropertyAsString("j:lastViewed"));
+                                    row.setLastUsed(Days.daysBetween(new LocalDate(sinceDate), new LocalDate()).getDays());
+                                    row.setCreated(portalNode.getProperty("jcr:created").getDate().getTime());
+                                    tableRowsToReturn.put(portalNode.getPath(), row);
+                                }
+                            }
                     return tableRowsToReturn;
                 }
             });
