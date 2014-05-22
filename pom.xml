@@ -98,26 +98,6 @@
       <url>https://devtools.jahia.com/nexus/content/repositories/jahia-enterprise-snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-  <dependencies>
-    <dependency>
-      <groupId>atg.taglib.json</groupId>
-      <artifactId>json-taglib</artifactId>
-      <version>0.4.1</version>
-      <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>commons-el</artifactId>
-          <groupId>commons-el</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.jahia.modules</groupId>
-      <artifactId>jcr-rest-javascript-utils</artifactId>
-      <version>1.0-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
   <repositories>
     <repository>
       <releases>
@@ -140,7 +120,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Jahia-Depends>default,jcr-rest-javascript-utils,siteSettings</Jahia-Depends>
+            <Jahia-Depends>default,siteSettings</Jahia-Depends>
             <Export-Package>org.jahia.modules.portal,org.jahia.modules.portal.tags,org.jahia.modules.portal.service.bean</Export-Package>
             <Import-Package>org.jahia.services.usermanager.ldap;resolution:=optional,${jahia.plugin.projectPackageImport},*</Import-Package>
           </instructions>

@@ -53,7 +53,7 @@
         <property name="debugEnabled" value="${portalDebugEnabled:true}"/>
     </bean>
 
-    <bean class="org.jahia.modules.jcrrestapi.filter.JCRRestJavaScriptLibFilter">
+    <bean class="org.jahia.modules.defaultmodule.filter.JCRRestJavaScriptLibFilter">
         <property name="priority" value="19"/>
         <property name="description" value="Add JCR Rest utils lib into the page"/>
         <property name="applyOnConfigurations" value="page" />
@@ -61,10 +61,6 @@
         <property name="applyOnNodeTypes" value="jnt:portalTab"/>
 
         <property name="scriptEngineUtils" ref="scriptEngineUtils"/>
-        <property name="javaScriptFileName" value="JCRRestUtils.js"/>
-        <property name="moduleName" value="jcr-rest-javascript-utils"/>
-        <property name="templateName" value="jcrRestUtilsInit.groovy"/>
-
         <property name="debugEnabled" value="${jcrRestUtilsDebugEnabled:true}"/>
         <property name="jcrRestAPIVersion" value="${jcrRestUtilsAPIVersion:v1}"/>
     </bean>
