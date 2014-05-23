@@ -4,10 +4,12 @@
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:osgi="http://www.eclipse.org/gemini/blueprint/schema/blueprint"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
        http://www.springframework.org/schema/mvc
-       http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+       http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.eclipse.org/gemini/blueprint/schema/blueprint http://www.eclipse.org/gemini/blueprint/schema/blueprint/gemini-blueprint.xsd">
 
     <util:map id="siteSettingsProperties">
         <entry key="groupDisplayLimit" value="${jahia.settings.groupDisplayLimit:100}"/>
@@ -15,10 +17,11 @@
     </util:map>
 
     <!-- Services -->
-    <bean id="portalService" name="PortalService" class="org.jahia.modules.portal.service.PortalService">
+    <bean id="portalService" class="org.jahia.modules.portal.service.PortalService">
         <property name="contentManager" ref="ContentManagerHelper"/>
         <property name="groupManagerService" ref="JahiaGroupManagerService"/>
     </bean>
+    <osgi:service id="portalServiceOsgi" ref="portalService" interface="org.jahia.modules.portal.service.PortalService"/>
     <context:annotation-config/>
     <context:component-scan base-package="org.jahia.modules.portal"/>
 
@@ -28,7 +31,7 @@
 
     <!-- Filters -->
     <bean class="org.jahia.modules.portal.filter.PortalSiteFilter">
-        <property name="portalService" ref="PortalService"/>
+        <property name="portalService" ref="portalService"/>
         <property name="priority" value="10"/>
         <property name="description" value="set the good site for the user portal"/>
         <property name="applyOnNodeTypes" value="jnt:portalTab,jmix:portalWidget"/>
@@ -76,19 +79,19 @@
     <!-- Error handlers -->
     <bean name="PortalTabRedirectHandler" class="org.jahia.modules.portal.error.PortalTabRedirectHandler">
         <property name="urlResolverFactory" ref="urlResolverFactory"/>
-        <property name="portalService" ref="PortalService"/>
+        <property name="portalService" ref="portalService"/>
     </bean>
 
     <!-- Actions -->
     <bean class="org.jahia.modules.portal.action.AddWidgetAction">
-        <property name="portalService" ref="PortalService"/>
+        <property name="portalService" ref="portalService"/>
     </bean>
     <bean class="org.jahia.modules.portal.action.MoveWidgetAction">
-        <property name="portalService" ref="PortalService"/>
+        <property name="portalService" ref="portalService"/>
         <property name="contentManager" ref="ContentManagerHelper"/>
     </bean>
     <bean class="org.jahia.modules.portal.action.CopyPortalModelAction">
-        <property name="portalService" ref="PortalService"/>
+        <property name="portalService" ref="portalService"/>
     </bean>
 
     <!-- Rules -->

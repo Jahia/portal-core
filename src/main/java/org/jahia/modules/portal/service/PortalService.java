@@ -484,12 +484,13 @@ public class PortalService {
                 portalContext.setLock(portalNode.hasProperty(PortalConstants.J_LOCKED) && portalNode.getProperty(PortalConstants.J_LOCKED).getBoolean());
                 portalContext.setModel(isModel);
                 portalContext.setCustomizable(isModel && portalNode.hasProperty(PortalConstants.J_ALLOW_CUSTOMIZATION) && portalNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean());
-                portalContext.setEnabled(isModel && portalNode.hasProperty(PortalConstants.J_ENABLED) && portalNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
                 JCRSiteNode site = JahiaSitesService.getInstance().getSite(siteInt, session);
 
                 JCRNodeWrapper modelNode = null;
                 boolean modelDeleted = false;
-                if(!isModel){
+                if(isModel){
+                    portalContext.setEnabled(portalNode.hasProperty(PortalConstants.J_ENABLED) && portalNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
+                }else {
                     try {
                         modelNode = (JCRNodeWrapper) portalNode.getProperty(PortalConstants.J_MODEL).getNode();
                     }catch (Exception e){
@@ -498,7 +499,9 @@ public class PortalService {
                     if(modelNode != null){
                         portalContext.setModelPath(modelNode.getPath());
                         portalContext.setModelIdentifier(modelNode.getIdentifier());
+                        portalContext.setEnabled(modelNode.hasProperty(PortalConstants.J_ENABLED) && modelNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
                     } else {
+                        portalContext.setEnabled(false);
                         modelDeleted = true;
                     }
                 }
