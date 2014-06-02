@@ -6,6 +6,8 @@ import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.bean.*;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
+import org.jahia.security.license.LicenseCheckException;
+import org.jahia.security.license.LicenseCheckerService;
 import org.jahia.services.content.*;
 import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.ExtendedNodeType;
@@ -22,6 +24,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
@@ -38,7 +41,7 @@ import java.util.*;
  * Time: 15:35
  * To change this template use File | Settings | File Templates.
  */
-public class PortalService {
+public class PortalService implements InitializingBean{
     private static Logger logger = LoggerFactory.getLogger(PortalService.class);
     private static final Comparator<? super JCRNodeWrapper> PORTALS_COMPARATOR = new Comparator<JCRNodeWrapper>() {
 
@@ -743,6 +746,13 @@ public class PortalService {
             portalModelNode.getSession().save();
         } catch (RepositoryException e) {
             logger.error(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (!LicenseCheckerService.Stub.isAllowed("org.jahia.portal-factory")) {
+            throw new LicenseCheckException("No license found for portal factory");
         }
     }
 }
