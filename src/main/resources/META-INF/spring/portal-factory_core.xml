@@ -56,7 +56,7 @@
         <property name="debugEnabled" value="${portalDebugEnabled:true}"/>
     </bean>
 
-    <bean class="org.jahia.modules.defaultmodule.filter.JCRRestJavaScriptLibFilter">
+    <bean class="org.jahia.modules.portal.filter.JCRRestJavaScriptLibFilter">
         <property name="priority" value="19"/>
         <property name="description" value="Add JCR Rest utils lib into the page"/>
         <property name="applyOnConfigurations" value="page" />

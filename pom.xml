@@ -76,7 +76,7 @@
   <parent>
     <groupId>org.jahia.modules</groupId>
     <artifactId>jahia-modules</artifactId>
-    <version>7.0.1.0-SNAPSHOT</version>
+    <version>7.0.0.0</version>
   </parent>
   <artifactId>portal-factory_core</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -88,16 +88,6 @@
     <developerConnection>scm:git:git@github.com:Jahia/portal-factory_core.git</developerConnection>
     <url>scm:git:git@github.com:Jahia/portal-factory_core.git</url>
   </scm>
-  <distributionManagement>
-    <repository>
-      <id>jahia-enterprise-releases</id>
-      <url>https://devtools.jahia.com/nexus/content/repositories/jahia-enterprise-releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>jahia-enterprise-snapshots</id>
-      <url>https://devtools.jahia.com/nexus/content/repositories/jahia-enterprise-snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
   <repositories>
     <repository>
       <releases>

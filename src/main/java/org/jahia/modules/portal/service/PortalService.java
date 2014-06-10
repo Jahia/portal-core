@@ -6,8 +6,6 @@ import org.jahia.modules.portal.PortalConstants;
 import org.jahia.modules.portal.service.bean.*;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
-import org.jahia.security.license.LicenseCheckException;
-import org.jahia.security.license.LicenseCheckerService;
 import org.jahia.services.content.*;
 import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.ExtendedNodeType;
@@ -41,7 +39,7 @@ import java.util.*;
  * Time: 15:35
  * To change this template use File | Settings | File Templates.
  */
-public class PortalService implements InitializingBean{
+public class PortalService{
     private static Logger logger = LoggerFactory.getLogger(PortalService.class);
     private static final Comparator<? super JCRNodeWrapper> PORTALS_COMPARATOR = new Comparator<JCRNodeWrapper>() {
 
@@ -749,10 +747,10 @@ public class PortalService implements InitializingBean{
         }
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws Exception {
         if (!LicenseCheckerService.Stub.isAllowed("org.jahia.portal")) {
             throw new LicenseCheckException("No license found for portal factory");
         }
-    }
+    }*/
 }
