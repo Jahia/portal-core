@@ -49,7 +49,8 @@ public class JCRRestJavaScriptLibFilter extends AbstractFilter{
         String context = StringUtils.isNotEmpty(renderContext.getRequest().getContextPath()) ? renderContext.getRequest().getContextPath() : "";
 
         // add lib
-        String path = context + "/modules/assets/javascript/" + JCR_REST_JS_FILE;
+        String path = context + "/modules/" + renderContext.getMainResource().getNode().getPrimaryNodeType().getTemplatePackage().getBundle().getSymbolicName()
+                + "/javascript/" + JCR_REST_JS_FILE;
         String encodedPath = URLEncoder.encode(path, "UTF-8");
         out += ("<jahia:resource type='javascript' path='" + encodedPath + "' insert='true' resource='" + JCR_REST_JS_FILE + "'/>");
 
