@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <content xmlns:j="http://www.jahia.org/jahia/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0">
     <modules jcr:primaryType="jnt:modules">
-        <portal-factory_core j:dependencies="default siteSettings"
+        <portal-core j:dependencies="default siteSettings"
                       j:modulePriority="0"
                     j:moduleType="module"
                     j:title="Portal factory - core"
@@ -49,6 +49,6 @@
                     </site-settings-base>
                 </templates>
 
-            </portal-factory_core>
+            </portal-core>
     </modules>
 </content>

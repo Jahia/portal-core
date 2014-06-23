@@ -80,15 +80,15 @@
     <artifactId>jahia-modules</artifactId>
     <version>7.0.0.0</version>
   </parent>
-  <artifactId>portal-factory_core</artifactId>
+  <artifactId>portal-core</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>Portal factory - core</name>
   <description>This is the custom module (portal factory - core) for running on a Jahia xCM server.</description>
   <scm>
-    <connection>scm:git:git@github.com:Jahia/portal-factory_core.git</connection>
-    <developerConnection>scm:git:git@github.com:Jahia/portal-factory_core.git</developerConnection>
-    <url>scm:git:git@github.com:Jahia/portal-factory_core.git</url>
+    <connection>scm:git:git@github.com:Jahia/portal-core.git</connection>
+    <developerConnection>scm:git:git@github.com:Jahia/portal-core.git</developerConnection>
+    <url>scm:git:git@github.com:Jahia/portal-core.git</url>
   </scm>
   <repositories>
     <repository>

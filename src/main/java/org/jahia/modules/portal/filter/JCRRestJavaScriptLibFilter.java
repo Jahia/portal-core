@@ -169,7 +169,7 @@ public class JCRRestJavaScriptLibFilter extends AbstractFilter{
 
     protected String getResolvedTemplate() throws IOException {
         if (resolvedTemplate == null) {
-            String templatePath = "/modules/portal-factory_core/WEB-INF/scripts/" + JCR_REST_SCRIPT_TEMPLATE;
+            String templatePath = "/modules/portal-core/WEB-INF/scripts/" + JCR_REST_SCRIPT_TEMPLATE;
             resolvedTemplate = WebUtils.getResourceAsString(templatePath);
             if (resolvedTemplate == null) {
                 logger.warn("Unable to lookup template at {}", JCR_REST_SCRIPT_TEMPLATE);
