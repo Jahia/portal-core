@@ -29,7 +29,7 @@
                         <portal-factory j:applyOn="jnt:virtualsite"
                                j:defaultTemplate="false"
                                j:hiddenTemplate="true"
-                               j:icon="/modules/portal-factory_core/templates/files/Portal-Factory-icon.png"
+                               j:icon="/modules/portal-core/templates/files/Portal-Factory-icon.png"
                                j:requiredPermissionNames="siteAdminPortalFactory"
                                j:view="siteSettings"
                                jcr:primaryType="jnt:contentTemplate">
