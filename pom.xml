@@ -81,7 +81,7 @@
     <version>7.0.0.0</version>
   </parent>
   <artifactId>portal-factory_core</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>Portal factory - core</name>
   <description>This is the custom module (portal factory - core) for running on a Jahia xCM server.</description>
