@@ -81,7 +81,9 @@ import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelGroups;
 import org.jahia.modules.portal.sitesettings.table.*;
 import org.jahia.services.content.*;
+import org.jahia.services.content.decorator.JCRGroupNode;
 import org.jahia.services.content.decorator.JCRSiteNode;
+import org.jahia.services.content.decorator.JCRUserNode;
 import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.View;
@@ -129,11 +131,11 @@ public class PortalFactoryHandler implements Serializable {
 
     public PortalModelTable initPortalModelsTable(RequestContext ctx) throws RepositoryException {
         JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
-        final int siteId = getRenderContext(ctx).getSite().getID();
+        final String siteKey = getRenderContext(ctx).getSite().getSiteKey();
         PortalModelTable result = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<PortalModelTable>() {
             @Override
             public PortalModelTable doInJCR(JCRSessionWrapper session) throws RepositoryException {
-                List<JCRNodeWrapper> portalModelNodes = portalService.getSitePortalModels(JahiaSitesService.getInstance().getSite(siteId, session), null, false, session);
+                List<JCRNodeWrapper> portalModelNodes = portalService.getSitePortalModels(JahiaSitesService.getInstance().getSiteByKey(siteKey, session), null, false, session);
 
                 PortalModelTable portalModelTable = new PortalModelTable();
                 List<PortalModelTableRow> portalModelTableRows = new ArrayList<PortalModelTableRow>();
@@ -175,11 +177,11 @@ public class PortalFactoryHandler implements Serializable {
     public boolean createPortalModel(final RequestContext ctx, final PortalModelForm form){
         try {
             JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
-            final int siteId = getRenderContext(ctx).getSite().getID();
+            final String siteKey = getRenderContext(ctx).getSite().getSiteKey();
             JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Object>() {
                 @Override
                 public Object doInJCR(JCRSessionWrapper session) throws RepositoryException {
-                    portalService.createPortalModel(form, JahiaSitesService.getInstance().getSite(siteId, session), session);
+                    portalService.createPortalModel(form, JahiaSitesService.getInstance().getSiteByKey(siteKey, session), session);
                     return null;
                 }
             });
@@ -304,7 +306,7 @@ public class PortalFactoryHandler implements Serializable {
 
     public UserPortalsTable initUserPortalsManager(RequestContext ctx, UserPortalsTable userPortalsTable) {
         JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
-        final int siteId = getRenderContext(ctx).getSite().getID();
+        final String siteKey = getRenderContext(ctx).getSite().getSiteKey();
         if(userPortalsTable == null){
             userPortalsTable = new UserPortalsTable();
         }
@@ -319,7 +321,7 @@ public class PortalFactoryHandler implements Serializable {
             long maxResults = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Long>() {
                 @Override
                 public Long doInJCR(JCRSessionWrapper session) throws RepositoryException {
-                    return getUserPortalsQuery(siteId, userPortalsTableToQuery, session).execute().getNodes().getSize();
+                    return getUserPortalsQuery(siteKey, userPortalsTableToQuery, session).execute().getNodes().getSize();
                 }
             });
             pager.setMaxResults(maxResults);
@@ -330,25 +332,25 @@ public class PortalFactoryHandler implements Serializable {
         return userPortalsTable;
     }
 
-    private Query getUserPortalsQuery(int siteId, UserPortalsTable userPortalsTable, JCRSessionWrapper sessionWrapper){
+    private Query getUserPortalsQuery(String siteKey, UserPortalsTable userPortalsTable, JCRSessionWrapper sessionWrapper){
         Query query = null;
         try {
             QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
             StringBuilder builder = new StringBuilder("select * from [" + PortalConstants.JNT_PORTAL_USER + "] as p where");
             boolean first = true;
             if(userPortalsTable.getSearchCriteria() != null && StringUtils.isNotEmpty(userPortalsTable.getSearchCriteria().getSearchString())){
-                Set<Principal> searchResult = PrincipalViewHelper.getSearchResult("allProps",
+                Set<JCRUserNode> searchResult = PrincipalViewHelper.getSearchResult("allProps",
                         userPortalsTable.getSearchCriteria().getSearchString(), null, "providers",
                         null);
 
-                Iterator<Principal> principals = searchResult.iterator();
+                Iterator<JCRUserNode> principals = searchResult.iterator();
                 while (principals.hasNext()){
                     if(first){
                         builder.append("(");
                         first = false;
                     }
-                    JahiaUser user = (JahiaUser) principals.next();
-                    builder.append(" isdescendantnode(p, ['").append(user.getLocalPath()).append("'])");
+                    JCRUserNode user = principals.next();
+                    builder.append(" isdescendantnode(p, ['").append(user.getPath()).append("'])");
                     if(principals.hasNext()){
                         builder.append(" or");
                     }else {
@@ -359,7 +361,7 @@ public class PortalFactoryHandler implements Serializable {
             if(!first){
                 builder.append(" and");
             }
-            builder.append(" p.['").append(PortalConstants.J_SITEID).append("'] = '").append(siteId).append("'");
+            builder.append(" p.['").append(PortalConstants.J_SITEKEY).append("'] = '").append(siteKey).append("'");
             if(userPortalsTable.getPager() != null && StringUtils.isNotEmpty(userPortalsTable.getPager().getSortBy())){
                 builder.append(" order by '").append(userPortalsTable.getPager().getSortBy()).append("' ").append(userPortalsTable.getPager().isSortAsc() ? "ASC" : "DESC");
             }
@@ -373,7 +375,7 @@ public class PortalFactoryHandler implements Serializable {
     public void searchUserPortals(RequestContext ctx, UserPortalsTable userPortalsTable) {
         try {
             JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
-            final int siteId = getRenderContext(ctx).getSite().getID();
+            final String siteKey = getRenderContext(ctx).getSite().getSiteKey();
 
             UserPortalsSearchCriteria searchCriteria = userPortalsTable.getSearchCriteria();
             initUserPortalsManager(ctx, userPortalsTable);
@@ -383,7 +385,7 @@ public class PortalFactoryHandler implements Serializable {
             long maxResults = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<Long>() {
                 @Override
                 public Long doInJCR(JCRSessionWrapper session) throws RepositoryException {
-                    Query query = getUserPortalsQuery(siteId, userPortalsTableToQuery, session);
+                    Query query = getUserPortalsQuery(siteKey, userPortalsTableToQuery, session);
                     if (!query.getStatement().contains("isdescendantnode") && userPortalsTableToQuery.getSearchCriteria() != null &&
                             StringUtils.isNotEmpty(userPortalsTableToQuery.getSearchCriteria().getSearchString())) {
                         return 0l;
@@ -403,12 +405,12 @@ public class PortalFactoryHandler implements Serializable {
     public void doUserPortalsQuery(RequestContext ctx, UserPortalsTable userPortalsTable){
         try {
             JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
-            final int siteId = getRenderContext(ctx).getSite().getID();
+            final String siteKey = getRenderContext(ctx).getSite().getSiteKey();
             final UserPortalsTable finalTable = userPortalsTable;
             LinkedHashMap<String, UserPortalsTableRow> tableRows = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<LinkedHashMap<String, UserPortalsTableRow>>() {
                 @Override
                 public LinkedHashMap<String, UserPortalsTableRow> doInJCR(JCRSessionWrapper session) throws RepositoryException {
-                    Query query = getUserPortalsQuery(siteId, finalTable, session);
+                    Query query = getUserPortalsQuery(siteKey, finalTable, session);
                     query.setLimit(finalTable.getPager().getItemsPerPage());
                     query.setOffset(finalTable.getPager().getItemsPerPage() * (finalTable.getPager().getPage() - 1));
 
@@ -482,22 +484,22 @@ public class PortalFactoryHandler implements Serializable {
      * @return an empty (newly initialized) search criteria bean
      */
     public SearchCriteria initCriteria(RequestContext ctx) {
-        return new SearchCriteria(((RenderContext) ctx.getExternalContext().getRequestMap().get("renderContext")).getSite().getID());
+        return new SearchCriteria(((RenderContext) ctx.getExternalContext().getRequestMap().get("renderContext")).getSite().getSiteKey());
     }
 
-    public Set<Principal> search(RequestContext ctx, PortalModelGroups portalModelGroups) {
+    public Set<JCRGroupNode> search(RequestContext ctx, PortalModelGroups portalModelGroups) {
         int displayLimit = Integer.parseInt(((Map<String, String>) ctx.getFlowScope().get("siteSettingsProperties")).get("groupDisplayLimit"));
         SearchCriteria searchCriteria = portalModelGroups.getSearchCriteria();
         long timer = System.currentTimeMillis();
-        Set<Principal> searchResult = PrincipalViewHelper.getGroupSearchResult(searchCriteria.getSearchIn(),
-                searchCriteria.getSiteId(), searchCriteria.getSearchString(), searchCriteria.getProperties(),
+        Set<JCRGroupNode> searchResult = PrincipalViewHelper.getGroupSearchResult(searchCriteria.getSearchIn(),
+                searchCriteria.getSiteKey(), searchCriteria.getSearchString(), searchCriteria.getProperties(),
                 searchCriteria.getStoredOn(), searchCriteria.getProviders());
         logger.info("Found {} groups in {} ms", searchResult.size(), System.currentTimeMillis() - timer);
         portalModelGroups.setCurrentRestrictions(new HashMap<String, Boolean>());
-        List<Principal> groups = new ArrayList<Principal>(searchResult);
+        List<JCRGroupNode> groups = new ArrayList<JCRGroupNode>(searchResult);
         for (int i = 0; i < groups.size(); i ++){
             if(i < (displayLimit - 1)){
-                String grpKey = ((JahiaGroup) groups.get(i)).getGroupKey();
+                String grpKey = groups.get(i).getGroupKey();
                 portalModelGroups.getCurrentRestrictions().put(grpKey, portalModelGroups.getGroupsKey().contains(grpKey));
             }else {
                 portalModelGroups.setDisplayLimited(true);
@@ -506,14 +508,6 @@ public class PortalFactoryHandler implements Serializable {
             }
         }
         return searchResult;
-    }
-
-    public Map<String, ? extends JahiaGroupManagerProvider> getProviders() {
-        Map<String, JahiaGroupManagerProvider> providers = new LinkedHashMap<String, JahiaGroupManagerProvider>();
-        for (JahiaGroupManagerProvider p : groupManagerService.getProviderList()) {
-            providers.put(p.getKey(), p);
-        }
-        return providers;
     }
 
     public void saveRestrictions(RequestContext ctx, PortalModelGroups portalModelGroups) throws RepositoryException {

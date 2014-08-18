@@ -122,8 +122,8 @@ public class PortalContext implements Serializable{
     private boolean isEnabled;
     @JsonProperty("debug")
     private boolean isDebug;
-    @JsonProperty("siteId")
-    private int siteId;
+    @JsonProperty("siteKey")
+    private String siteKey;
 
     public String getPath() {
         return path;
@@ -269,11 +269,11 @@ public class PortalContext implements Serializable{
         this.portalWidgetTypes = portalWidgetTypes;
     }
 
-    public int getSiteId() {
-        return siteId;
+    public String getSiteKey() {
+        return siteKey;
     }
 
-    public void setSiteId(int siteId) {
-        this.siteId = siteId;
+    public void setSiteKey(String siteKey) {
+        this.siteKey = siteKey;
     }
 }

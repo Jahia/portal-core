@@ -71,6 +71,7 @@
  */
 package org.jahia.modules.portal.sitesettings.table;
 
+import org.jahia.services.content.decorator.JCRGroupNode;
 import org.jahia.services.usermanager.JahiaGroup;
 
 import java.io.Serializable;
@@ -86,7 +87,7 @@ public class PortalModelTableRow implements Serializable{
     private String path;
     private String name;
     private long userPortals;
-    private List<JahiaGroup> restrictedGroups;
+    private List<JCRGroupNode> restrictedGroups;
     private boolean enabled;
     private long lastUsed;
 
@@ -122,11 +123,11 @@ public class PortalModelTableRow implements Serializable{
         this.userPortals = userPortals;
     }
 
-    public List<JahiaGroup> getRestrictedGroups() {
+    public List<JCRGroupNode> getRestrictedGroups() {
         return restrictedGroups;
     }
 
-    public void setRestrictedGroups(List<JahiaGroup> restrictedGroups) {
+    public void setRestrictedGroups(List<JCRGroupNode> restrictedGroups) {
         this.restrictedGroups = restrictedGroups;
     }
 

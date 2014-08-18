@@ -78,6 +78,7 @@ import org.jahia.modules.portal.service.bean.*;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
 import org.jahia.services.content.*;
+import org.jahia.services.content.decorator.JCRGroupNode;
 import org.jahia.services.content.decorator.JCRSiteNode;
 import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
@@ -93,7 +94,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import javax.jcr.NodeIterator;
 import javax.jcr.PathNotFoundException;
@@ -445,7 +445,7 @@ public class PortalService{
 
     public void fixPortalSiteInContext(RenderContext renderContext, JCRNodeWrapper portalNode) throws RepositoryException {
         if(!portalIsModel(portalNode)){
-            JCRSiteNode portalSite = JahiaSitesService.getInstance().getSite((int) portalNode.getProperty(PortalConstants.J_SITEID).getLong(), portalNode.getSession());
+            JCRSiteNode portalSite = JahiaSitesService.getInstance().getSiteByKey(portalNode.getProperty(PortalConstants.J_SITEKEY).getString(), portalNode.getSession());
             renderContext.setSite(portalSite);
             renderContext.setSiteInfo(new SiteInfo(portalSite));
         }
@@ -497,7 +497,7 @@ public class PortalService{
             portal.setProperty(PortalConstants.JCR_TITLE, modelNode.getDisplayableName());
             portal.setProperty(PortalConstants.J_FULL_TEMPLATE, modelNode.getPropertyAsString(PortalConstants.J_FULL_TEMPLATE));
             portal.setProperty(PortalConstants.J_MODEL, modelNode);
-            portal.setProperty(PortalConstants.J_SITEID, modelNode.getResolveSite().getID());
+            portal.setProperty(PortalConstants.J_SITEKEY, modelNode.getResolveSite().getSiteKey());
             portal.grantRoles("u:guest", Collections.singleton("reader"));
 
             //copy tabs
@@ -537,7 +537,7 @@ public class PortalService{
         final String currentPath = portalTabNode.getPath();
         final boolean isEditable = portalTabNode.hasPermission("jcr:write_live");
         final Locale mainResourceLocale = renderContext.getMainResourceLocale();
-        final int siteInt = renderContext.getSite().getID();
+        final String siteKey = renderContext.getSite().getSiteKey();
 
         PortalContext portalContext = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), sessionWrapper.getWorkspace().getName(), sessionWrapper.getLocale(), new JCRCallback<PortalContext>() {
             @Override
@@ -556,7 +556,7 @@ public class PortalService{
                 portalContext.setLock(portalNode.hasProperty(PortalConstants.J_LOCKED) && portalNode.getProperty(PortalConstants.J_LOCKED).getBoolean());
                 portalContext.setModel(isModel);
                 portalContext.setCustomizable(isModel && portalNode.hasProperty(PortalConstants.J_ALLOW_CUSTOMIZATION) && portalNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean());
-                JCRSiteNode site = JahiaSitesService.getInstance().getSite(siteInt, session);
+                JCRSiteNode site = JahiaSitesService.getInstance().getSiteByKey(siteKey, session);
 
                 JCRNodeWrapper modelNode = null;
                 boolean modelDeleted = false;
@@ -578,7 +578,7 @@ public class PortalService{
                     }
                 }
 
-                portalContext.setSiteId(site.getID());
+                portalContext.setSiteKey(site.getSiteKey());
                 portalContext.setPortalTabTemplates(new ArrayList<PortalKeyNameObject>());
                 portalContext.setPortalTabSkins(new ArrayList<PortalKeyNameObject>());
                 portalContext.setPortalWidgetTypes(new TreeSet<PortalWidgetType>(WIDGET_TYPES_COMPARATOR));
@@ -769,12 +769,12 @@ public class PortalService{
         }
     }
 
-    public JahiaGroup getGroupFromKey(String grpKey){
-        return groupManagerService.lookupGroup(grpKey);
+    public JCRGroupNode getGroupFromKey(String grpKey){
+        return groupManagerService.lookupGroupByPath(grpKey);
     }
 
-    public List<JahiaGroup> getRestrictedGroups(JCRNodeWrapper portal) {
-        List<JahiaGroup> groups = new ArrayList<JahiaGroup>();
+    public List<JCRGroupNode> getRestrictedGroups(JCRNodeWrapper portal) {
+        List<JCRGroupNode> groups = new ArrayList<JCRGroupNode>();
         try {
             for (String groupKey : getRestrictedGroupNames(portal)){
                 try{
@@ -801,7 +801,7 @@ public class PortalService{
                 if(restrictedGroups != null && restrictedGroups.size() > 0) {
                     for(String groupKey : restrictedGroups){
                         try{
-                            JahiaGroup group = groupManagerService.lookupGroup(groupKey);
+                            JCRGroupNode group = groupManagerService.lookupGroupByPath(groupKey);
                             portalModelNode.grantRoles("g:" + group.getName(), roles);
                         } catch (Exception e) {
                             logger.error(e.getMessage(), e);    
