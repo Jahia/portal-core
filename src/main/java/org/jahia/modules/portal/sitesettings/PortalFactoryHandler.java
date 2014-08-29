@@ -88,7 +88,9 @@ import org.jahia.services.content.nodetypes.ExtendedNodeType;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.View;
 import org.jahia.services.sites.JahiaSitesService;
-import org.jahia.services.usermanager.*;
+import org.jahia.services.usermanager.JahiaGroup;
+import org.jahia.services.usermanager.JahiaGroupManagerService;
+import org.jahia.services.usermanager.SearchCriteria;
 import org.jahia.utils.i18n.Messages;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -107,7 +109,6 @@ import javax.jcr.RepositoryException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import java.io.Serializable;
-import java.security.Principal;
 import java.util.*;
 
 /**
@@ -140,7 +141,7 @@ public class PortalFactoryHandler implements Serializable {
                 PortalModelTable portalModelTable = new PortalModelTable();
                 List<PortalModelTableRow> portalModelTableRows = new ArrayList<PortalModelTableRow>();
 
-                for (JCRNodeWrapper portalModelNode : portalModelNodes){
+                for (JCRNodeWrapper portalModelNode : portalModelNodes) {
                     PortalModelTableRow portalModelTableRow = new PortalModelTableRow();
                     portalModelTableRow.setName(portalModelNode.getDisplayableName());
                     portalModelTableRow.setPath(portalModelNode.getPath());
@@ -174,7 +175,7 @@ public class PortalFactoryHandler implements Serializable {
         });
     }
 
-    public boolean createPortalModel(final RequestContext ctx, final PortalModelForm form){
+    public boolean createPortalModel(final RequestContext ctx, final PortalModelForm form) {
         try {
             JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
             final String siteKey = getRenderContext(ctx).getSite().getSiteKey();
@@ -191,8 +192,8 @@ public class PortalFactoryHandler implements Serializable {
         }
         return true;
     }
-    
-    public boolean updatePortalModel(RequestContext ctx, PortalForm form, String portalModelIdentifier){
+
+    public boolean updatePortalModel(RequestContext ctx, PortalForm form, String portalModelIdentifier) {
         try {
             JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
             form.setPortalModelIdentifier(portalModelIdentifier);
@@ -223,14 +224,14 @@ public class PortalFactoryHandler implements Serializable {
         });
     }
 
-    public void initPortalForm(RequestContext ctx){
+    public void initPortalForm(RequestContext ctx) {
         RenderContext renderContext = getRenderContext(ctx);
         JCRSiteNode site = renderContext.getSite();
 
         ctx.getRequestScope().put("templatesPath", site.getTemplatePackage().getRootFolderPath() + "/" + site.getTemplatePackage().getVersion() + "/templates");
 
         List<PortalKeyNameObject> widgetTypes = new ArrayList<PortalKeyNameObject>();
-        for (ExtendedNodeType nodeType : portalService.getWidgetNodeTypes(site)){
+        for (ExtendedNodeType nodeType : portalService.getWidgetNodeTypes(site)) {
             PortalKeyNameObject widgetType = new PortalKeyNameObject();
             widgetType.setName(portalService.getI18NodeTypeName(nodeType, renderContext.getMainResourceLocale()));
             widgetType.setKey(nodeType.getName());
@@ -262,7 +263,7 @@ public class PortalFactoryHandler implements Serializable {
         JCRSiteNode site = renderContext.getSite();
 
         List<PortalKeyNameObject> widgetTypes = new ArrayList<PortalKeyNameObject>();
-        for (ExtendedNodeType nodeType : portalService.getWidgetNodeTypes(site)){
+        for (ExtendedNodeType nodeType : portalService.getWidgetNodeTypes(site)) {
             PortalKeyNameObject widgetType = new PortalKeyNameObject();
             widgetType.setName(portalService.getI18NodeTypeName(nodeType, renderContext.getMainResourceLocale()));
             widgetType.setKey(nodeType.getName());
@@ -273,7 +274,7 @@ public class PortalFactoryHandler implements Serializable {
         PortalForm formToUpdate = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), "live", sessionWrapper.getLocale(), new JCRCallback<PortalForm>() {
             @Override
             public PortalForm doInJCR(JCRSessionWrapper session) throws RepositoryException {
-                if(StringUtils.isNotEmpty(identifier)){
+                if (StringUtils.isNotEmpty(identifier)) {
                     try {
                         JCRNodeWrapper portalNode = session.getNodeByUUID(identifier);
 
@@ -283,7 +284,7 @@ public class PortalFactoryHandler implements Serializable {
 
                         List<String> allowedWidgetTypes = new ArrayList<String>();
                         JCRPropertyWrapper allowedWidgetTypesProp = portalNode.getProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES);
-                        for(JCRValueWrapper allowedWidgetType : allowedWidgetTypesProp.getValues()){
+                        for (JCRValueWrapper allowedWidgetType : allowedWidgetTypesProp.getValues()) {
                             allowedWidgetTypes.add(allowedWidgetType.getString());
                         }
                         form.setAllowedWidgetTypes(allowedWidgetTypes.toArray(new String[allowedWidgetTypes.size()]));
@@ -307,7 +308,7 @@ public class PortalFactoryHandler implements Serializable {
     public UserPortalsTable initUserPortalsManager(RequestContext ctx, UserPortalsTable userPortalsTable) {
         JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
         final String siteKey = getRenderContext(ctx).getSite().getSiteKey();
-        if(userPortalsTable == null){
+        if (userPortalsTable == null) {
             userPortalsTable = new UserPortalsTable();
         }
         UserPortalsPager pager = new UserPortalsPager();
@@ -332,37 +333,37 @@ public class PortalFactoryHandler implements Serializable {
         return userPortalsTable;
     }
 
-    private Query getUserPortalsQuery(String siteKey, UserPortalsTable userPortalsTable, JCRSessionWrapper sessionWrapper){
+    private Query getUserPortalsQuery(String siteKey, UserPortalsTable userPortalsTable, JCRSessionWrapper sessionWrapper) {
         Query query = null;
         try {
             QueryManager queryManager = sessionWrapper.getWorkspace().getQueryManager();
             StringBuilder builder = new StringBuilder("select * from [" + PortalConstants.JNT_PORTAL_USER + "] as p where");
             boolean first = true;
-            if(userPortalsTable.getSearchCriteria() != null && StringUtils.isNotEmpty(userPortalsTable.getSearchCriteria().getSearchString())){
+            if (userPortalsTable.getSearchCriteria() != null && StringUtils.isNotEmpty(userPortalsTable.getSearchCriteria().getSearchString())) {
                 Set<JCRUserNode> searchResult = PrincipalViewHelper.getSearchResult("allProps",
                         userPortalsTable.getSearchCriteria().getSearchString(), null, "providers",
                         null);
 
                 Iterator<JCRUserNode> principals = searchResult.iterator();
-                while (principals.hasNext()){
-                    if(first){
+                while (principals.hasNext()) {
+                    if (first) {
                         builder.append("(");
                         first = false;
                     }
                     JCRUserNode user = principals.next();
                     builder.append(" isdescendantnode(p, ['").append(user.getPath()).append("'])");
-                    if(principals.hasNext()){
+                    if (principals.hasNext()) {
                         builder.append(" or");
-                    }else {
+                    } else {
                         builder.append(")");
                     }
                 }
             }
-            if(!first){
+            if (!first) {
                 builder.append(" and");
             }
             builder.append(" p.['").append(PortalConstants.J_SITEKEY).append("'] = '").append(siteKey).append("'");
-            if(userPortalsTable.getPager() != null && StringUtils.isNotEmpty(userPortalsTable.getPager().getSortBy())){
+            if (userPortalsTable.getPager() != null && StringUtils.isNotEmpty(userPortalsTable.getPager().getSortBy())) {
                 builder.append(" order by '").append(userPortalsTable.getPager().getSortBy()).append("' ").append(userPortalsTable.getPager().isSortAsc() ? "ASC" : "DESC");
             }
             query = queryManager.createQuery(builder.toString(), Query.JCR_SQL2);
@@ -402,7 +403,7 @@ public class PortalFactoryHandler implements Serializable {
         }
     }
 
-    public void doUserPortalsQuery(RequestContext ctx, UserPortalsTable userPortalsTable){
+    public void doUserPortalsQuery(RequestContext ctx, UserPortalsTable userPortalsTable) {
         try {
             JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
             final String siteKey = getRenderContext(ctx).getSite().getSiteKey();
@@ -417,23 +418,23 @@ public class PortalFactoryHandler implements Serializable {
                     LinkedHashMap<String, UserPortalsTableRow> tableRowsToReturn = new LinkedHashMap<String, UserPortalsTableRow>();
                     if (query.getStatement().contains("isdescendantnode") || finalTable.getSearchCriteria() == null ||
                             !StringUtils.isNotEmpty(finalTable.getSearchCriteria().getSearchString())) {
-                                NodeIterator nodeIterator = query.execute().getNodes();
-                                while (nodeIterator.hasNext()) {
-                                    JCRNodeWrapper portalNode = (JCRNodeWrapper) nodeIterator.next();
-                                    UserPortalsTableRow row = new UserPortalsTableRow();
-                                    row.setUserNodeIdentifier(JCRContentUtils.getParentOfType(portalNode, "jnt:user").getIdentifier());
-                                    try {
-                                        row.setModelName(((JCRNodeWrapper) portalNode.getProperty("j:model").getNode()).getDisplayableName());
-                                    } catch (Exception e) {
-                                        // model deleted
-                                        row.setModelName("No model found");
-                                    }
-                                    DateTime sinceDate = ISODateTimeFormat.dateOptionalTimeParser().parseDateTime(portalNode.getPropertyAsString("j:lastViewed"));
-                                    row.setLastUsed(Days.daysBetween(new LocalDate(sinceDate), new LocalDate()).getDays());
-                                    row.setCreated(portalNode.getProperty("jcr:created").getDate().getTime());
-                                    tableRowsToReturn.put(portalNode.getPath(), row);
-                                }
+                        NodeIterator nodeIterator = query.execute().getNodes();
+                        while (nodeIterator.hasNext()) {
+                            JCRNodeWrapper portalNode = (JCRNodeWrapper) nodeIterator.next();
+                            UserPortalsTableRow row = new UserPortalsTableRow();
+                            row.setUserNodeIdentifier(JCRContentUtils.getParentOfType(portalNode, "jnt:user").getIdentifier());
+                            try {
+                                row.setModelName(((JCRNodeWrapper) portalNode.getProperty("j:model").getNode()).getDisplayableName());
+                            } catch (Exception e) {
+                                // model deleted
+                                row.setModelName("No model found");
                             }
+                            DateTime sinceDate = ISODateTimeFormat.dateOptionalTimeParser().parseDateTime(portalNode.getPropertyAsString("j:lastViewed"));
+                            row.setLastUsed(Days.daysBetween(new LocalDate(sinceDate), new LocalDate()).getDays());
+                            row.setCreated(portalNode.getProperty("jcr:created").getDate().getTime());
+                            tableRowsToReturn.put(portalNode.getPath(), row);
+                        }
+                    }
                     return tableRowsToReturn;
                 }
             });
@@ -448,16 +449,16 @@ public class PortalFactoryHandler implements Serializable {
         PortalModelGroups portalModelGroups = new PortalModelGroups();
         portalModelGroups.setPortalIdentifier(portalModelIdentifier);
 
-        if(StringUtils.isEmpty(searchCriteria.getStoredOn())){
+        if (StringUtils.isEmpty(searchCriteria.getStoredOn())) {
             searchCriteria.setStoredOn("everywhere");
         }
-        if(StringUtils.isEmpty(searchCriteria.getSearchIn())){
+        if (StringUtils.isEmpty(searchCriteria.getSearchIn())) {
             searchCriteria.setSearchIn("allProps");
         }
-        if(StringUtils.isEmpty(searchCriteria.getSearchString())){
+        if (StringUtils.isEmpty(searchCriteria.getSearchString())) {
             searchCriteria.setSearchString("");
         }
-        
+
         portalModelGroups.setSearchCriteria(searchCriteria);
 
         final String portalIdentifier = portalModelGroups.getPortalIdentifier();
@@ -487,7 +488,7 @@ public class PortalFactoryHandler implements Serializable {
         return new SearchCriteria(((RenderContext) ctx.getExternalContext().getRequestMap().get("renderContext")).getSite().getSiteKey());
     }
 
-    public Set<JCRGroupNode> search(RequestContext ctx, PortalModelGroups portalModelGroups) {
+    public Set<JahiaGroup> search(RequestContext ctx, PortalModelGroups portalModelGroups) {
         int displayLimit = Integer.parseInt(((Map<String, String>) ctx.getFlowScope().get("siteSettingsProperties")).get("groupDisplayLimit"));
         SearchCriteria searchCriteria = portalModelGroups.getSearchCriteria();
         long timer = System.currentTimeMillis();
@@ -497,17 +498,28 @@ public class PortalFactoryHandler implements Serializable {
         logger.info("Found {} groups in {} ms", searchResult.size(), System.currentTimeMillis() - timer);
         portalModelGroups.setCurrentRestrictions(new HashMap<String, Boolean>());
         List<JCRGroupNode> groups = new ArrayList<JCRGroupNode>(searchResult);
-        for (int i = 0; i < groups.size(); i ++){
-            if(i < (displayLimit - 1)){
+        Set<JahiaGroup> jahiaGroups = new HashSet<JahiaGroup>();
+        for (int i = 0; i < groups.size(); i++) {
+            if (i < (displayLimit - 1)) {
                 String grpKey = groups.get(i).getGroupKey();
                 portalModelGroups.getCurrentRestrictions().put(grpKey, portalModelGroups.getGroupsKey().contains(grpKey));
-            }else {
+            } else {
                 portalModelGroups.setDisplayLimited(true);
                 portalModelGroups.setDisplayLimit(displayLimit);
                 break;
             }
         }
-        return searchResult;
+        for (JCRGroupNode groupNode : groups) {
+            jahiaGroups.add(groupNode.getJahiaGroup());
+        }
+        return jahiaGroups;
+    }
+
+    public Map<String, ? extends JCRStoreProvider> getProviders() {
+        Map<String, JCRStoreProvider> providers = new LinkedHashMap<String, JCRStoreProvider>();
+        final JCRStoreProvider provider = JCRSessionFactory.getInstance().getMountPoints().get("/");
+        providers.put(provider.getKey(), provider);
+        return providers;
     }
 
     public void saveRestrictions(RequestContext ctx, PortalModelGroups portalModelGroups) throws RepositoryException {
@@ -519,11 +531,11 @@ public class PortalFactoryHandler implements Serializable {
                 List<String> groupKeysToAdd = new ArrayList<String>();
                 List<String> groupKeysToRemove = new ArrayList<String>();
 
-                for (String groupKey : copy.getCurrentRestrictions().keySet()){
-                    if(copy.getCurrentRestrictions().get(groupKey) && (copy.getGroupsKey() == null || !copy.getGroupsKey().contains(groupKey))){
+                for (String groupKey : copy.getCurrentRestrictions().keySet()) {
+                    if (copy.getCurrentRestrictions().get(groupKey) && (copy.getGroupsKey() == null || !copy.getGroupsKey().contains(groupKey))) {
                         groupKeysToRemove.add(groupKey);
                         copy.getCurrentRestrictions().put(groupKey, false);
-                    }else if(!copy.getCurrentRestrictions().get(groupKey) && (copy.getGroupsKey() != null && copy.getGroupsKey().contains(groupKey))){
+                    } else if (!copy.getCurrentRestrictions().get(groupKey) && (copy.getGroupsKey() != null && copy.getGroupsKey().contains(groupKey))) {
                         groupKeysToAdd.add(groupKey);
                         copy.getCurrentRestrictions().put(groupKey, true);
                     }
@@ -565,12 +577,12 @@ public class PortalFactoryHandler implements Serializable {
         return true;
     }
 
-    public String getTemplatesPath(RequestContext ctx){
+    public String getTemplatesPath(RequestContext ctx) {
         JCRSiteNode currentSite = getRenderContext(ctx).getSite();
         return currentSite.getTemplatePackage().getRootFolderPath() + "/" + currentSite.getTemplatePackage().getVersion() + "/templates";
     }
 
-    public void deleteUserPortal(RequestContext ctx, MessageContext messageContext, final String selectedPortal, final UserPortalsTable userPortalsTable){
+    public void deleteUserPortal(RequestContext ctx, MessageContext messageContext, final String selectedPortal, final UserPortalsTable userPortalsTable) {
         JCRSessionWrapper sessionWrapper = getCurrentUserSession(ctx, "live");
         try {
             String portalPath = JCRTemplate.getInstance().doExecuteWithSystemSession(sessionWrapper.getUser().getUsername(), sessionWrapper.getWorkspace().getName(), sessionWrapper.getLocale(), new JCRCallback<String>() {
@@ -598,18 +610,18 @@ public class PortalFactoryHandler implements Serializable {
         }
     }
 
-    private void setActionMessage(MessageContext msgCtx, boolean success, String panel, String action, Object name){
+    private void setActionMessage(MessageContext msgCtx, boolean success, String panel, String action, Object name) {
         Locale locale = LocaleContextHolder.getLocale();
 
         String successFlag = success ? ".successfully" : ".failed";
 
         String message = Messages.get(BUNDLE, panel + successFlag + action, locale);
-        if(name != null){
+        if (name != null) {
             message = Messages.format(message, name);
         }
 
         MessageBuilder messageBuilder = new MessageBuilder();
-        if(success){
+        if (success) {
             messageBuilder.info();
         } else {
             messageBuilder.error();

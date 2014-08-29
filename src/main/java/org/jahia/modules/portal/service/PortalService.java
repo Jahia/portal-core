@@ -74,7 +74,10 @@ package org.jahia.modules.portal.service;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.ajax.gwt.helper.ContentManagerHelper;
 import org.jahia.modules.portal.PortalConstants;
-import org.jahia.modules.portal.service.bean.*;
+import org.jahia.modules.portal.service.bean.PortalContext;
+import org.jahia.modules.portal.service.bean.PortalKeyNameObject;
+import org.jahia.modules.portal.service.bean.PortalWidgetType;
+import org.jahia.modules.portal.service.bean.PortalWidgetTypeView;
 import org.jahia.modules.portal.sitesettings.form.PortalForm;
 import org.jahia.modules.portal.sitesettings.form.PortalModelForm;
 import org.jahia.services.content.*;
@@ -110,7 +113,7 @@ import java.util.*;
  * Time: 15:35
  * To change this template use File | Settings | File Templates.
  */
-public class PortalService{
+public class PortalService {
     private static Logger logger = LoggerFactory.getLogger(PortalService.class);
     private static final Comparator<? super JCRNodeWrapper> PORTALS_COMPARATOR = new Comparator<JCRNodeWrapper>() {
 
@@ -207,12 +210,12 @@ public class PortalService{
         JCRNodeWrapper portalNode = portalsRootFolderNode.addNode(JCRContentUtils.generateNodeName(form.getPortal().getName(), 32), PortalConstants.JNT_PORTAL_MODEL);
         portalNode.setProperty(PortalConstants.JCR_TITLE, form.getPortal().getName());
         portalNode.setProperty(PortalConstants.J_TEMPLATE_ROOT_PATH, form.getTemplateRootPath());
-		if(StringUtils.isNotEmpty(form.getPortal().getTemplateFull())){
-			portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, getPortalTabTemplate(form.getPortal().getTemplateFull(),
+        if (StringUtils.isNotEmpty(form.getPortal().getTemplateFull())) {
+            portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, getPortalTabTemplate(form.getPortal().getTemplateFull(),
                     JCRSessionFactory.getInstance().getCurrentUserSession()).getName());
-		}else {
-			portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, "");
-		}
+        } else {
+            portalNode.setProperty(PortalConstants.J_FULL_TEMPLATE, "");
+        }
         portalNode.setProperty(PortalConstants.J_ALLOW_CUSTOMIZATION, form.getPortal().getAllowCustomization());
         portalNode.setProperty(PortalConstants.J_ALLOWED_WIDGET_TYPES, form.getPortal().getAllowedWidgetTypes());
         setReadRoleForPortalModel(portalNode, false);
@@ -246,7 +249,7 @@ public class PortalService{
             NodeIterator nodes = portalNode.getNodes();
             while (nodes.hasNext()) {
                 JCRNodeWrapper node = (JCRNodeWrapper) nodes.next();
-                if(node.isNodeType(PortalConstants.JNT_PORTAL_TAB)){
+                if (node.isNodeType(PortalConstants.JNT_PORTAL_TAB)) {
                     portalTabs.add(node);
                 }
             }
@@ -284,36 +287,36 @@ public class PortalService{
         return portalTabTemplates;
     }
 
-	public JCRNodeWrapper getPortalTabTemplate(String templatePath, JCRSessionWrapper sessionWrapper) {
-		JCRNodeWrapper templatePortalNode = null;
-		try{
-			JCRNodeWrapper templateNode = sessionWrapper.getNode(templatePath);
-			for (JCRValueWrapper value : templateNode.getProperty(PortalConstants.J_APPLY_ON).getValues()){
-				if(value.getString().equals(PortalConstants.JNT_PORTAL_TAB)){
-					templatePortalNode = templateNode;
-				}
-			}
-		}catch (RepositoryException e){
-			logger.error(e.getMessage(), e);
-		}
+    public JCRNodeWrapper getPortalTabTemplate(String templatePath, JCRSessionWrapper sessionWrapper) {
+        JCRNodeWrapper templatePortalNode = null;
+        try {
+            JCRNodeWrapper templateNode = sessionWrapper.getNode(templatePath);
+            for (JCRValueWrapper value : templateNode.getProperty(PortalConstants.J_APPLY_ON).getValues()) {
+                if (value.getString().equals(PortalConstants.JNT_PORTAL_TAB)) {
+                    templatePortalNode = templateNode;
+                }
+            }
+        } catch (RepositoryException e) {
+            logger.error(e.getMessage(), e);
+        }
 
-		return templatePortalNode;
-	}
+        return templatePortalNode;
+    }
 
     public JCRNodeWrapper addWidgetToPortal(JCRNodeWrapper portalTabNode, String nodetypeName, String nodeName, String colname, String beforeNodePath, JCRSessionWrapper session) {
         JCRNodeWrapper columnNode = getColumn(portalTabNode, colname);
 
         try {
-            if(StringUtils.isEmpty(nodeName)){
+            if (StringUtils.isEmpty(nodeName)) {
                 ExtendedNodeType nodetype = NodeTypeRegistry.getInstance().getNodeType(nodetypeName);
                 nodeName = getI18NodeTypeName(nodetype, session.getLocale());
             }
             JCRNodeWrapper widget = columnNode.addNode(JCRContentUtils.findAvailableNodeName(columnNode, JCRContentUtils.generateNodeName(nodeName)), nodetypeName);
-            if(StringUtils.isNotEmpty(beforeNodePath)){
+            if (StringUtils.isNotEmpty(beforeNodePath)) {
                 contentManager.moveOnTopOf(widget.getPath(), beforeNodePath, session);
             }
             widget.setProperty(PortalConstants.JCR_TITLE, nodeName);
-            if(portalIsModel(portalTabNode.getParent())){
+            if (portalIsModel(portalTabNode.getParent())) {
                 widget.addMixin(PortalConstants.JMIX_PORTAL_WIDGET_MODEL);
             }
             session.save();
@@ -329,7 +332,7 @@ public class PortalService{
     public String getI18NodeTypeName(ExtendedNodeType nodeType, Locale locale) {
         try {
             return Messages.get(nodeType.getTemplatePackage(), nodeType.getName().replace(":", "_"), locale);
-        }catch (Exception e){
+        } catch (Exception e) {
             return nodeType.getName();
         }
     }
@@ -432,7 +435,7 @@ public class PortalService{
 
             while (result.hasNext()) {
                 JCRNodeWrapper modelNode = (JCRNodeWrapper) result.next();
-                if(!userPortalModelIds.contains(modelNode.getIdentifier()) && modelNode.hasProperty(PortalConstants.J_ENABLED) && modelNode.getProperty(PortalConstants.J_ENABLED).getBoolean()){
+                if (!userPortalModelIds.contains(modelNode.getIdentifier()) && modelNode.hasProperty(PortalConstants.J_ENABLED) && modelNode.getProperty(PortalConstants.J_ENABLED).getBoolean()) {
                     portals.add(modelNode);
                 }
             }
@@ -444,7 +447,7 @@ public class PortalService{
     }
 
     public void fixPortalSiteInContext(RenderContext renderContext, JCRNodeWrapper portalNode) throws RepositoryException {
-        if(!portalIsModel(portalNode)){
+        if (!portalIsModel(portalNode)) {
             JCRSiteNode portalSite = JahiaSitesService.getInstance().getSiteByKey(portalNode.getProperty(PortalConstants.J_SITEKEY).getString(), portalNode.getSession());
             renderContext.setSite(portalSite);
             renderContext.setSiteInfo(new SiteInfo(portalSite));
@@ -481,8 +484,8 @@ public class PortalService{
     public JCRNodeWrapper initUserPortalFromModel(JCRNodeWrapper modelNode, JCRSessionWrapper sessionWrapper) {
         try {
             // test if the model is customizable
-            if(modelNode.hasProperty(PortalConstants.J_ALLOW_CUSTOMIZATION) &&
-                    !modelNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean()){
+            if (modelNode.hasProperty(PortalConstants.J_ALLOW_CUSTOMIZATION) &&
+                    !modelNode.getProperty(PortalConstants.J_ALLOW_CUSTOMIZATION).getBoolean()) {
                 return null;
             }
 
@@ -507,15 +510,15 @@ public class PortalService{
             }
 
             // copy/ref behavior for widgets
-            for (JCRNodeWrapper portalTab : JCRContentUtils.getChildrenOfType(portal, PortalConstants.JNT_PORTAL_TAB)){
+            for (JCRNodeWrapper portalTab : JCRContentUtils.getChildrenOfType(portal, PortalConstants.JNT_PORTAL_TAB)) {
                 portalTab.denyRoles("g:users", Collections.singleton("reader"));
                 portalTab.denyRoles("u:guest", Collections.singleton("reader"));
                 portalTab.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("reader"));
                 portalTab.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("owner"));
-                
-                for (JCRNodeWrapper portalColumn : JCRContentUtils.getChildrenOfType(portalTab, PortalConstants.JNT_PORTAL_COLUMN)){
-                    for (JCRNodeWrapper widget : JCRContentUtils.getChildrenOfType(portalColumn, PortalConstants.JMIX_PORTAL_WIDGET_MODEL)){
-                        if(widget.hasProperty(PortalConstants.J_BEHAVIOR) && widget.getProperty(PortalConstants.J_BEHAVIOR).getString().equals(PortalConstants.J_BEHAVIOR_REF)){
+
+                for (JCRNodeWrapper portalColumn : JCRContentUtils.getChildrenOfType(portalTab, PortalConstants.JNT_PORTAL_COLUMN)) {
+                    for (JCRNodeWrapper widget : JCRContentUtils.getChildrenOfType(portalColumn, PortalConstants.JMIX_PORTAL_WIDGET_MODEL)) {
+                        if (widget.hasProperty(PortalConstants.J_BEHAVIOR) && widget.getProperty(PortalConstants.J_BEHAVIOR).getString().equals(PortalConstants.J_BEHAVIOR_REF)) {
                             JCRNodeWrapper widgetRef = portalColumn.addNode(widget.getName() + "_ref", PortalConstants.JNT_PORTAL_WIDGET_REFERENCE);
                             widgetRef.setProperty("j:node", sessionWrapper.getNode(modelNode.getPath() + "/" + portalTab.getName() + "/" + portalColumn.getName() + "/" + widget.getName()));
                             contentManager.moveOnTopOf(widgetRef.getPath(), widget.getPath(), sessionWrapper);
@@ -560,15 +563,15 @@ public class PortalService{
 
                 JCRNodeWrapper modelNode = null;
                 boolean modelDeleted = false;
-                if(isModel){
+                if (isModel) {
                     portalContext.setEnabled(portalNode.hasProperty(PortalConstants.J_ENABLED) && portalNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
-                }else {
+                } else {
                     try {
                         modelNode = (JCRNodeWrapper) portalNode.getProperty(PortalConstants.J_MODEL).getNode();
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         // model deleted
                     }
-                    if(modelNode != null){
+                    if (modelNode != null) {
                         portalContext.setModelPath(modelNode.getPath());
                         portalContext.setModelIdentifier(modelNode.getIdentifier());
                         portalContext.setEnabled(modelNode.hasProperty(PortalConstants.J_ENABLED) && modelNode.getProperty(PortalConstants.J_ENABLED).getBoolean());
@@ -582,11 +585,11 @@ public class PortalService{
                 portalContext.setPortalTabTemplates(new ArrayList<PortalKeyNameObject>());
                 portalContext.setPortalTabSkins(new ArrayList<PortalKeyNameObject>());
                 portalContext.setPortalWidgetTypes(new TreeSet<PortalWidgetType>(WIDGET_TYPES_COMPARATOR));
-                if(isEditable){
+                if (isEditable) {
 
                     // Templates for portal tabs
                     List<JCRNodeWrapper> templates = getPortalTabTemplates(portalNode.getProperty(PortalConstants.J_TEMPLATE_ROOT_PATH).getString(), session);
-                    for (JCRNodeWrapper template : templates){
+                    for (JCRNodeWrapper template : templates) {
                         PortalKeyNameObject portalTabTemplate = new PortalKeyNameObject();
                         portalTabTemplate.setName(template.getDisplayableName());
                         portalTabTemplate.setKey(template.getName());
@@ -595,12 +598,12 @@ public class PortalService{
 
                     // Widget skins
                     SortedSet<View> widgetSkins = getViewSet(PortalConstants.JMIX_PORTAL_WIDGET, site);
-                    for(View widgetView : widgetSkins){
-                        if(widgetView.getKey().startsWith("box")){
+                    for (View widgetView : widgetSkins) {
+                        if (widgetView.getKey().startsWith("box")) {
                             PortalKeyNameObject portalTabSkin = new PortalKeyNameObject();
-                            try{
+                            try {
                                 portalTabSkin.setName(Messages.get(widgetView.getModule(), widgetView.getKey(), mainResourceLocale));
-                            }catch (MissingResourceException e){
+                            } catch (MissingResourceException e) {
                                 // no resourceBundle for skin
                                 portalTabSkin.setName(widgetView.getKey());
                             }
@@ -614,27 +617,27 @@ public class PortalService{
                     Collection<ExtendedNodeType> widgetTypes = getPortalWidgetNodeTypes(portalNode);
                     Collection<ExtendedNodeType> modelWidgetTypes = !isModel && !modelDeleted ? getPortalWidgetNodeTypes(modelNode) : null;
 
-                    for (ExtendedNodeType widgetType : widgetTypes){
-                        if(!isModel && !modelDeleted){
-                            if(modelWidgetTypes.contains(widgetType)){
+                    for (ExtendedNodeType widgetType : widgetTypes) {
+                        if (!isModel && !modelDeleted) {
+                            if (modelWidgetTypes.contains(widgetType)) {
                                 PortalWidgetType portalWidgetType = buildPortalWidgetType(widgetType, site, mainResourceLocale, false);
                                 portalContext.getPortalWidgetTypes().add(portalWidgetType);
                                 modelWidgetTypes.remove(widgetType);
                             }
-                        }else {
+                        } else {
                             PortalWidgetType portalWidgetType = buildPortalWidgetType(widgetType, site, mainResourceLocale, false);
                             portalContext.getPortalWidgetTypes().add(portalWidgetType);
                         }
                     }
-                    if(!isModel && !modelDeleted){
-                        for (ExtendedNodeType modelWidgetType : modelWidgetTypes){
+                    if (!isModel && !modelDeleted) {
+                        for (ExtendedNodeType modelWidgetType : modelWidgetTypes) {
                             PortalWidgetType portalWidgetType = buildPortalWidgetType(modelWidgetType, site, mainResourceLocale, true);
                             portalContext.getPortalWidgetTypes().add(portalWidgetType);
                         }
                     }
                 }
 
-                if(updateLastPortalUsed){
+                if (updateLastPortalUsed) {
                     DateTime currentDateTime = new DateTime();
                     String lastViewed = portalNode.getPropertyAsString(PortalConstants.J_LASTVIEWED);
 
@@ -657,7 +660,7 @@ public class PortalService{
         return portalContext;
     }
 
-    private PortalWidgetType buildPortalWidgetType(ExtendedNodeType widgetType, JCRSiteNode site, Locale locale, boolean isNew){
+    private PortalWidgetType buildPortalWidgetType(ExtendedNodeType widgetType, JCRSiteNode site, Locale locale, boolean isNew) {
         PortalWidgetType portalWidgetType = new PortalWidgetType();
         portalWidgetType.setName(widgetType.getName());
         portalWidgetType.setDisplayableName(getI18NodeTypeName(widgetType, locale));
@@ -665,8 +668,8 @@ public class PortalService{
         portalWidgetType.setNew(isNew);
 
         SortedSet<View> widgetViews = getViewSet(widgetType.getName(), site);
-        for(View widgetView : widgetViews){
-            if(widgetView != null && widgetView.getKey().startsWith("portal.")){
+        for (View widgetView : widgetViews) {
+            if (widgetView != null && widgetView.getKey().startsWith("portal.")) {
                 PortalWidgetTypeView widgetViewTypeView = new PortalWidgetTypeView();
                 widgetViewTypeView.setPath(widgetView.getPath());
                 widgetViewTypeView.setKey(widgetView.getKey());
@@ -677,7 +680,7 @@ public class PortalService{
         return portalWidgetType;
     }
 
-    public SortedSet<View> getViewSet(String nt, JCRSiteNode site){
+    public SortedSet<View> getViewSet(String nt, JCRSiteNode site) {
         try {
             return RenderService.getInstance().getViewsSet(NodeTypeRegistry.getInstance().getNodeType(nt), site, "html");
         } catch (Exception e) {
@@ -731,8 +734,8 @@ public class PortalService{
 
     public List<String> getRestrictedGroupNames(JCRNodeWrapper modelNode) throws RepositoryException {
         ArrayList<String> allowedGroups = new ArrayList<String>();
-        if(modelNode.hasProperty(PortalConstants.J_ALLOWED_USER_GROUPS) && modelNode.getProperty(PortalConstants.J_ALLOWED_USER_GROUPS).getValues().length > 0){
-            for (JCRValueWrapper value : modelNode.getProperty(PortalConstants.J_ALLOWED_USER_GROUPS).getValues()){
+        if (modelNode.hasProperty(PortalConstants.J_ALLOWED_USER_GROUPS) && modelNode.getProperty(PortalConstants.J_ALLOWED_USER_GROUPS).getValues().length > 0) {
+            for (JCRValueWrapper value : modelNode.getProperty(PortalConstants.J_ALLOWED_USER_GROUPS).getValues()) {
                 allowedGroups.add(value.getString());
             }
         }
@@ -741,45 +744,45 @@ public class PortalService{
 
     public void addRestrictedGroupsToModel(JCRNodeWrapper modelNode, List<String> groupKeys) throws RepositoryException {
         Set<String> allowedGroups = new HashSet<String>(getRestrictedGroupNames(modelNode));
-        if(groupKeys != null && groupKeys.size() > 0){
-            for (String groupKey : groupKeys){
+        if (groupKeys != null && groupKeys.size() > 0) {
+            for (String groupKey : groupKeys) {
                 allowedGroups.add(groupKey);
             }
             modelNode.setProperty(PortalConstants.J_ALLOWED_USER_GROUPS, allowedGroups.toArray(new String[allowedGroups.size()]));
         }
         modelNode.getSession().save();
 
-        if(isPortalModelEnabled(modelNode)){
+        if (isPortalModelEnabled(modelNode)) {
             setReadRoleForPortalModel(modelNode, true);
         }
     }
 
     public void removeRestrictedGroupsFromModel(JCRNodeWrapper modelNode, List<String> groupKeys) throws RepositoryException {
         List<String> allowedGroups = new ArrayList<String>(getRestrictedGroupNames(modelNode));
-        if(groupKeys != null && groupKeys.size() > 0){
-            for (String groupKey : groupKeys){
+        if (groupKeys != null && groupKeys.size() > 0) {
+            for (String groupKey : groupKeys) {
                 allowedGroups.remove(groupKey);
             }
             modelNode.setProperty(PortalConstants.J_ALLOWED_USER_GROUPS, allowedGroups.toArray(new String[allowedGroups.size()]));
         }
         modelNode.getSession().save();
 
-        if(isPortalModelEnabled(modelNode)){
+        if (isPortalModelEnabled(modelNode)) {
             setReadRoleForPortalModel(modelNode, true);
         }
     }
 
-    public JCRGroupNode getGroupFromKey(String grpKey){
+    public JCRGroupNode getGroupFromKey(String grpKey) {
         return groupManagerService.lookupGroupByPath(grpKey);
     }
 
-    public List<JCRGroupNode> getRestrictedGroups(JCRNodeWrapper portal) {
-        List<JCRGroupNode> groups = new ArrayList<JCRGroupNode>();
+    public List<JahiaGroup> getRestrictedGroups(JCRNodeWrapper portal) {
+        List<JahiaGroup> groups = new ArrayList<JahiaGroup>();
         try {
-            for (String groupKey : getRestrictedGroupNames(portal)){
-                try{
-                    groups.add(getGroupFromKey(groupKey));
-                }catch (Exception e){
+            for (String groupKey : getRestrictedGroupNames(portal)) {
+                try {
+                    groups.add(getGroupFromKey(groupKey).getJahiaGroup());
+                } catch (Exception e) {
                     logger.error("Cannot find group with key: " + groupKey, e);
                 }
             }
@@ -798,13 +801,13 @@ public class PortalService{
 
             if (enabled) {
                 List<String> restrictedGroups = getRestrictedGroupNames(portalModelNode);
-                if(restrictedGroups != null && restrictedGroups.size() > 0) {
-                    for(String groupKey : restrictedGroups){
-                        try{
+                if (restrictedGroups != null && restrictedGroups.size() > 0) {
+                    for (String groupKey : restrictedGroups) {
+                        try {
                             JCRGroupNode group = groupManagerService.lookupGroupByPath(groupKey);
                             portalModelNode.grantRoles("g:" + group.getName(), roles);
                         } catch (Exception e) {
-                            logger.error(e.getMessage(), e);    
+                            logger.error(e.getMessage(), e);
                         }
                     }
                 } else {
