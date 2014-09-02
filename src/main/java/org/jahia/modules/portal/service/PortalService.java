@@ -513,8 +513,8 @@ public class PortalService {
             for (JCRNodeWrapper portalTab : JCRContentUtils.getChildrenOfType(portal, PortalConstants.JNT_PORTAL_TAB)) {
                 portalTab.denyRoles("g:users", Collections.singleton("reader"));
                 portalTab.denyRoles("u:guest", Collections.singleton("reader"));
-                portalTab.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("reader"));
-                portalTab.grantRoles(sessionWrapper.getUser().getUserKey(), Collections.singleton("owner"));
+                portalTab.grantRoles("u:"+sessionWrapper.getUser().getUsername(), Collections.singleton("reader"));
+                portalTab.grantRoles("u:"+sessionWrapper.getUser().getUsername(), Collections.singleton("owner"));
 
                 for (JCRNodeWrapper portalColumn : JCRContentUtils.getChildrenOfType(portalTab, PortalConstants.JNT_PORTAL_COLUMN)) {
                     for (JCRNodeWrapper widget : JCRContentUtils.getChildrenOfType(portalColumn, PortalConstants.JMIX_PORTAL_WIDGET_MODEL)) {
