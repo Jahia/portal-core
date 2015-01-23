@@ -89,6 +89,12 @@
     <developerConnection>scm:git:git@github.com:Jahia/portal-core.git</developerConnection>
     <url>scm:git:git@github.com:Jahia/portal-core.git</url>
   </scm>
+
+    <properties>
+        <jahia-depends>default,siteSettings</jahia-depends>
+        <export-package>org.jahia.modules.portal,org.jahia.modules.portal.tags,org.jahia.modules.portal.service,org.jahia.modules.portal.service.bean</export-package>
+    </properties>
+
   <repositories>
     <repository>
       <releases>
@@ -103,20 +109,4 @@
       <url>https://devtools.jahia.com/nexus/content/groups/public</url>
     </repository>
   </repositories>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Jahia-Depends>default,siteSettings</Jahia-Depends>
-            <Export-Package>org.jahia.modules.portal,org.jahia.modules.portal.tags,org.jahia.modules.portal.service,org.jahia.modules.portal.service.bean</Export-Package>
-            <Import-Package>org.jahia.services.usermanager.ldap;resolution:=optional,${jahia.plugin.projectPackageImport},*</Import-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
