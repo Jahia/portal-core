@@ -382,8 +382,8 @@ Jahia.Portal.prototype = {
     deleteCurrentTab: function (callback) {
         var instance = this;
         instance._debug("Delete tab: " + instance.portalTabPath);
-        var url = JCRRestUtils.buildURL("", "", "", instance.portalIdentifier + "/children");
-        JCRRestUtils.standardCall(url, "DELETE", JSON.stringify([instance.portalTabNodeName]), function(data){
+        var url = JCRRestUtils.buildURL("", "", "", instance.portalTabIdentifier);
+        JCRRestUtils.standardCall(url, "DELETE", null, function(data){
             if (callback) {
                 callback(data)
             }
@@ -695,9 +695,8 @@ Jahia.Portal.Widget.prototype = {
      */
     performDelete: function () {
         var instance = this;
-        var url = JCRRestUtils.buildURL("", "", "", instance._columnJcrIdentifier + "/children");
-        JCRRestUtils.standardCall(url, "DELETE",
-            JSON.stringify([this._path.substring(this._path.lastIndexOf("/") + 1)]),
+        var url = JCRRestUtils.buildURL("", "", "", this._jcrIdentifier);
+        JCRRestUtils.standardCall(url, "DELETE", null,
             function (data) {
                 instance._portal._debug("Widget " + instance._path + " successfully deleted");
                 // delete from html
