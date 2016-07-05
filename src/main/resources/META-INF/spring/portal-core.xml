@@ -34,7 +34,7 @@
         <property name="portalService" ref="portalService"/>
         <property name="priority" value="10"/>
         <property name="description" value="set the good site for the user portal"/>
-        <property name="applyOnNodeTypes" value="jnt:portalTab,jmix:portalWidget"/>
+        <property name="applyOnMainResource" value="true"/>
     </bean>
 
     <bean class="org.jahia.modules.portal.filter.PortalInitFilter">
