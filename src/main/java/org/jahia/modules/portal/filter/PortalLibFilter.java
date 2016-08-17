@@ -46,6 +46,7 @@ package org.jahia.modules.portal.filter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.modules.portal.service.bean.PortalContext;
 import org.jahia.services.render.RenderContext;
@@ -121,10 +122,11 @@ public class PortalLibFilter extends AbstractFilter {
 
     private String serializePortal(RenderContext renderContext) throws RepositoryException, JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
+        ObjectWriter writer = objectMapper.writer();
         PortalContext portal = (PortalContext) renderContext.getRequest().getAttribute("portalContext");
         portal.setDebug(debugEnabled);
 
-        return objectMapper.writeValueAsString(portal);
+        return writer.writeValueAsString(portal);
     }
     
     protected String getResolvedTemplate() throws IOException {
